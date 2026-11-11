@@ -1,0 +1,47 @@
+# 工程修復後的完整驗證（commit 0afb1ed）
+
+## 本機工作目錄
+
+$ python3 tests/test_check_wiki.py
+共94個情境（其中判定規則5個），失敗0個。
+exit=0
+
+$ python3 scripts/build_index.py --check
+index.md跟文獻檔、證據卡同步
+exit=0
+
+$ python3 scripts/check_wiki.py --strict
+
+文獻 6 篇（算進5篇的獨立論文 6 篇），證據卡 39 張（pending 0 張）。
+錯誤 0 個，警告 0 個。
+exit=0
+
+$ python3 audition/test_ovm.py
+輸出跟audition/run2.log逐字相同
+exit=0
+
+## 從GitHub乾淨clone（0afb1ed）
+
+$ python3 tests/test_check_wiki.py
+共94個情境（其中判定規則5個），失敗0個。
+exit=0
+
+$ python3 scripts/build_index.py --check
+index.md跟文獻檔、證據卡同步
+exit=0
+
+$ python3 scripts/check_wiki.py --strict
+
+文獻 6 篇（算進5篇的獨立論文 6 篇），證據卡 39 張（pending 0 張）。
+錯誤 0 個，警告 0 個。
+exit=0
+
+$ python3 audition/test_ovm.py
+輸出跟audition/run2.log逐字相同
+exit=0
+
+## 本機（有PDF）
+
+$ python3 scripts/check_quotes.py
+引用 31 段：逐字找到 22，OCR逐字 8，OCR近似 1，找不到 0，無法比對 0。
+exit=0

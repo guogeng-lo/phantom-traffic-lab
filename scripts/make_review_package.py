@@ -145,6 +145,46 @@ LIMITED = """# 審查包（第{round}輪，限定範圍）：第3輪問題的修
 """
 
 
+ENGINEERING = """# 工程審查包：檢查程式和回歸測試（只審程式，不審文獻）
+
+## 你的角色
+
+你是獨立審查者。這份Wiki有兩支檢查程式：`scripts/check_wiki.py`（格式、索引同步、個資和金鑰掃描，包含Git歷史）和`scripts/build_index.py`（從證據卡產生索引）。上一次審查（附在最後）找到7項程式問題，整理的人先把反例寫成測試、在舊版重現，再修改程式。這次**只審程式碼和回歸測試**，不審論文、證據卡或科學內容，也不需要論文PDF。
+
+請確認：
+
+1. **7項問題都修好了**：SHA-256偽表頭、`NotSHA-256`這類偽標記、測試只在整份輸出找關鍵字、索引標記重複、證據卡有重複的`## 主張`、錨點和程式碼裡的連結、Git textconv和Git指令失敗的處理。
+2. **反例測試有效**：每個新測試真的測到它名稱說的事；在舊版會失敗、在新版會通過（修改前後的實際輸出附在後面）。判定規則`judge()`會不會被騙。
+3. **沒有引入新的重大漏判**：
+   - 學號、手機、信箱、路徑、金鑰、座號的偵測，有沒有任何寫法能讓它漏掉（特別是SHA-256排除）。
+   - 索引能不能在沒報錯的情況下跟證據卡不同步。
+   - Git指令失敗時會不會被當成沒問題。
+4. **能跑就跑**：如果你的環境能連到GitHub，請clone公開repo `guogeng-lo/phantom-traffic-lab`，checkout到commit `{commit}`，跑：
+   - `python3 tests/test_check_wiki.py`
+   - `python3 scripts/build_index.py --check`
+   - `python3 scripts/check_wiki.py --strict`
+   - 貼上實際輸出和結束代碼。
+   - 也歡迎自己寫反例去試。
+   - 不能跑就寫「沒有執行」，不要推測結果。
+
+## 請照這個格式回覆
+
+第一部分，7項問題逐項：
+
+| 問題 | 修好了嗎（修好／部分修好／沒修好） | 根據（程式位置、測試名稱或你實際跑的結果） |
+
+第二部分，新發現的問題（沒有就寫「沒有」）：
+
+| 問題 | 嚴重程度（重大：會讓個資或金鑰漏判、索引無聲不同步、Git失敗被當成沒問題、測試測不到宣稱的事／一般） | 重現方式 | 建議怎麼改 |
+
+第三部分，你實際執行了什麼、結果和結束代碼。
+
+第四部分，無法確認的地方。
+
+最後一行寫：7項中修好幾項；新問題幾個（其中重大幾個）；有沒有重大問題：有／沒有。
+"""
+
+
 def changed_since(commit):
     out = subprocess.run(["git", "diff", "--name-only", commit, "--", "wiki"], cwd=ROOT,
                          capture_output=True, text=True, check=True).stdout.split()
@@ -169,10 +209,17 @@ def main():
     ap.add_argument("--previous")
     ap.add_argument("--round", type=int, default=1)
     ap.add_argument("--limited", action="store_true", help="限定範圍的複核（第3關第4輪）")
+    ap.add_argument("--engineering", action="store_true", help="只審程式和測試，不放Wiki檔案")
     ap.add_argument("--extra", nargs="*", default=[], help="另外附上的程式或執行輸出（原文照放）")
     args = ap.parse_args()
     wiki = ROOT / "wiki"
-    if args.since:
+    if args.engineering:
+        files, appendix = [], []
+        commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True,
+                                text=True, check=True).stdout.strip()
+        head = ENGINEERING.replace("{commit}", commit)
+        out_path = ROOT / "pipeline" / "review" / "n3-engineering-review.md"
+    elif args.since:
         files = changed_since(args.since)
         template = LIMITED if args.limited else RECHECK
         commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True,
@@ -193,7 +240,8 @@ def main():
     out = [head, "\n## 這份審查包包含的檔案版本\n", "| 檔案 | SHA-256 |", "|---|---|"]
     extra = [ROOT / e for e in args.extra]
     out += [f"| `{p.relative_to(ROOT).as_posix()}` | `{sha(p)}` |" for p in files + appendix + extra]
-    out.append("\n# 以下是要審查的Wiki內容\n")
+    if files:
+        out.append("\n# 以下是要審查的Wiki內容\n")
     for p in files:
         out.append(f"\n\n========== 檔案：{p.relative_to(ROOT).as_posix()} ==========\n")
         out.append(p.read_text(encoding="utf-8").strip())
