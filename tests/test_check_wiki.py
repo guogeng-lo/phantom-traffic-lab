@@ -65,17 +65,27 @@ related:
 只有一次實驗。
 """
 
-INDEX = "# 索引\n\n- sources/demo2000.md\n- cards/demo2000-claim.md\n"
+INDEX_HEAD = "# 索引\n\n人工寫的導覽。\n\n"
 
 
 def make_site(tmp):
     (tmp / "scripts").mkdir()
     shutil.copy(SCRIPT, tmp / "scripts" / "check_wiki.py")
+    shutil.copy(SCRIPT.parent / "build_index.py", tmp / "scripts" / "build_index.py")
     (tmp / "wiki" / "sources").mkdir(parents=True)
     (tmp / "wiki" / "cards").mkdir()
     (tmp / "wiki" / "sources" / "demo2000.md").write_text(SOURCE, encoding="utf-8")
     (tmp / "wiki" / "cards" / "demo2000-claim.md").write_text(CARD, encoding="utf-8")
-    (tmp / "wiki" / "index.md").write_text(INDEX, encoding="utf-8")
+    sys.path.insert(0, str(SCRIPT.parent))
+    from check_wiki import INDEX_BEGIN, INDEX_END
+    (tmp / "wiki" / "index.md").write_text(INDEX_HEAD + INDEX_BEGIN + "\n" + INDEX_END + "\n", encoding="utf-8")
+    rebuild(tmp)
+
+
+def rebuild(tmp):
+    """照規定的做法：改了文獻檔或證據卡之後重建索引。"""
+    subprocess.run([sys.executable, "-B", str(tmp / "scripts" / "build_index.py"), "--root", str(tmp)],
+                   check=True, capture_output=True)
 
 
 def run(tmp, *args):
@@ -173,7 +183,7 @@ def C(tmp):
 def add_popular(tmp):
     t = SOURCE.replace("demo2000", "news2001").replace("kind: paper", "kind: popular")
     (tmp / "wiki" / "sources" / "news2001.md").write_text(t, encoding="utf-8")
-    edit(tmp / "wiki" / "index.md", "- cards", "- sources/news2001.md\n- cards")
+    rebuild(tmp)
 
 
 # 第4個欄位是選項：args＝額外參數；warn＝預期只有警告（結束代碼0）且警告裡有這段字；
@@ -181,7 +191,7 @@ def add_popular(tmp):
 CASES = [
     ("正常資料", lambda t: None, None),
     ("主張裡只有年份，units寫無數值", lambda t: (edit(C(t), "units: m", "units: 無數值"),
-                                       edit(C(t), "22台車繞230m的環", "做了實驗")), None),
+                                       edit(C(t), "22台車繞230m的環", "做了實驗"), rebuild(t)), None),
     ("文獻少一個欄位", lambda t: edit(S(t), "venue: Demo Journal 1(1)\n", ""), "缺少欄位 venue"),
     ("閱讀狀態亂寫", lambda t: edit(S(t), "read_status: 全文已讀", "read_status: 大概讀過"), "read_status 要是"),
     ("DOI格式錯", lambda t: edit(S(t), "doi: 10.1234/demo.2000", "doi: demo"), "doi 格式不對"),
@@ -208,7 +218,7 @@ CASES = [
      "source 要是repo裡存在的檔案"),
     ("related指到不存在的卡", lambda t: edit(C(t), "related:", "related: nope-card"), "related 的 nope-card 不存在"),
     ("卡片id跟檔名不同", lambda t: edit(C(t), "id: demo2000-claim", "id: other"), "跟檔名不一樣"),
-    ("索引沒列卡片", lambda t: edit(t / "wiki" / "index.md", "- cards/demo2000-claim.md\n", ""), "沒有列出證據卡"),
+    ("索引沒列卡片", lambda t: edit(t / "wiki" / "index.md", "(cards/demo2000-claim.md)", ""), "沒有列出證據卡"),
     ("放了PDF", lambda t: (t / "raw.pdf").write_bytes(b"%PDF-1.4"), "PDF不能放進repo"),
     ("檔案裡有像學號的數字", lambda t: (t / "note.md").write_text("學號 412345678\n", encoding="utf-8"),  # privacy-scan: ignore
      "像學號"),
@@ -224,8 +234,8 @@ CASES = [
         "rate 1.412345678 / 0.0912345678\n", encoding="utf-8"), None),
     ("欄位重複", lambda t: edit(C(t), "status: confirmed", "status: confirmed\nstatus: pending"),
      "欄位 status 出現不只一次"),
-    ("索引列了不存在的卡", lambda t: edit(t / "wiki" / "index.md", "- cards/demo2000-claim.md",
-                                    "- cards/demo2000-claim.md\n- cards/deleted-card.md"),
+    ("索引列了不存在的卡", lambda t: edit(t / "wiki" / "index.md", "人工寫的導覽。",
+                                    "人工寫的導覽。見[舊卡](cards/deleted-card.md)。"),
      "cards/deleted-card.md 不存在"),
     ("有數字的主張，locator只寫全文", lambda t: edit(C(t), "locator: p.3 圖2", "locator: 全文"),
      "locator 要到頁碼"),
@@ -236,7 +246,7 @@ CASES = [
                                          commit_all(t, "pdf"), (t / "a.pdf").unlink(), commit_all(t, "rm")),
      "出現過PDF：a.pdf", {"args": ["--strict"]}),
     ("有confirmed卡的論文才算進5篇", lambda t: None, "算進5篇的獨立論文 1 篇", {"out": True}),
-    ("沒有confirmed卡的論文不算", lambda t: edit(C(t), "status: confirmed", "status: pending"),
+    ("沒有confirmed卡的論文不算", lambda t: (edit(C(t), "status: confirmed", "status: pending"), rebuild(t)),
      "算進5篇的獨立論文 0 篇", {"out": True}),
     # 以下是雜湊值排除（2026-11-11，看到n3-package-r2.md的SHA-256被誤判成學號之後才加的）
     ("SHA-256表格裡的雜湊值不算學號", note(SHA_TABLE + f"| `a.md` | `{fake_hash(SID)}` |\n"), None),
@@ -282,6 +292,25 @@ CASES = [
      history_versions("| 檔案 | 備註 |\n|---|---|\n" + rows(10),
                       "| 檔案 | 備註 |\n|---|---|\n" + rows(10) + f"| `x.md` | `{fake_hash(SID)}` |\n"),
      "像學號的9位數字", {"args": ["--strict"]}),
+    # 以下是索引自動產生和同步檢查（2026-11-12，第2、3輪審查發現手寫的索引摘要沒跟著卡片更新之後才加的）
+    ("改了卡片的主張沒重建索引要擋", lambda t: edit(C(t), "22台車繞230m的環", "22台車繞260m的環"), "不同步"),
+    ("改了卡片的狀態沒重建索引要擋", lambda t: edit(C(t), "status: confirmed", "status: pending"), "不同步"),
+    ("改了卡片的條件沒重建索引要擋", lambda t: edit(C(t), "conditions: 環狀道路", "conditions: 直線道路"), "不同步"),
+    ("改了文獻的閱讀狀態沒重建索引要擋",
+     lambda t: (edit(S(t), "read_status: 全文已讀", "read_status: 部分章節"), edit(S(t), "read_scope: 全文", "read_scope: 第1節")),
+     "不同步"),
+    ("新增卡片沒重建索引要擋",
+     lambda t: (t / "wiki" / "cards" / "demo2000-second.md").write_text(CARD.replace("demo2000-claim", "demo2000-second"),
+                                                                       encoding="utf-8"), "不同步"),
+    ("手改自動產生的摘要要擋", lambda t: edit(t / "wiki" / "index.md", "22台車繞230m的環", "22台車繞環"), "不同步"),
+    ("自動產生的標記被刪掉要擋",
+     lambda t: edit(t / "wiki" / "index.md", "<!-- 自動產生結束 -->", ""), "找不到自動產生區塊的標記"),
+    ("改了卡片也重建索引就通過", lambda t: (edit(C(t), "22台車繞230m的環", "22台車繞260m的環"), rebuild(t)), None),
+    ("改人工寫的導覽不用重建", lambda t: edit(t / "wiki" / "index.md", "人工寫的導覽。", "人工寫的導覽，改過。"), None),
+    ("主張裡的相對連結在索引裡改成從wiki出發",
+     lambda t: (edit(C(t), "22台車繞230m的環。", "22台車繞230m的環，見[本卡](demo2000-claim.md)。"), rebuild(t),
+                edit(t / "wiki" / "index.md", "見[本卡](cards/demo2000-claim.md)", "見[本卡](cards/demo2000-claim.md)")),
+     None),
 ]
 
 

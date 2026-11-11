@@ -1,0 +1,13 @@
+$ python3 scripts/check_wiki.py   # 改之前的版本（commit c0adcff）
+
+文獻 6 篇（算進5篇的獨立論文 6 篇），證據卡 39 張（pending 0 張）。
+錯誤 0 個，警告 0 個。
+exit=0
+
+$ grep orosz2010-ring-stability wiki/index.md
+| orosz2010-ring-stability | model_theory | confirmed | 環上N台車，沒有延遲時最先不穩定的是最長的波 | [cards/orosz2010-ring-stability.md](cards/orosz2010-ring-stability.md) |
+
+$ grep -A1 '^## 主張' wiki/cards/orosz2010-ring-stability.md
+## 主張
+
+（這是綜述附錄裡的數學推導，所以類型是model_theory。）在沒有反應延遲的跟車模型裡，環上N台車時，非零的波各有穩定分界，k和N−k是一對共軛、共用同一條分界；N是偶數時k=N/2沒有有限的分界。N≥3時，越過分界時最先失去穩定的是k=1（和它的共軛N−1，最長的波）。固定均勻車距、讓N趨近無限多時，最先失穩的k=1的波數2π/N趨近0（長波），整體的穩定條件變成(A8)。

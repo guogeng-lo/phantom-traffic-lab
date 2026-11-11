@@ -25,7 +25,7 @@
 | `raw/` | 論文PDF | 不上傳（.gitignore） |
 | `wiki/sources/<id>.md` | 每篇文獻一個檔案 | 是 |
 | `wiki/cards/<id>.md` | 證據卡，一張一個主張 | 是 |
-| `wiki/index.md` | 主題索引，所有文獻和證據卡都要列在這裡 | 是 |
+| `wiki/index.md` | 主題索引。文獻表和證據卡清單由`scripts/build_index.py`從文獻檔、證據卡產生，不能手改；開頭的介紹和導覽人工寫 | 是 |
 | `wiki/glossary.md` | 中英術語對照 | 是 |
 | `wiki/disputes.md` | 研究差異與未解問題 | 是 |
 | `wiki/slide-map.md` | 簡報每頁對應哪些證據卡 | 是 |
@@ -111,7 +111,7 @@ related: 其他卡id，用逗號分隔，可留空
 1. 確認PDF或全文已經放在`raw/`，或確認只能讀到哪些部分。
 2. 建文獻檔，照實填`read_status`和`read_scope`。
 3. 每個值得用的主張建一張證據卡。
-4. 在`wiki/index.md`列出新的文獻和卡片；有新術語就加進`wiki/glossary.md`；有差異就照第6節處理。
+4. 跑`python3 scripts/build_index.py`重建索引（不要手改索引裡的文獻表和證據卡）；有新術語就加進`wiki/glossary.md`；有差異就照第6節處理。
 5. 跑`python3 scripts/check_wiki.py`，錯誤要是0；PDF在`raw/`的話，再跑`python3 scripts/check_quotes.py`，引用要全部找到。
 6. 在`runs/`寫一份ingest紀錄（格式見`runs/README.md`），包括檢查輸出原文、問題和修正。
 7. 前兩篇（Bando 1995、Sugiyama 2008）要先給使用者看整理結果，使用者確認後才commit。之後可以2～3篇一批，但每篇都要有自己的紀錄。
@@ -147,8 +147,9 @@ PDF拿不到、引用找不到、結論有疑問時，不猜不補，記在紀�
 ## 9. 指令
 
 ```
-python3 scripts/check_wiki.py            # 文獻、證據卡、索引、個資掃描（Git歷史的問題只列警告）
+python3 scripts/check_wiki.py            # 文獻、證據卡、索引（含是否跟卡片同步）、個資掃描（Git歷史的問題只列警告）
 python3 scripts/check_wiki.py --strict   # commit之後、push之前用：Git歷史裡的PDF和疑似個資也算錯誤
+python3 scripts/build_index.py           # 從文獻檔和證據卡重建wiki/index.md的自動產生區塊；改了文獻檔或卡片就要跑
 python3 scripts/check_quotes.py          # 證據卡的英文引用要在raw/的PDF裡找得到；結果分成逐字、OCR逐字、OCR近似，後兩種要人對照頁面確認，報告不能混在一起寫
 python3 tests/test_check_wiki.py         # 故意弄壞資料，確認檢查程式擋得住
 python3 audition/test_ovm.py             # 選題階段的模型測試，輸出應該跟audition/run2.log一樣

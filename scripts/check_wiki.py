@@ -6,6 +6,7 @@
 因為歷史要改只能改寫歷史，必須先問使用者）。
 """
 import argparse
+import posixpath
 import re
 import subprocess
 import sys
@@ -209,6 +210,12 @@ def check_index(root, rep, sources, cards):
         rep.err("wiki/index.md", "檔案不存在")
         return
     text = idx.read_text(encoding="utf-8")
+    expected = index_with_generated(text, render_index(root))
+    if expected is None:
+        rep.err("wiki/index.md", "找不到自動產生區塊的標記，請照原本的格式放回兩行標記，再跑 python3 scripts/build_index.py")
+    elif expected != text:
+        rep.err("wiki/index.md", "跟文獻檔、證據卡不同步（自動產生的部分被手改，或卡片改了沒重建），"
+                                 "請跑 python3 scripts/build_index.py")
     for kind, name in re.findall(r"\b(sources|cards)/([a-z0-9-]+)\.md", text):
         if not (root / "wiki" / kind / f"{name}.md").is_file():
             rep.err("wiki/index.md", f"列出的 {kind}/{name}.md 不存在")
@@ -218,6 +225,64 @@ def check_index(root, rep, sources, cards):
     for cid in cards:
         if f"cards/{cid}.md" not in text:
             rep.err("wiki/index.md", f"沒有列出證據卡 {cid}")
+
+
+# index.md的文獻表和證據卡清單由scripts/build_index.py從文獻檔、證據卡產生（單一事實來源）。
+# 兩個標記中間是產生的內容，外面的主題介紹和導覽人工寫。check_index會重新產生一次，跟檔案不同就報錯。
+# （2026-11-12加的：第2、3輪審查發現手寫的索引摘要沒跟著卡片更新，見runs/2026-11-12-index-generation.md。）
+INDEX_BEGIN = "<!-- 以下由scripts/build_index.py從wiki/sources和wiki/cards產生，不要手改；改了文獻檔或證據卡就重跑 -->"
+INDEX_END = "<!-- 自動產生結束 -->"
+OURS_GROUP = "我們自己的推導和模擬"
+
+
+def fix_links(text):
+    """主張裡的相對連結是從cards/出發寫的，放進index.md要改成從wiki/出發。"""
+    def repl(m):
+        target = m.group(1)
+        if re.match(r"^(https?:|#|/)", target):
+            return m.group(0)
+        return f"]({posixpath.normpath(posixpath.join('cards', target))})"
+    return re.sub(r"\]\(([^)\s]+)\)", repl, text)
+
+
+def render_index(root):
+    wiki = root / "wiki"
+    srcs, groups = [], {}
+    for p in sorted((wiki / "sources").glob("*.md")):
+        if p.name == "_template.md":
+            continue
+        meta, _ = parse(p)
+        meta = meta or {}
+        srcs.append(f"| {p.stem} | {meta.get('kind', '')} | {meta.get('read_status', '')} | "
+                    f"[sources/{p.name}](sources/{p.name}) |")
+    n_cards = 0
+    for p in sorted((wiki / "cards").glob("*.md")):
+        if p.name == "_template.md":
+            continue
+        meta, body = parse(p)
+        meta = meta or {}
+        n_cards += 1
+        group = OURS_GROUP if meta.get("type", "").startswith("our_") else meta.get("source", "")
+        claim = fix_links(sections(body).get("主張", ""))
+        groups.setdefault(group, []).append(
+            f"#### [{p.stem}](cards/{p.name})\n\n- 類型：{meta.get('type', '')}\n- 狀態：{meta.get('status', '')}\n"
+            f"- 條件：{meta.get('conditions', '')}\n\n{claim}")
+    out = [INDEX_BEGIN, "", "## 文獻", "", "| id | 種類 | 閱讀狀態 | 檔案 |", "|---|---|---|---|", *srcs, "",
+           "## 證據卡", "", f"共{n_cards}張。每張的條件取自卡片的conditions欄位，主張直接取自卡片的「## 主張」，都沒有另外縮寫；原文依據和限制請點進卡片看。"]
+    for g in sorted(k for k in groups if k != OURS_GROUP) + ([OURS_GROUP] if OURS_GROUP in groups else []):
+        out += ["", f"### {g}"]
+        for item in groups[g]:
+            out += ["", item]
+    out += ["", INDEX_END]
+    return "\n".join(out)
+
+
+def index_with_generated(text, generated):
+    """把index.md裡兩個標記之間換成新產生的內容；沒有標記就回傳None。"""
+    a, b = text.find(INDEX_BEGIN), text.find(INDEX_END)
+    if a < 0 or b < a:
+        return None
+    return text[:a] + generated + text[b + len(INDEX_END):]
 
 
 def tracked_files(root):
