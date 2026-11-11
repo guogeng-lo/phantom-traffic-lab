@@ -114,6 +114,32 @@ def our_card_to_ignored(tmp):
     edit(C(tmp), "source: demo2000", "source: local/sim.py")
 
 
+# 雜湊值排除的測試用：假學號、假手機只在這兩行出現，其他地方用變數組字串。
+SID = "412345678"  # privacy-scan: ignore
+PHONE = "0912345678"  # privacy-scan: ignore
+SHA_TABLE = "| 檔案 | SHA-256 |\n|---|---|\n"
+
+
+def fake_hash(inner="", n=64):
+    """長得像SHA-256的十六進位字串，可以在中間夾一段數字。"""
+    return ("ab" * 10 + inner).ljust(n, "c")[:n]
+
+
+def note(text):
+    return lambda t: (t / "note.md").write_text(text, encoding="utf-8")
+
+
+def history_note(text):
+    """先commit一個檔案，再刪掉：現在的檔案乾淨，只剩歷史裡有。"""
+    def f(tmp):
+        git(tmp, "init", "-q")
+        (tmp / "note.md").write_text(text, encoding="utf-8")
+        commit_all(tmp, "add")
+        (tmp / "note.md").unlink()
+        commit_all(tmp, "remove")
+    return f
+
+
 def edit(path, old, new):
     t = path.read_text(encoding="utf-8")
     assert old in t, f"測試寫錯了：{path.name} 裡找不到 {old!r}"
@@ -196,6 +222,32 @@ CASES = [
     ("有confirmed卡的論文才算進5篇", lambda t: None, "算進5篇的獨立論文 1 篇", {"out": True}),
     ("沒有confirmed卡的論文不算", lambda t: edit(C(t), "status: confirmed", "status: pending"),
      "算進5篇的獨立論文 0 篇", {"out": True}),
+    # 以下是雜湊值排除（2026-11-11，看到n3-package-r2.md的SHA-256被誤判成學號之後才加的）
+    ("SHA-256表格裡的雜湊值不算學號", note(SHA_TABLE + f"| `a.md` | `{fake_hash(SID)}` |\n"), None),
+    ("SHA-256表格裡的雜湊值不算手機", note(SHA_TABLE + f"| `a.md` | `{fake_hash(PHONE)}` |\n"), None),
+    ("SHA-256欄的雜湊後面接說明也排除",
+     note("| 檔案 | SHA-256（第2輪後） |\n|---|---|\n" + f"| `a.md` | `{fake_hash(SID)}`（第2輪修改後） |\n"), None),
+    ("同一行有SHA-256標記的雜湊值不算學號", note(f"PDF的SHA-256 `{fake_hash(SID)}`\n"), None),
+    ("學號緊接中文照樣偵測", note(f"學號{SID}\n"), "像學號的9位數字"),
+    ("學號夾在英文字母中照樣偵測", note(f"id{SID}x\n"), "像學號的9位數字"),
+    ("沒有分隔的手機號碼照樣偵測", note(f"電話{PHONE}\n"), "手機號碼"),
+    ("一般句子裡的學號照樣偵測", note(f"請{SID}同學到辦公室\n"), "像學號的9位數字"),
+    ("沒有SHA-256標記的64位十六進位不放行", note(f"commit `{fake_hash(SID)}`\n"), "像學號的9位數字"),
+    ("SHA-256欄裡只有63位不放行", note(SHA_TABLE + f"| `a.md` | `{fake_hash(SID, 63)}` |\n"), "像學號的9位數字"),
+    ("SHA-256欄裡沒有反引號不放行", note(SHA_TABLE + f"| `a.md` | {fake_hash(SID)} |\n"), "像學號的9位數字"),
+    ("雜湊放在SHA-256以外的欄不放行",
+     note("| 檔案 | SHA-256 | 備註 |\n|---|---|---|\n" + f"| `a.md` | `{fake_hash()}` | `{fake_hash(SID)}` |\n"),
+     "像學號的9位數字"),
+    ("表格結束後的雜湊不放行", note(SHA_TABLE + f"| `a.md` | `{fake_hash()}` |\n\n`{fake_hash(SID)}`\n"),
+     "像學號的9位數字"),
+    ("SHA-256表格同一列的學號照樣偵測",
+     note(SHA_TABLE + f"| `a.md` | `{fake_hash()}` | 學號{SID} |\n"), "像學號的9位數字"),
+    ("SHA-256表格同一列的金鑰照樣偵測",
+     note(SHA_TABLE + f"| `sk-{'a' * 30}` | `{fake_hash(SID)}` |\n"), "金鑰或Token"),
+    ("歷史裡SHA-256表格的雜湊不算學號（--strict）",
+     history_note(SHA_TABLE + f"| `a.md` | `{fake_hash(SID)}` |\n"), None, {"args": ["--strict"]}),
+    ("歷史裡沒有標記的雜湊照樣抓（--strict）",
+     history_note(f"commit `{fake_hash(SID)}`\n"), "像學號的9位數字", {"args": ["--strict"]}),
 ]
 
 

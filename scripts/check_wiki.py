@@ -229,10 +229,57 @@ def tracked_files(root):
         return [p for p in root.rglob("*") if p.is_file() and ".git" not in p.parts]
 
 
-def scan_line(line):
+# SHA-256雜湊值是64位十六進位，裡面常會剛好有一段像學號或手機的數字。只在有明確標記時排除：
+# 1. 同一行寫了「SHA-256」，後面緊接著用反引號包起來的64位小寫十六進位；或
+# 2. 表格的表頭有一欄以「SHA-256」開頭，而且這一格以反引號包起來的64位小寫十六進位開頭。
+# 排除只套用在學號和手機兩條規則，信箱、路徑、金鑰、座號照原本那一行檢查。
+# （2026-11-11看到pipeline/review/n3-package-r2.md的雜湊被誤判成學號之後才加的，紀錄在
+#  runs/2026-11-11-check-wiki-hash-exclusion.md。）
+HASH_TOKEN = "`[0-9a-f]{64}`"
+LABELED_HASH = re.compile(r"(SHA-256[:：]?\s*)" + HASH_TOKEN)
+HASH_CELL = re.compile(r"^(\s*)" + HASH_TOKEN)
+HASH_MASKED = {"像學號的9位數字", "手機號碼"}
+
+
+def sha_column(line):
+    """表格表頭裡以SHA-256開頭的那一欄，回傳它用「|」切開後的位置；不是這種表頭就回傳None。"""
+    if not line.lstrip().startswith("|"):
+        return None
+    for i, cell in enumerate(line.split("|")):
+        if cell.strip().startswith("SHA-256"):
+            return i
+    return None
+
+
+class ShaTable:
+    """一行一行讀，記住現在是不是在有SHA-256欄的表格裡。表格一結束（下一行不是「|」開頭）就失效。"""
+    def __init__(self):
+        self.col = None
+
+    def feed(self, line):
+        col = sha_column(line)
+        if col is not None:
+            self.col = col
+        elif not line.lstrip().startswith("|"):
+            self.col = None
+        return self.col
+
+
+def mask_hashes(line, sha_col=None):
+    line = LABELED_HASH.sub(r"\1`<sha256>`", line)
+    if sha_col is not None and line.lstrip().startswith("|"):
+        cells = line.split("|")
+        if sha_col < len(cells):
+            cells[sha_col] = HASH_CELL.sub(r"\1`<sha256>`", cells[sha_col])
+        line = "|".join(cells)
+    return line
+
+
+def scan_line(line, sha_col=None):
     if IGNORE_MARK in line:
         return []
-    return [name for pat, name in PRIVACY if pat.search(line)]
+    masked = mask_hashes(line, sha_col)
+    return [name for pat, name in PRIVACY if pat.search(masked if name in HASH_MASKED else line)]
 
 
 def check_history(root, rep, strict):
@@ -248,15 +295,19 @@ def check_history(root, rep, strict):
     for name in sorted(set(git("log", "--all", "--name-only", "--format=").splitlines())):
         if name.lower().endswith(".pdf"):
             report("Git歷史", f"出現過PDF：{name}")
-    commit, path = "", ""
+    commit, path, table = "", "", ShaTable()
     for line in git("log", "--all", "-p", "--no-color", "--format=commit %h").splitlines():
         if line.startswith("commit "):
-            commit = line[7:]
+            commit, table = line[7:], ShaTable()
         elif line.startswith("+++ "):
-            path = line[6:] if line.startswith("+++ b/") else line[4:]
+            path, table = (line[6:] if line.startswith("+++ b/") else line[4:]), ShaTable()
+        elif line.startswith("@@"):
+            table = ShaTable()  # 新的一段diff可能從檔案中間開始，看不到表頭就不排除
         elif line.startswith("+"):
-            for name in scan_line(line[1:]):
+            for name in scan_line(line[1:], table.feed(line[1:])):
                 report(f"Git歷史 {commit} {path}", f"疑似{name}")
+        elif line.startswith(" "):
+            table.feed(line[1:])  # 沒改的上下文行也要追表頭，但它本身已經在別的commit掃過
 
 
 def check_privacy(root, rep, tracked):
@@ -271,8 +322,9 @@ def check_privacy(root, rep, tracked):
             text = p.read_text(encoding="utf-8")
         except (UnicodeDecodeError, OSError):
             continue
+        table = ShaTable()
         for n, line in enumerate(text.splitlines(), 1):
-            for name in scan_line(line):
+            for name in scan_line(line, table.feed(line)):
                 rep.err(f"{rel}:{n}", f"疑似{name}")
 
 
