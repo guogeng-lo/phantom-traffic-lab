@@ -6,8 +6,21 @@
 
 1. 上一輪列出的每一個問題，有沒有修好。
 2. 修改有沒有引入新的錯誤（讀錯原文、數字或頁碼錯、把模型講成實驗、語氣過度）。整理的人有時也會改上一輪沒指出的地方，這些一樣要檢查。
+3. `wiki/index.md`跟證據卡是否一致：索引裡每一列的類型、狀態和摘要，跟那張卡的`type`、`status`和「主張」有沒有不一樣，摘要有沒有比主張講得更強、或漏掉會改變意思的條件；文獻那張表的種類和閱讀狀態，跟文獻檔的`kind`、`read_status`是否相同。全部列都要看，不只這輪改過的。
 
-這份審查包只放改過的檔案。沒改過的檔案上一輪已經看過，不用重看。
+這份審查包只完整放改過的檔案。沒改過的檔案上一輪已經看過，忠實度不用重看；最後的附錄只放它們的開頭欄位和「主張」，用來做第3項的核對。
+
+## 上傳的PDF和對應的文獻id
+
+| 文獻id | 檔案 | 注意 |
+|---|---|---|
+| bando1995 | bando.pdf | 掃描檔，頁碼看頁首的1035～1042 |
+| sugiyama2008 | NewJPhys_10_033001.pdf | 前面多兩頁（典藏庫封面和出版商的頁面），頁碼看頁首的1～7 |
+| nagel1992 | ajp-jp1v2p2221.pdf | 掃描檔，頁碼2221～2229 |
+| tadaki2013 | NewJPhys_15_103034.pdf | 前面多兩頁，頁碼看頁首 |
+| stern2018 | 1705.01693v1.pdf | arXiv預印本，頁碼就是PDF頁碼 |
+| orosz2010 | PTRSA2published.pdf | 頁碼4455～4479；Wiki只讀了部分章節，見文獻檔的read_scope |
+
 
 ## 請照這個格式回覆
 
@@ -19,9 +32,13 @@
 
 | 卡片id | 問題類型 | 嚴重程度 | 原文在哪裡 | 問題是什麼 | 建議怎麼改 |
 
-第三部分，無法確認的地方。
+第三部分，`index.md`和證據卡不一致的地方（沒有就寫「沒有」）：
 
-最後一行寫：上一輪問題修好幾條、部分修好幾條、沒修好幾條；新問題幾條。
+| 卡片id或文獻id | 索引寫的 | 卡片或文獻檔寫的 | 問題是什麼 |
+
+第四部分，無法確認的地方。
+
+最後一行寫：上一輪問題修好幾條、部分修好幾條、沒修好幾條；新問題幾條；索引不一致幾條。
 
 
 ## 這份審查包包含的檔案版本
@@ -41,6 +58,42 @@
 | `wiki/glossary.md` | `daca7aedbd49a4e1bdd6ed86f43097769e6722841f4207dbef8e8572d7419b02` |
 | `wiki/index.md` | `64d5d5632b1f9e6af6e16f97ee0078ed6a479c9a3c9f1d41f48706d9202f95f1` |
 | `wiki/sources/sugiyama2008.md` | `0bb6874178c625d61444a44d38922eb0e71ec77063c8a09ac61073552a554220` |
+| `wiki/cards/bando1995-capacity.md` | `9ec2145eab6e999bcce22d350cf8fd6baf3f8a5d5da6550d387910ecd6133c9e` |
+| `wiki/cards/bando1995-cluster-values.md` | `507fff3823e47ea893003ed2ec887de1e9b8b2c107ffdd35a5a514570c20d5d7` |
+| `wiki/cards/bando1995-large-n-note.md` | `114108267408dcbcce044c9780d8f695049a759281a889171ceb525c403ed1d0` |
+| `wiki/cards/bando1995-linear-stability.md` | `9373d6bd06979be539f18d21cc510c49dc59387a220e6bc415070881ec8ca4b2` |
+| `wiki/cards/bando1995-no-delay.md` | `527e89639f6d403e14ea511d978df1332796f8ef9ab50ac895878d1b8c5cba27` |
+| `wiki/cards/bando1995-ovm-equation.md` | `66d6c10c8dc13e5f787a7dc3c6464d37fed6eec208dcbf2f5b5e5ce747120153` |
+| `wiki/cards/bando1995-spontaneous-jam.md` | `adfbc601430f51f481bc4d3ec65fb4fd27322212f65e7771950d051fd0f94afd` |
+| `wiki/cards/bando1995-stable-regions.md` | `4341b82ffec1ec800591c1b601e789a5bee7f79bf169c9e491e3fee48f4cb0c4` |
+| `wiki/cards/bando1995-velocity-function.md` | `6694d775771202064a8b0df7349917a5ca3a0ce3de7436ba8e6060b9848d3b1a` |
+| `wiki/cards/nagel1992-circle-jams.md` | `11d952d1a97abd63a048bcf2f91ead24b526f8440024687239a3efda7e1012f1` |
+| `wiki/cards/nagel1992-randomization.md` | `228d143002bd566baf9e7241935de8a8d775a9bcb87c2f49896f820851cb521b` |
+| `wiki/cards/nagel1992-real-units.md` | `187abaef28bcd048211ace931ff6e0e764b60916da8a9e29e52b4b80837eb63a` |
+| `wiki/cards/nagel1992-rules.md` | `68e4f0053e2fc64fcd2880a4c7e9d4f911175b9207aba42013f46b4d9db7d276` |
+| `wiki/cards/nagel1992-transition.md` | `cff003b1c465855d10ecfce4ef4043524886c790892d017344f0d735392cf392` |
+| `wiki/cards/orosz2010-delays.md` | `d9c562f5d7016899e6905612496f9f7d6564253edca9b78ec99c8d61445a6bab` |
+| `wiki/cards/orosz2010-ovm-family.md` | `3ec4021e1c01e64462dab467a21e4d8e9edff5b7e8138bbab6a567a2c61ea5c2` |
+| `wiki/cards/orosz2010-stability-approaches.md` | `b18ce4b79567da3b13973d8bded3db23905c8854625c42c03db056ab44a8f317` |
+| `wiki/cards/ours-finite-n-simulation.md` | `e1d21332119095e1f4a59e155db96bb56dc901156c9abc1e9e0f4ed327a3cc7c` |
+| `wiki/cards/stern2018-controllers.md` | `780ebe4917f2ece75e94a36aab12cc86fc07fd48e87e8c1dbfb0b645e54c253f` |
+| `wiki/cards/stern2018-setup.md` | `285eb37718f26659de9a323a779108245859ccf0e8f10f2fd935377cecf06e39` |
+| `wiki/cards/stern2018-waves-emerge.md` | `2ec922b1026dc7c4571f94c520ac1f6788bfd9c1dc5671fab60c6abb7d1a0161` |
+| `wiki/cards/sugiyama2008-23-vehicles.md` | `59a1918f28237f05d49bf2d6f87fa272f2f3b52c7a50b613110f5e667ee088d7` |
+| `wiki/cards/sugiyama2008-backward-wave.md` | `7c805e9157bead59c55e004ae342ca3c8bd68059641fcb69f3790497aba6893c` |
+| `wiki/cards/sugiyama2008-fundamental-diagram.md` | `5b4e275cf71d7576e7aa5c4f3c9f2528bab4cee02dd90d6e73286b61d9145e6d` |
+| `wiki/cards/sugiyama2008-highway-comparison.md` | `1821b3ebdfa55608111d23ca1c8428c0ca89c1e5c94b5b79d19e6daf92b818b7` |
+| `wiki/cards/sugiyama2008-jam-emerges.md` | `52ada92ad185baee982284c6d9c8e9f2a1583845612e089d18681b04ce4974ca` |
+| `wiki/cards/sugiyama2008-mechanism.md` | `edc56ceed98ead16bc7064cfddb41d9f8e09df920594445a7091ddbaebb79288` |
+| `wiki/cards/sugiyama2008-setup.md` | `b49e2bf508faee3154534651e6c9748f8172b5f0c1c5e2bcb9eb0af629c01e13` |
+| `wiki/cards/tadaki2013-high-density.md` | `21a9268b67acebb561d6d5efedb9a79295bac2e0a297759bb32485de932c315e` |
+| `wiki/cards/tadaki2013-metastable.md` | `1825a7fad619e863ce2625f04adac717afdd73c9fbeca4843b4117efab7a26eb` |
+| `wiki/cards/tadaki2013-setup.md` | `f0fbf5b2b1ca5762eb2f3779d37198f4623035eb789df7e79d7d1cdb5e89cb3a` |
+| `wiki/sources/bando1995.md` | `fa31a7abc9f7265f818f479dc4e92b4f7f7eb8d7806316324c2a75b94a47ecc6` |
+| `wiki/sources/nagel1992.md` | `3b2d4e6facadd89f4e5ebf57a14cb67e586512eed18fa59690e7202db04c8825` |
+| `wiki/sources/orosz2010.md` | `0ccdc9adeabfc3ff3f8c29794dae350fca93faf088587526e291e965aade7676` |
+| `wiki/sources/stern2018.md` | `dddbab143c9aec53262e7ea21843b7ba4d94611dba23c8e6ec9b87fc29889e09` |
+| `wiki/sources/tadaki2013.md` | `820a2f2c9cf91befb7078f6411b119c6ab4fd4a0ecbdec11e35876a30e988f1a` |
 
 # 以下是要審查的Wiki內容
 
@@ -513,6 +566,653 @@ independent: 是
 ## ingest紀錄
 
 - [runs/2026-11-11-n1-sugiyama2008-r1.md](../../runs/2026-11-11-n1-sugiyama2008-r1.md)
+
+
+========== 附錄：沒改過的檔案，只放開頭欄位和主張（只用來核對index.md） ==========
+
+
+
+---------- wiki/cards/bando1995-capacity.md ----------
+
+---
+id: bando1995-capacity
+type: model_theory
+source: bando1995
+locator: 第1041頁式(25)(26)
+conditions: N=100、L=200的模擬；運輸量用N/T估算（T是一台車跑完一圈的時間）
+units: 無因次
+status: confirmed
+related: bando1995-spontaneous-jam
+---
+
+## 主張
+
+在這組條件下，用模擬估出的「有塞車時」通過量，和用均勻車流解直接算出的通過量，都約0.48；作者覺得奇怪，說會在之後的論文討論。兩個數字的取得方式不同：前者來自模擬裡一台車跑一圈的時間，後者是公式計算。
+
+
+---------- wiki/cards/bando1995-cluster-values.md ----------
+
+---
+id: bando1995-cluster-values
+type: model_theory
+source: bando1995
+locator: 第1040頁圖7～8和右欄、第1041頁圖9
+conditions: 同bando1995-spontaneous-jam的模擬條件；數值是作者從最後100步的分布讀出來的
+units: 無因次
+status: confirmed
+related: bando1995-spontaneous-jam, bando1995-stable-regions
+---
+
+## 主張
+
+塞車形成之後，塞車團裡的車距約0.32、速度約0.03（幾乎停住）；團外的車距約3.68、速度約1.88。以車距小於2界定擁擠區時，100台車裡有50台在擁擠區。作者把模擬分成三個階段：前50步符合線性分析，50～400步看起來很亂，400步之後慢慢穩定下來。
+
+
+---------- wiki/cards/bando1995-large-n-note.md ----------
+
+---
+id: bando1995-large-n-note
+type: model_theory
+source: bando1995
+locator: 第1036頁左欄第2段
+conditions: 作者對環狀道路邊界條件的說明
+units: 無數值
+status: confirmed
+related: ours-finite-n-threshold
+---
+
+## 主張
+
+作者說，只要車數和環長夠大，環狀道路這個邊界條件對分析和模擬都不重要；邊界條件的詳細影響留到之後的論文。
+
+
+---------- wiki/cards/bando1995-linear-stability.md ----------
+
+---
+id: bando1995-linear-stability
+type: model_theory
+source: bando1995
+locator: 第1036～1037頁式(5)～(12)、圖1
+conditions: 跟bando1995-ovm-equation相同；只看均勻車流附近很小的擾動（線性化）
+units: 無因次
+status: confirmed
+related: bando1995-ovm-equation, ours-finite-n-threshold
+---
+
+## 主張
+
+線性穩定性分析是判斷一點小變化會慢慢消失、還是越來越嚴重的方法。在均勻車流上加很小的擾動，把擾動拆成一個一個的波（第k個波的α_k=2πk/N）來看會不會變大。作者得到的總結（式(12)）是：速度函數在均勻車距的斜率V'(b)小於a/2時穩定，大於a/2時不穩定；在這個跟車方程式裡，換成別的速度函數V也適用。這個a/2是長波極限（車數很多）的分界；車數有限的環道，要依式(9)(11)逐一檢查那幾個非零的波，見[ours-finite-n-threshold](ours-finite-n-threshold.md)。
+
+
+---------- wiki/cards/bando1995-no-delay.md ----------
+
+---
+id: bando1995-no-delay
+type: model_theory
+source: bando1995
+locator: 第1035頁右欄、第1042頁右欄
+conditions: 作者對模型設計的說明
+units: 無數值
+status: confirmed
+related: bando1995-ovm-equation
+---
+
+## 主張
+
+這個模型刻意沒有加入駕駛的反應延遲。作者認為，因為模型寫的是加速度（二階方程式），本身就隱含了「速度跟不上變化」的效果，不需要另外加延遲時間。
+
+
+---------- wiki/cards/bando1995-ovm-equation.md ----------
+
+---
+id: bando1995-ovm-equation
+type: model_theory
+source: bando1995
+locator: 第1036頁式(1)～(4)
+conditions: 單車道環狀道路，N台車、環長L，所有駕駛敏感度a相同，沒有反應延遲
+units: 原文未指定物理單位（若用物理單位，a的單位是時間的倒數）
+status: confirmed
+related: bando1995-linear-stability, bando1995-velocity-function, bando1995-no-delay
+---
+
+## 主張
+
+每台車的加速度由「它想開的速度」和「現在的速度」的差決定：想開的速度V只看自己到前車的距離，差距乘上敏感度a就是加速度。所有車等距、等速的均勻車流（每台車的速度和間距都一樣；車距b=L/N、速度V(b)）一定是這個方程式的一個解。
+
+
+---------- wiki/cards/bando1995-spontaneous-jam.md ----------
+
+---
+id: bando1995-spontaneous-jam
+type: model_theory
+source: bando1995
+locator: 第1037頁式(17)～(19)、第1038頁式(24)後段、第1039頁圖5、第1040頁圖6
+conditions: 模擬，不是實驗；N=100、L=200（車距2）、a=1、V=tanh(Δx−2)+tanh2；初始位置幾乎等距，第1台車往前偏0.1，所有車的初速都是0（式(19)）
+units: 無因次
+status: confirmed
+related: bando1995-velocity-function, bando1995-cluster-values, sugiyama2008-backward-wave
+---
+
+## 主張
+
+在模擬裡，100台車的初始位置幾乎等距，只有第1台往前移0.1，所有車從靜止（初速0）開始，之後車流自己分成幾段幾乎停住的塞車和幾段快速前進的車，最後形成5團塞車；這些塞車團都以相同的速度慢慢往後移動。
+
+
+---------- wiki/cards/bando1995-stable-regions.md ----------
+
+---
+id: bando1995-stable-regions
+type: model_theory
+source: bando1995
+locator: 第1041頁右欄最後一段、圖10
+conditions: V=tanh(Δx−2)+tanh2、a=1；圖10是示意圖
+units: 無數值
+status: confirmed
+related: bando1995-linear-stability, bando1995-cluster-values, sugiyama2008-mechanism
+---
+
+## 主張
+
+在這篇的模型和參數條件下，在速度函數的曲線上，車距很小和車距很大的地方都是穩定區，只有中間一段是不穩定區。均勻車距落在不穩定區時，車子會被推往兩邊的穩定區，一部分擠成塞車、一部分拉開跑快。
+
+
+---------- wiki/cards/bando1995-velocity-function.md ----------
+
+---
+id: bando1995-velocity-function
+type: model_theory
+source: bando1995
+locator: 第1037頁式(16)、第1038頁式(24)和圖3～4、第1042頁圖11
+conditions: 無因次；a=1
+units: 無因次
+status: confirmed
+related: bando1995-ovm-equation, bando1995-spontaneous-jam
+---
+
+## 主張
+
+作者先試了最簡單的速度函數V=tanh(Δx)，結果在不穩定時會有車往後倒退，等於撞車。所以改用V(Δx)=tanh(Δx−2)+tanh2：車距是0時目標速度V(0)是0（實際速度還是由加速度方程式決定）。作者說在這個模型的模擬裡，駕駛會慢慢加減速、不會超過前車。
+
+
+---------- wiki/cards/nagel1992-circle-jams.md ----------
+
+---
+id: nagel1992-circle-jams
+type: model_theory
+source: nagel1992
+locator: 第2223頁圖1、第2224頁圖2和第1段
+conditions: 環狀道路（週期邊界）、v_max=5；圖1密度0.03、圖2密度0.1（每格的車數）
+units: 車／格
+status: confirmed
+related: nagel1992-randomization, nagel1992-transition
+---
+
+## 主張
+
+模擬裡，密度低（每格0.03台）時車流順暢；密度較高（每格0.1台）時，車速的隨機變動會讓一小團一小團的塞車隨機出現，塞車團往後移動，車子開進去停一下、再從前端加速離開，像高速公路上的走走停停波。
+
+
+---------- wiki/cards/nagel1992-randomization.md ----------
+
+---
+id: nagel1992-randomization
+type: model_theory
+source: nagel1992
+locator: 第2222頁第2節最後兩段
+conditions: 同nagel1992-rules
+units: 格、時間步
+status: confirmed
+related: nagel1992-rules, nagel1992-circle-jams
+---
+
+## 主張
+
+作者說第3步的隨機減速是讓模擬像真實交通的關鍵，它代表人的行為或外在條件造成的速度變動；如果沒有這一步，模型完全確定，任何初始狀態都會很快變成一個固定、每步往後移一格的樣子。
+
+
+---------- wiki/cards/nagel1992-real-units.md ----------
+
+---
+id: nagel1992-real-units
+type: model_theory
+source: nagel1992
+locator: 第2227頁第5節、第2228頁第1～2段
+conditions: 作者用幾種粗略的方法把模型換算成真實單位；高速公路的數字是作者引用的量測值
+units: m、s、km/h
+status: confirmed
+related: nagel1992-rules
+---
+
+## 主張
+
+作者把一格換算成7.5公尺（塞車時一台車佔的長度），並用幾種方法估算一個時間步大約是0.5到1秒的量級（其中一個數字原文印為0.7秒，但照它列的算式是0.54秒），結論是時間步的數量級是「秒」。其中一種方法用了高速公路上量到的塞車波往後速度約15 km/h。
+
+
+---------- wiki/cards/nagel1992-rules.md ----------
+
+---
+id: nagel1992-rules
+type: model_theory
+source: nagel1992
+locator: 第2222頁第2節
+conditions: 單車道，道路切成格子，每格最多一台車；所有車同時更新
+units: 格、時間步
+status: confirmed
+related: nagel1992-randomization
+---
+
+## 主張
+
+每一步，每台車依序做4件事：1. 還沒到最高速、前面空間夠，就加速1；2. 前車太近，就減到不會撞上的速度；3. 速度大於0的車，以機率p隨機減速1；4. 照速度往前走。
+
+
+---------- wiki/cards/nagel1992-transition.md ----------
+
+---
+id: nagel1992-transition
+type: model_theory
+source: nagel1992
+locator: 第2224頁第2段、第2225頁圖4
+conditions: 環狀道路、v_max=5；長時間平均；系統長度L=10^4格（圖4）
+units: 車／格
+status: confirmed
+related: nagel1992-circle-jams
+---
+
+## 主張
+
+這個模型的基本圖上，大約在密度每格0.08台附近看得到從順暢到塞車的轉變；另外，基本圖流量最大值的位置和形狀會隨系統大小改變。作者說從這些圖看不出確切的轉變點在哪。
+
+
+---------- wiki/cards/orosz2010-delays.md ----------
+
+---
+id: orosz2010-delays
+type: review
+source: orosz2010
+locator: 第4467頁第3～4段
+conditions: 有反應延遲的跟車模型
+units: 無數值
+status: confirmed
+related: orosz2010-ring-stability, bando1995-no-delay
+---
+
+## 主張
+
+作者指出，如果駕駛的反應延遲夠大，均勻車流可能改在短的波（高頻）失去穩定，不再是最長的波；延遲再大，連駕駛想減小擾動的努力都可能失效。
+
+
+---------- wiki/cards/orosz2010-ovm-family.md ----------
+
+---
+id: orosz2010-ovm-family
+type: review
+source: orosz2010
+locator: 第4461頁式(3.7)前的h_n定義和式(3.7)、第4462頁式(3.10)和三種延遲設定、第4462～4463頁式(3.12)
+conditions: 單車道、車子一樣長、駕駛相同；綜述整理
+units: 保留物理量綱（距離、速度、鬆弛時間T）
+status: confirmed
+related: bando1995-ovm-equation, bando1995-no-delay
+---
+
+## 主張
+
+在Orosz等人的整理裡，動態跟車模型把加速度寫成車距、車距變化和自己速度的函數，可以有反應延遲；OV模型是其中一類，加速度＝（想開的速度－現在速度）÷T，再加一項看相對速度的W。作者說，延遲全部設為0的做法就是Bando 1995用的。
+
+
+---------- wiki/cards/orosz2010-stability-approaches.md ----------
+
+---
+id: orosz2010-stability-approaches
+type: review
+source: orosz2010
+locator: 第4466～4467頁第5節、式(5.1)～(5.3)、第4475～4476頁附錄A式(A6)～(A10)
+conditions: 均勻車流附近的小擾動（線性化）
+units: 無數值
+status: confirmed
+related: bando1995-linear-stability, orosz2010-ring-stability
+---
+
+## 主張
+
+分析均勻車流穩不穩定，文獻裡有三種做法：假設無限長道路上的波、看環上N台車、或看一排車的訊號會不會一台傳一台放大。作者說三種做法得到相同的結果，並在附錄用沒有延遲的情況示範：環上N台車的條件保留N和離散的波數，車數趨近無限多（均勻車距固定）時，跟看一排車的條件取最小值時一致。均勻車流失去穩定時，會出現行進的波。
+
+
+---------- wiki/cards/ours-finite-n-simulation.md ----------
+
+---
+id: ours-finite-n-simulation
+type: our_simulation
+source: audition/run2.log
+locator: 測試A4、A4b（程式在audition/test_ovm.py）
+conditions: V=tanh(Δx−2)+tanh2；N=22；車距2和2.5；RK4，時間步長0.05；只激發k=1的小擾動
+units: 無因次
+status: confirmed
+related: ours-finite-n-threshold
+---
+
+## 主張
+
+用模擬量出22台車的分界：車距2時量到1.95966（公式1.95949），車距2.5時量到1.54126（公式1.54104）。a=1.98時，照a/2條件應該不穩定，模擬裡擾動卻是衰減的。
+
+
+---------- wiki/cards/stern2018-controllers.md ----------
+
+---
+id: stern2018-controllers
+type: experiment
+source: stern2018
+locator: 第3頁第1.2節、第5～7頁第3節和式(1)～(5)、第8頁第3.4節
+conditions: 自動控制器用那台車自己量到的速度、跟前車的距離，以及從距離變化估出的前車速度；實驗A和B另外有外部給的目標速度
+units: s
+status: confirmed
+related: stern2018-results
+---
+
+## 主張
+
+三種控制方式（實驗A的FollowerStopper、實驗B由受過訓練的人照同類策略開、實驗C的PI控制器）的共同想法是：那台車照著車流的平均速度開，而不是跟著前車忽快忽慢。前車加速時讓空隙變大、前車減速時把空隙吃掉，同樣的時間走同樣的距離，但加速和煞車少很多；距離太近時一定以安全為先。
+
+
+---------- wiki/cards/stern2018-setup.md ----------
+
+---
+id: stern2018-setup
+type: experiment
+source: stern2018
+locator: 第3頁第2.1節、第4～5頁
+conditions: 單車道環道；21～22台車；只有一台車的速度可以自動控制
+units: m、台
+status: confirmed
+related: sugiyama2008-setup, stern2018-waves-emerge
+---
+
+## 主張
+
+實驗在周長260公尺的單車道環道進行，21～22台車，其中一台是可以自動控制速度的車；其他駕駛被要求像尖峰時段那樣開：前方空隙拉大時要追上，同時保持安全、禁止貼車，目的是不讓他們自己把波消掉。那台控制車為了方便緊急閃避，行駛半徑往外偏半個車寬。
+
+
+---------- wiki/cards/stern2018-waves-emerge.md ----------
+
+---
+id: stern2018-waves-emerge
+type: experiment
+source: stern2018
+locator: 第4頁第2.2節、第9～10頁第4.2節、表1、表2、表4
+conditions: 所有車都由人開的時段
+units: s
+status: confirmed
+related: stern2018-setup, sugiyama2008-jam-emerges
+---
+
+## 主張
+
+三場實驗在全部由人開的時候都出現了走走停停波：實驗A在第79秒、實驗B在第55秒、實驗C在第161秒看到第一個波。
+
+
+---------- wiki/cards/sugiyama2008-23-vehicles.md ----------
+
+---
+id: sugiyama2008-23-vehicles
+type: experiment
+source: sugiyama2008
+locator: 第5頁第3段、腳註15
+conditions: 同一個230公尺環道，車數23台
+units: 台
+status: confirmed
+related: sugiyama2008-setup
+---
+
+## 主張
+
+作者做過不同車數的實驗，文中只提到23台的結果：也形成了塞車團，速度跟22台時一樣。
+
+
+---------- wiki/cards/sugiyama2008-backward-wave.md ----------
+
+---
+id: sugiyama2008-backward-wave
+type: experiment
+source: sugiyama2008
+locator: 第5頁第1～2段、第6頁圖4
+conditions: 同sugiyama2008-setup的條件；速度是從360度攝影機的影片讀出的軌跡估算
+units: km/h、台
+status: confirmed
+related: sugiyama2008-jam-emerges, sugiyama2008-highway-comparison
+---
+
+## 主張
+
+塞車團往跟車子相反的方向移動，速度大約20 km/h，而且大小和速度維持不變。團裡的車完全停下，團外的車約40 km/h；前端的車加速離開，後面又有車加入，所以塞車團一直在，但裡面的車一直在換。
+
+
+---------- wiki/cards/sugiyama2008-fundamental-diagram.md ----------
+
+---
+id: sugiyama2008-fundamental-diagram
+type: experiment
+source: sugiyama2008
+locator: 第2頁最後一段、第3頁圖1
+conditions: 日本某條高速公路單一地點一個月的資料，由當時的日本道路公團量測
+units: 台/km、台/5分鐘
+status: confirmed
+related: sugiyama2008-mechanism
+---
+
+## 主張
+
+把高速公路上的車流密度和流量畫成圖（基本圖；圖1畫的是密度和流量的關係），資料點在臨界密度附近明顯分成兩群：自由流和擁擠車流。圖1這個地點的臨界密度約每公里25台。
+
+
+---------- wiki/cards/sugiyama2008-highway-comparison.md ----------
+
+---
+id: sugiyama2008-highway-comparison
+type: experiment
+source: sugiyama2008
+locator: 第5頁第2段、第6頁圖5
+conditions: 作者拿其他研究的高速公路資料比較；圖5的軌跡是從Treiterer和Myers 1974的圖描下來的，原始空拍是1967年
+units: km/h
+status: confirmed
+related: sugiyama2008-backward-wave
+---
+
+## 主張
+
+作者表示，實驗裡塞車團往後退的速度（約20 km/h）跟真實高速公路上量到的塞車往後傳的速度差不多，並用1967年高速公路空拍描出的車輛軌跡（圖5）來比較。
+
+
+---------- wiki/cards/sugiyama2008-jam-emerges.md ----------
+
+---
+id: sugiyama2008-jam-emerges
+type: experiment
+source: sugiyama2008
+locator: 第4頁最後一段、第5頁圖3
+conditions: 同sugiyama2008-setup的條件（230公尺、22台車）
+units: 分鐘、台
+status: confirmed
+related: sugiyama2008-setup, sugiyama2008-backward-wave
+---
+
+## 主張
+
+一開始均勻的車流維持了一段時間，之後車距出現小小的波動並逐漸變大，最後有幾台車被迫完全停下，形成走走停停。圖3的第二張照片是開始3分鐘後拍的，那時已經有一團5台車的塞車。
+
+
+---------- wiki/cards/sugiyama2008-mechanism.md ----------
+
+---
+id: sugiyama2008-mechanism
+type: model_theory
+source: sugiyama2008
+locator: 第1～2頁摘要、第3頁第2段、第7頁第1～2段
+conditions: 作者依自己的交通流模型（引用參考文獻[2]～[4]）做的解釋，不是這個實驗直接量到的
+units: 無數值
+status: confirmed
+related: sugiyama2008-jam-emerges, sugiyama2008-23-vehicles
+---
+
+## 主張
+
+這篇裡有三種不同層次的說法，要分開看：一是作者對模型的說明，模型在一開始是自由流、平均密度略高於某個臨界值時，能在沒有瓶頸的環道上產生塞車，機制是小波動在密度低時消失、超過臨界值時長大；二是環道實驗的觀察，在他們選的車數下，沒有瓶頸也出現了塞車；三是作者對瓶頸的解釋，瓶頸只是讓密度超過臨界值的觸發，不是塞車的根本原因。
+
+
+---------- wiki/cards/sugiyama2008-setup.md ----------
+
+---
+id: sugiyama2008-setup
+type: experiment
+source: sugiyama2008
+locator: 第4頁第2～3段、圖2
+conditions: 平坦地面、單一車道的環形道路；車數事先用模型估過，刻意放在不穩定的範圍
+units: m、km/h、台
+status: confirmed
+related: sugiyama2008-jam-emerges
+---
+
+## 主張
+
+實驗用周長230公尺的環形道路放22台車，開始前讓車子以約30 km/h、間距大致均勻地繞圈；之後駕駛只被要求安全跟前車、盡量維持巡航速度。
+
+
+---------- wiki/cards/tadaki2013-high-density.md ----------
+
+---
+id: tadaki2013-high-density
+type: experiment
+source: tadaki2013
+locator: 第12頁第2段、第8頁圖5、第18頁圖C.2
+conditions: 40台那一場（場次1940），是第一天的場次；有列入兩天車速和波動的圖5和第12頁的討論，但沒有納入用來估計臨界密度的選定資料
+units: 台
+status: confirmed
+related: bando1995-stable-regions
+---
+
+## 主張
+
+40台那一場的車速波動非常小，時空圖上車流是均勻的。作者提到有些理論模型預測密度高到一定程度時均勻車流又會變穩定，但說目前還不清楚這場觀察到的是不是那種情況。
+
+
+---------- wiki/cards/tadaki2013-metastable.md ----------
+
+---
+id: tadaki2013-metastable
+type: experiment
+source: tadaki2013
+locator: 第5頁表1、第6頁定點量測說明、第9頁圖7(c)、第10頁圖8和內文
+conditions: 圖7(c)用的是第二天2228、2328（28台）和2830（30台）三場；另一場30台的2030另列在圖8
+units: 台、台/m
+status: confirmed
+related: tadaki2013-critical-density
+---
+
+## 主張
+
+圖7(c)的三場（28台兩場、30台一場）裡，基本圖上同一個密度附近同時有自由流和塞車兩種點，作者據此判讀出現了介穩態。
+
+
+---------- wiki/cards/tadaki2013-setup.md ----------
+
+---
+id: tadaki2013-setup
+type: experiment
+source: tadaki2013
+locator: 第3～5頁、圖2～3、表1
+conditions: 室內平地環道；同款車；大學生駕駛；目標速度30 km/h
+units: m、km/h、台、s
+status: confirmed
+related: tadaki2013-density-dependence
+---
+
+## 主張
+
+實驗在名古屋巨蛋周長314公尺的室內環道進行，兩天共19場，每場10到40台同款的車，由52位大學生輪流開，被要求用自己的方式安全地以約30 km/h行駛；車的位置用雷射掃描器大約每0.2秒量一次。
+
+
+---------- wiki/sources/bando1995.md ----------
+
+---
+id: bando1995
+kind: paper
+authors: M. Bando, K. Hasebe, A. Nakayama, A. Shibata, Y. Sugiyama
+year: 1995
+title: Dynamical model of traffic congestion and numerical simulation
+venue: Physical Review E 51(2), 1035–1042
+doi: 10.1103/PhysRevE.51.1035
+url: https://doi.org/10.1103/PhysRevE.51.1035
+read_status: 全文已讀
+read_scope: 第1035～1042頁全文，包含式(1)～(27)、圖1～11和參考文獻；PDF是掃描檔，對照頁面圖片讀，另外用OCR轉成文字做引用比對
+independent: 是
+---
+
+
+---------- wiki/sources/nagel1992.md ----------
+
+---
+id: nagel1992
+kind: paper
+authors: Kai Nagel, Michael Schreckenberg
+year: 1992
+title: A cellular automaton model for freeway traffic
+venue: Journal de Physique I 2(12), 2221–2229
+doi: 10.1051/jp1:1992277
+url: https://doi.org/10.1051/jp1:1992277
+read_status: 全文已讀
+read_scope: 第2221～2229頁全文和圖1～6；用的是HAL典藏的掃描版（jpa-00246697），文字層字序錯亂，對照頁面圖片讀
+independent: 是
+---
+
+
+---------- wiki/sources/orosz2010.md ----------
+
+---
+id: orosz2010
+kind: paper
+authors: Gábor Orosz, R. Eddie Wilson, Gábor Stépán
+year: 2010
+title: Traffic jams: dynamics and control
+venue: Philosophical Transactions of the Royal Society A 368, 4455–4479
+doi: 10.1098/rsta.2010.0205
+url: https://doi.org/10.1098/rsta.2010.0205
+read_status: 部分章節
+read_scope: 第4455～4456頁（摘要和開頭）、第3(b)節跟車模型（第4461～4463頁）、第5節線性動力學（第4466～4467頁）、第6節開頭、附錄A（第4475～4476頁）；第2、4節和第6節大部分、第7節控制沒有細讀；用的是作者個人網站上的PDF
+independent: 是
+---
+
+
+---------- wiki/sources/stern2018.md ----------
+
+---
+id: stern2018
+kind: paper
+authors: Raphael E. Stern, Shumo Cui, Maria Laura Delle Monache, Rahul Bhadani, Matt Bunting, Miles Churchill, Nathaniel Hamilton, R'mani Haulcy, Hannah Pohlmann, Fangyu Wu, Benedetto Piccoli, Benjamin Seibold, Jonathan Sprinkle, Daniel B. Work
+year: 2018
+title: Dissipation of stop-and-go waves via control of autonomous vehicles: Field experiments
+venue: Transportation Research Part C: Emerging Technologies（卷期和頁碼待查證）
+doi: 10.1016/j.trc.2018.02.005
+url: https://arxiv.org/abs/1705.01693
+read_status: 全文已讀
+read_scope: arXiv預印本1705.01693v1（2017-05-04）第1～14頁本文和表1～4；附錄只看了需要的部分。正式期刊版沒有讀，兩個版本可能有差異
+independent: 是
+---
+
+
+---------- wiki/sources/tadaki2013.md ----------
+
+---
+id: tadaki2013
+kind: paper
+authors: Shin-ichi Tadaki, Macoto Kikuchi, Minoru Fukui, Akihiro Nakayama, Katsuhiro Nishinari, Akihiro Shibata, Yuki Sugiyama, Taturu Yosida, Satoshi Yukawa
+year: 2013
+title: Phase transition in traffic jam experiment on a circuit
+venue: New Journal of Physics 15, 103034 (20pp)
+doi: 10.1088/1367-2630/15/10/103034
+url: https://doi.org/10.1088/1367-2630/15/10/103034
+read_status: 全文已讀
+read_scope: 期刊第1～20頁：本文第1～12頁全文、表1、圖1～8；附錄A～E的文字和圖說（附錄裡每一場的時空圖沒有逐張細看）
+independent: 是
+---
 
 
 ========== 上一輪的審查意見原文 ==========

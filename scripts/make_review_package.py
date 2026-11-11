@@ -6,6 +6,8 @@
       # 第2輪以後：只放<commit>之後改過的Wiki檔案，加上上一輪的審查意見，請審查者確認有沒有修好
 審查包只放審查標準、文獻檔、證據卡、研究差異和推導文件，不放我們的ingest紀錄和自己的看法，
 避免審查的AI被生成者的判斷影響。每個輸入檔的SHA-256寫在檔頭，之後Wiki改了，就知道這份審查過期了。
+第2輪以後的審查包另外附上沒改過的證據卡的開頭欄位和「主張」、沒改過的文獻檔開頭欄位，
+只給審查者核對index.md和證據卡是否一致（第3輪起加的，因為第2輪發現索引摘要沒跟著卡片更新）。
 """
 import argparse
 import hashlib
@@ -17,13 +19,7 @@ sys.dont_write_bytecode = True
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "pipeline" / "review" / "n3-package.md"
 
-CRITERIA = """# 審查包：幽靈塞車Wiki的研究差異與忠實度審查
-
-## 你的角色
-
-你是獨立審查者。這份Wiki是另一個AI依6篇論文整理的，整理的人沒有參與這次審查。請對照我同時上傳的論文PDF，檢查證據卡有沒有讀錯原文。你的意見不會被直接採用，有爭議的地方我們會再回原文核對，所以請只寫你在PDF裡確認得到的事，不確定就寫不確定。
-
-## 上傳的PDF和對應的文獻id
+PDFS = """## 上傳的PDF和對應的文獻id
 
 | 文獻id | 檔案 | 注意 |
 |---|---|---|
@@ -34,7 +30,15 @@ CRITERIA = """# 審查包：幽靈塞車Wiki的研究差異與忠實度審查
 | stern2018 | 1705.01693v1.pdf | arXiv預印本，頁碼就是PDF頁碼 |
 | orosz2010 | PTRSA2published.pdf | 頁碼4455～4479；Wiki只讀了部分章節，見文獻檔的read_scope |
 
-## 要檢查的五件事
+"""
+
+CRITERIA_RAW = """# 審查包：幽靈塞車Wiki的研究差異與忠實度審查
+
+## 你的角色
+
+你是獨立審查者。這份Wiki是另一個AI依6篇論文整理的，整理的人沒有參與這次審查。請對照我同時上傳的論文PDF，檢查證據卡有沒有讀錯原文。你的意見不會被直接採用，有爭議的地方我們會再回原文核對，所以請只寫你在PDF裡確認得到的事，不確定就寫不確定。
+
+{pdfs}## 要檢查的五件事
 
 1. **忠實度**：每張卡的「主張」和「原文依據」有沒有讀錯、誇大、或漏掉會改變意思的條件。數字、單位、頁碼、圖表和式子編號對不對。
 2. **證據類型**：`type`有沒有放錯。experiment是論文裡真實車輛的實驗或觀測；model_theory是論文裡的模型、推導或電腦模擬；review是綜述的整理；our_derivation、our_simulation是我們自己的。特別注意：有沒有把模型或模擬的結果寫得像真實道路已經證實。
@@ -59,6 +63,8 @@ CRITERIA = """# 審查包：幽靈塞車Wiki的研究差異與忠實度審查
 最後一行寫：總共檢查了幾張卡、有問題的幾張。
 """
 
+CRITERIA = CRITERIA_RAW.replace("{pdfs}", PDFS)
+
 
 def sha(p):
     return hashlib.sha256(p.read_bytes()).hexdigest()
@@ -72,9 +78,11 @@ RECHECK = """# 審查包（第{round}輪）：確認上一輪的問題有沒有�
 
 1. 上一輪列出的每一個問題，有沒有修好。
 2. 修改有沒有引入新的錯誤（讀錯原文、數字或頁碼錯、把模型講成實驗、語氣過度）。整理的人有時也會改上一輪沒指出的地方，這些一樣要檢查。
+3. `wiki/index.md`跟證據卡是否一致：索引裡每一列的類型、狀態和摘要，跟那張卡的`type`、`status`和「主張」有沒有不一樣，摘要有沒有比主張講得更強、或漏掉會改變意思的條件；文獻那張表的種類和閱讀狀態，跟文獻檔的`kind`、`read_status`是否相同。全部列都要看，不只這輪改過的。
 
-這份審查包只放改過的檔案。沒改過的檔案上一輪已經看過，不用重看。
+這份審查包只完整放改過的檔案。沒改過的檔案上一輪已經看過，忠實度不用重看；最後的附錄只放它們的開頭欄位和「主張」，用來做第3項的核對。
 
+{pdfs}
 ## 請照這個格式回覆
 
 第一部分，上一輪的問題逐條回覆，一張卡一列：
@@ -85,9 +93,13 @@ RECHECK = """# 審查包（第{round}輪）：確認上一輪的問題有沒有�
 
 | 卡片id | 問題類型 | 嚴重程度 | 原文在哪裡 | 問題是什麼 | 建議怎麼改 |
 
-第三部分，無法確認的地方。
+第三部分，`index.md`和證據卡不一致的地方（沒有就寫「沒有」）：
 
-最後一行寫：上一輪問題修好幾條、部分修好幾條、沒修好幾條；新問題幾條。
+| 卡片id或文獻id | 索引寫的 | 卡片或文獻檔寫的 | 問題是什麼 |
+
+第四部分，無法確認的地方。
+
+最後一行寫：上一輪問題修好幾條、部分修好幾條、沒修好幾條；新問題幾條；索引不一致幾條。
 """
 
 
@@ -96,6 +108,17 @@ def changed_since(commit):
                          capture_output=True, text=True, check=True).stdout.split()
     return sorted(ROOT / f for f in out if f.endswith(".md") and not f.endswith("_template.md")
                   and (ROOT / f).is_file())
+
+
+def summary_only(p):
+    """只留開頭欄位和「## 主張」那一段（文獻檔只留開頭欄位）。"""
+    text = p.read_text(encoding="utf-8")
+    head_end = text.index("\n---", 4) + 4
+    keep = text[:head_end].strip()
+    if "/cards/" in p.as_posix() and "## 主張" in text:
+        claim = text.split("## 主張", 1)[1].split("\n## ", 1)[0].strip()
+        keep += "\n\n## 主張\n\n" + claim
+    return keep
 
 
 def main():
@@ -107,7 +130,10 @@ def main():
     wiki = ROOT / "wiki"
     if args.since:
         files = changed_since(args.since)
-        head = RECHECK.format(round=args.round)
+        head = RECHECK.replace("{round}", str(args.round)).replace("{pdfs}", PDFS)
+        changed = set(files)
+        appendix = sorted(p for d in ("sources", "cards") for p in (wiki / d).glob("*.md")
+                          if p.name != "_template.md" and p not in changed)
         out_path = ROOT / "pipeline" / "review" / f"n3-package-r{args.round}.md"
     else:
         # index.md也要放：它的每張卡摘要是卡片主張的縮寫，卡片改了它常常沒跟著改（第2輪審查才發現）
@@ -116,20 +142,26 @@ def main():
         files += sorted(p for p in (wiki / "cards").glob("*.md") if p.name != "_template.md")
         head = CRITERIA
         out_path = OUT
+        appendix = []
     out = [head, "\n## 這份審查包包含的檔案版本\n", "| 檔案 | SHA-256 |", "|---|---|"]
-    out += [f"| `{p.relative_to(ROOT).as_posix()}` | `{sha(p)}` |" for p in files]
+    out += [f"| `{p.relative_to(ROOT).as_posix()}` | `{sha(p)}` |" for p in files + appendix]
     out.append("\n# 以下是要審查的Wiki內容\n")
     for p in files:
         out.append(f"\n\n========== 檔案：{p.relative_to(ROOT).as_posix()} ==========\n")
         out.append(p.read_text(encoding="utf-8").strip())
+    if appendix:
+        out.append("\n\n========== 附錄：沒改過的檔案，只放開頭欄位和主張（只用來核對index.md） ==========\n")
+        for p in appendix:
+            out.append(f"\n\n---------- {p.relative_to(ROOT).as_posix()} ----------\n")
+            out.append(summary_only(p))
     if args.previous:
         out.append("\n\n========== 上一輪的審查意見原文 ==========\n")
         out.append((ROOT / args.previous).read_text(encoding="utf-8").strip())
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text("\n".join(out) + "\n", encoding="utf-8", newline="\n")
     n_cards = sum(1 for p in files if "/cards/" in p.as_posix())
-    print(f"已產生 {out_path.relative_to(ROOT).as_posix()}：{len(files)} 個檔案，其中證據卡 {n_cards} 張，"
-          f"{out_path.stat().st_size // 1024} KB")
+    print(f"已產生 {out_path.relative_to(ROOT).as_posix()}：完整檔案 {len(files)} 個（其中證據卡 {n_cards} 張），"
+          f"附錄 {len(appendix)} 個，{out_path.stat().st_size // 1024} KB")
 
 
 if __name__ == "__main__":
