@@ -1,11 +1,15 @@
 """產生第3關（研究差異與忠實度審查）的審查包。
 
-用法：python3 scripts/make_review_package.py
-輸出：pipeline/review/n3-package.md
+用法：
+  python3 scripts/make_review_package.py                     # 第1輪：全部檔案，輸出pipeline/review/n3-package.md
+  python3 scripts/make_review_package.py --since <commit> --previous <上一輪審查原文> --round 2
+      # 第2輪以後：只放<commit>之後改過的Wiki檔案，加上上一輪的審查意見，請審查者確認有沒有修好
 審查包只放審查標準、文獻檔、證據卡、研究差異和推導文件，不放我們的ingest紀錄和自己的看法，
 避免審查的AI被生成者的判斷影響。每個輸入檔的SHA-256寫在檔頭，之後Wiki改了，就知道這份審查過期了。
 """
+import argparse
 import hashlib
+import subprocess
 import sys
 from pathlib import Path
 
@@ -60,22 +64,71 @@ def sha(p):
     return hashlib.sha256(p.read_bytes()).hexdigest()
 
 
+RECHECK = """# 審查包（第{round}輪）：確認上一輪的問題有沒有修好
+
+## 你的角色
+
+你是獨立審查者。上一輪你（或另一個審查者）對這份Wiki提出了意見，原文附在最後。整理的人逐條回到論文核對後修改了下面這些檔案。請對照同樣的6篇論文PDF，確認：
+
+1. 上一輪列出的每一個問題，有沒有修好。
+2. 修改有沒有引入新的錯誤（讀錯原文、數字或頁碼錯、把模型講成實驗、語氣過度）。
+
+這份審查包只放改過的檔案。沒改過的檔案上一輪已經看過，不用重看。
+
+## 請照這個格式回覆
+
+第一部分，上一輪的問題逐條回覆，一張卡一列：
+
+| 卡片id或檔案 | 上一輪的問題 | 修好了嗎（修好／部分修好／沒修好） | 說明 |
+
+第二部分，新發現的問題（沒有就寫「沒有」），格式跟上一輪的第一部分一樣：
+
+| 卡片id | 問題類型 | 嚴重程度 | 原文在哪裡 | 問題是什麼 | 建議怎麼改 |
+
+第三部分，無法確認的地方。
+
+最後一行寫：上一輪問題修好幾條、部分修好幾條、沒修好幾條；新問題幾條。
+"""
+
+
+def changed_since(commit):
+    out = subprocess.run(["git", "diff", "--name-only", commit, "--", "wiki"], cwd=ROOT,
+                         capture_output=True, text=True, check=True).stdout.split()
+    return sorted(ROOT / f for f in out if f.endswith(".md") and not f.endswith("_template.md")
+                  and (ROOT / f).is_file())
+
+
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--since")
+    ap.add_argument("--previous")
+    ap.add_argument("--round", type=int, default=1)
+    args = ap.parse_args()
     wiki = ROOT / "wiki"
-    files = [wiki / "glossary.md", wiki / "disputes.md", wiki / "derivations" / "finite-n-threshold.md"]
-    files += sorted(p for p in (wiki / "sources").glob("*.md") if p.name != "_template.md")
-    files += sorted(p for p in (wiki / "cards").glob("*.md") if p.name != "_template.md")
-    out = [CRITERIA, "\n## 這份審查包包含的檔案版本\n", "| 檔案 | SHA-256 |", "|---|---|"]
+    if args.since:
+        files = changed_since(args.since)
+        head = RECHECK.format(round=args.round)
+        out_path = ROOT / "pipeline" / "review" / f"n3-package-r{args.round}.md"
+    else:
+        files = [wiki / "glossary.md", wiki / "disputes.md", wiki / "derivations" / "finite-n-threshold.md"]
+        files += sorted(p for p in (wiki / "sources").glob("*.md") if p.name != "_template.md")
+        files += sorted(p for p in (wiki / "cards").glob("*.md") if p.name != "_template.md")
+        head = CRITERIA
+        out_path = OUT
+    out = [head, "\n## 這份審查包包含的檔案版本\n", "| 檔案 | SHA-256 |", "|---|---|"]
     out += [f"| `{p.relative_to(ROOT).as_posix()}` | `{sha(p)}` |" for p in files]
     out.append("\n# 以下是要審查的Wiki內容\n")
     for p in files:
         out.append(f"\n\n========== 檔案：{p.relative_to(ROOT).as_posix()} ==========\n")
         out.append(p.read_text(encoding="utf-8").strip())
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text("\n".join(out) + "\n", encoding="utf-8", newline="\n")
+    if args.previous:
+        out.append("\n\n========== 上一輪的審查意見原文 ==========\n")
+        out.append((ROOT / args.previous).read_text(encoding="utf-8").strip())
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text("\n".join(out) + "\n", encoding="utf-8", newline="\n")
     n_cards = sum(1 for p in files if "/cards/" in p.as_posix())
-    print(f"已產生 {OUT.relative_to(ROOT).as_posix()}：{len(files)} 個檔案，其中證據卡 {n_cards} 張，"
-          f"{OUT.stat().st_size // 1024} KB")
+    print(f"已產生 {out_path.relative_to(ROOT).as_posix()}：{len(files)} 個檔案，其中證據卡 {n_cards} 張，"
+          f"{out_path.stat().st_size // 1024} KB")
 
 
 if __name__ == "__main__":
