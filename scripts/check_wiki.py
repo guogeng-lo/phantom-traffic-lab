@@ -75,6 +75,17 @@ def parse(path):
     return meta, text[end + 5:]
 
 
+def dup_sections(rep, where, body):
+    """同一個「## 」段落出現兩次，sections()只會留一段，索引會漏掉另一段，所以直接報錯。"""
+    seen = set()
+    for line in body.splitlines():
+        m = re.match(r"^## (.+?)\s*$", line)
+        if m:
+            if m.group(1) in seen:
+                rep.err(where, f"段落「## {m.group(1)}」出現不只一次")
+            seen.add(m.group(1))
+
+
 def sections(body):
     out, cur = {}, None
     for line in body.splitlines():
@@ -156,6 +167,7 @@ def check_cards(root, rep, sources, tracked):
             continue
         cards[p.stem] = (meta, body, where)
     for cid, (meta, body, where) in cards.items():
+        dup_sections(rep, where, body)
         if meta.get("id") != cid:
             rep.err(where, f"id {meta.get('id')} 跟檔名不一樣")
         if not ID_RE.match(cid):
@@ -212,7 +224,8 @@ def check_index(root, rep, sources, cards):
     text = idx.read_text(encoding="utf-8")
     expected = index_with_generated(text, render_index(root))
     if expected is None:
-        rep.err("wiki/index.md", "找不到自動產生區塊的標記，請照原本的格式放回兩行標記，再跑 python3 scripts/build_index.py")
+        rep.err("wiki/index.md", "找不到自動產生區塊的標記，或標記不合規定（標記要各出現一次、獨立成行，"
+                                 "開始在結束前面）；請照原本的格式放回兩行標記，再跑 python3 scripts/build_index.py")
     elif expected != text:
         rep.err("wiki/index.md", "跟文獻檔、證據卡不同步（自動產生的部分被手改，或卡片改了沒重建），"
                                  "請跑 python3 scripts/build_index.py")
@@ -235,14 +248,21 @@ INDEX_END = "<!-- 自動產生結束 -->"
 OURS_GROUP = "我們自己的推導和模擬"
 
 
-def fix_links(text):
-    """主張裡的相對連結是從cards/出發寫的，放進index.md要改成從wiki/出發。"""
+CODE = re.compile(r"(```.*?```|`[^`\n]*`)", re.S)
+
+
+def fix_links(text, card_name):
+    """主張裡的相對連結是從cards/出發寫的，放進index.md要改成從wiki/出發；
+    「#段落」這種卡片內的錨點改成指回那張卡。程式碼（行內和區塊）裡的字不動。"""
     def repl(m):
         target = m.group(1)
-        if re.match(r"^(https?:|#|/)", target):
+        if re.match(r"^(https?:|mailto:|/)", target):
             return m.group(0)
+        if target.startswith("#"):
+            return f"](cards/{card_name}{target})"
         return f"]({posixpath.normpath(posixpath.join('cards', target))})"
-    return re.sub(r"\]\(([^)\s]+)\)", repl, text)
+    parts = CODE.split(text)
+    return "".join(part if i % 2 else re.sub(r"\]\(([^)\s]+)\)", repl, part) for i, part in enumerate(parts))
 
 
 def render_index(root):
@@ -263,7 +283,7 @@ def render_index(root):
         meta = meta or {}
         n_cards += 1
         group = OURS_GROUP if meta.get("type", "").startswith("our_") else meta.get("source", "")
-        claim = fix_links(sections(body).get("主張", ""))
+        claim = fix_links(sections(body).get("主張", ""), p.name)
         groups.setdefault(group, []).append(
             f"#### [{p.stem}](cards/{p.name})\n\n- 類型：{meta.get('type', '')}\n- 狀態：{meta.get('status', '')}\n"
             f"- 條件：{meta.get('conditions', '')}\n\n{claim}")
@@ -278,11 +298,14 @@ def render_index(root):
 
 
 def index_with_generated(text, generated):
-    """把index.md裡兩個標記之間換成新產生的內容；沒有標記就回傳None。"""
-    a, b = text.find(INDEX_BEGIN), text.find(INDEX_END)
-    if a < 0 or b < a:
+    """把index.md裡兩個標記之間換成新產生的內容。標記要各出現一次、獨立成行、開始在結束前面，
+    否則回傳None（重複的標記會讓第二份過期內容躲過比對）。"""
+    lines = text.split("\n")
+    begins = [i for i, l in enumerate(lines) if l == INDEX_BEGIN]
+    ends = [i for i, l in enumerate(lines) if l == INDEX_END]
+    if (text.count(INDEX_BEGIN), text.count(INDEX_END), len(begins), len(ends)) != (1, 1, 1, 1) or begins[0] > ends[0]:
         return None
-    return text[:a] + generated + text[b + len(INDEX_END):]
+    return "\n".join(lines[:begins[0]] + generated.split("\n") + lines[ends[0] + 1:])
 
 
 def tracked_files(root):
@@ -301,35 +324,50 @@ def tracked_files(root):
 # （2026-11-11看到pipeline/review/n3-package-r2.md的雜湊被誤判成學號之後才加的，紀錄在
 #  runs/2026-11-11-check-wiki-hash-exclusion.md。掃Git歷史時用那個commit的完整檔案判斷表頭，
 #  見runs/2026-11-11-check-wiki-history-fullfile.md。）
+# 2026-11-12第4輪工程審查後收緊（runs/2026-11-12-eng-fixes-after-r4.md）：
+# - 同一行的標記：「SHA-256」前後不能接英數、底線或連字號（NotSHA-256、SHA-256-old都不算）。
+# - 表格：第一列是表頭、緊接著一列分隔列（|---|）、而且表頭剛好有一格是「SHA-256」或「SHA-256（說明）」，
+#   才算有SHA-256欄的表格；資料列的格數要跟表頭一樣；那一格的內容只能是雜湊值，後面最多接一個全形括號說明。
 HASH_TOKEN = "`[0-9a-f]{64}`"
 HASH_RE = re.compile(HASH_TOKEN)
-LABELED_HASH = re.compile(r"(SHA-256[:：]?\s*)" + HASH_TOKEN)
-HASH_CELL = re.compile(r"^(\s*)" + HASH_TOKEN)
+LABELED_HASH = re.compile(r"((?<![A-Za-z0-9_-])SHA-256(?![A-Za-z0-9_-])[:：]?\s*)" + HASH_TOKEN)
+HASH_CELL = re.compile(r"^(\s*)" + HASH_TOKEN + r"((?:（[^（）]*）)?\s*)$")
+SHA_HEADER_CELL = re.compile(r"^SHA-256(?:（[^（）]*）)?$")
+SEPARATOR = re.compile(r"^\s*\|(?:\s*:?-{3,}:?\s*\|)+\s*$")
 HASH_MASKED = {"像學號的9位數字", "手機號碼"}
 
 
 def sha_column(line):
-    """表格表頭裡以SHA-256開頭的那一欄，回傳它用「|」切開後的位置；不是這種表頭就回傳None。"""
+    """表頭列裡剛好有一格是「SHA-256」或「SHA-256（說明）」時，回傳那一格用「|」切開後的位置；否則None。"""
     if not line.lstrip().startswith("|"):
         return None
-    for i, cell in enumerate(line.split("|")):
-        if cell.strip().startswith("SHA-256"):
-            return i
-    return None
+    hits = [i for i, cell in enumerate(line.split("|")) if SHA_HEADER_CELL.match(cell.strip())]
+    return hits[0] if len(hits) == 1 else None
 
 
 class ShaTable:
-    """一行一行讀，記住現在是不是在有SHA-256欄的表格裡。表格一結束（下一行不是「|」開頭）就失效。"""
+    """一行一行讀，判斷現在這一行是不是「有SHA-256欄的真表格」的資料列。
+    表格從一串「|」開頭的行的第一列開始，第二列一定要是分隔列，表格一結束（下一行不是「|」開頭）就失效。"""
     def __init__(self):
+        self.row = 0          # 目前是這個表格的第幾列（0代表不在表格裡）
+        self.header_col = None
+        self.ncells = 0
         self.col = None
 
     def feed(self, line):
-        col = sha_column(line)
-        if col is not None:
-            self.col = col
-        elif not line.lstrip().startswith("|"):
-            self.col = None
-        return self.col
+        if not line.lstrip().startswith("|"):
+            self.row, self.header_col, self.col = 0, None, None
+            return None
+        self.row += 1
+        cells = len(line.split("|"))
+        if self.row == 1:
+            self.header_col, self.ncells, self.col = sha_column(line), cells, None
+            return None
+        if self.row == 2:
+            if self.header_col is not None and SEPARATOR.match(line) and cells == self.ncells:
+                self.col = self.header_col
+            return None
+        return self.col if cells == self.ncells else None
 
 
 def mask_hashes(line, sha_col=None):
@@ -337,7 +375,7 @@ def mask_hashes(line, sha_col=None):
     if sha_col is not None and line.lstrip().startswith("|"):
         cells = line.split("|")
         if sha_col < len(cells):
-            cells[sha_col] = HASH_CELL.sub(r"\1`<sha256>`", cells[sha_col])
+            cells[sha_col] = HASH_CELL.sub(r"\1`<sha256>`\2", cells[sha_col])
         line = "|".join(cells)
     return line
 
@@ -354,19 +392,42 @@ def check_history(root, rep, strict):
     def git(*args):
         return subprocess.run(["git", *args], cwd=root, capture_output=True, text=True,
                               encoding="utf-8", errors="replace", check=True).stdout
+
+    def git_failed(args, e):
+        detail = (getattr(e, "stderr", "") or str(e)).strip().splitlines()
+        rep.err("Git歷史", f"Git指令失敗，歷史沒有檢查完（git {' '.join(args)}）：{detail[-1] if detail else e}")
+
+    report = rep.err if strict else rep.warn
+    try:
+        inside = subprocess.run(["git", "rev-parse", "--is-inside-work-tree"], cwd=root, capture_output=True,
+                                text=True).stdout.strip() == "true"
+    except OSError as e:
+        report("Git歷史", f"找不到git，沒辦法檢查歷史：{e}")
+        return
+    if not inside:
+        if strict:
+            rep.err("Git歷史", "這裡不是Git repo，--strict沒辦法檢查歷史")
+        return
     try:
         git("rev-parse", "--verify", "HEAD")
-    except (OSError, subprocess.CalledProcessError):
+    except subprocess.CalledProcessError:
+        return  # 還沒有任何commit，沒有歷史可以掃
+    # 一律加--no-textconv：Git for Windows預設對PDF設了文字轉換（astextplain），轉換失敗會讓git log整個失敗
+    args = ("log", "--all", "--no-textconv", "--name-only", "--format=")
+    try:
+        names = git(*args)
+    except (OSError, subprocess.CalledProcessError) as e:
+        git_failed(args, e)
         return
-    report = rep.err if strict else rep.warn
-    for name in sorted(set(git("log", "--all", "--name-only", "--format=").splitlines())):
+    for name in sorted(set(names.splitlines())):
         if name.lower().endswith(".pdf"):
             report("Git歷史", f"出現過PDF：{name}")
+
     def sha_cols(commit, path):
         """讀這個commit裡這個檔案的完整內容，算出每一行是不是在SHA-256表格裡（行號從1開始）。
         讀不到（例如檔名有特殊字元）就全部當成不在表格裡，也就是不排除。"""
         try:
-            text = git("show", f"{commit}:{path}")
+            text = git("cat-file", "-p", f"{commit}:{path}")  # cat-file不做文字轉換
         except subprocess.CalledProcessError:
             return {}
         table = ShaTable()
@@ -382,7 +443,13 @@ def check_history(root, rep, strict):
     # 只掃每個commit新增的行，但表頭用那個commit的完整檔案判斷，不靠diff前後幾行的上下文。
     # 用@@標頭的行數判斷哪些行是內容，內容剛好以「+++」開頭也不會被當成檔名。
     commit, path, added, n, old_left, new_left = "", "", [], 0, 0, 0
-    for line in git("log", "--all", "-p", "--no-color", "--format=commit %h").splitlines():
+    args = ("log", "--all", "-p", "--no-color", "--no-textconv", "--format=commit %h")
+    try:
+        log = git(*args)
+    except (OSError, subprocess.CalledProcessError) as e:
+        git_failed(args, e)
+        return
+    for line in log.splitlines():
         if old_left > 0 or new_left > 0:
             if line.startswith("+"):
                 added.append((n, line[1:]))

@@ -66,6 +66,8 @@ related:
 """
 
 INDEX_HEAD = "# 索引\n\n人工寫的導覽。\n\n"
+sys.path.insert(0, str(SCRIPT.parent))
+from check_wiki import INDEX_BEGIN, INDEX_END  # noqa: E402
 
 
 def make_site(tmp):
@@ -76,8 +78,6 @@ def make_site(tmp):
     (tmp / "wiki" / "cards").mkdir()
     (tmp / "wiki" / "sources" / "demo2000.md").write_text(SOURCE, encoding="utf-8")
     (tmp / "wiki" / "cards" / "demo2000-claim.md").write_text(CARD, encoding="utf-8")
-    sys.path.insert(0, str(SCRIPT.parent))
-    from check_wiki import INDEX_BEGIN, INDEX_END
     (tmp / "wiki" / "index.md").write_text(INDEX_HEAD + INDEX_BEGIN + "\n" + INDEX_END + "\n", encoding="utf-8")
     rebuild(tmp)
 
@@ -160,6 +160,46 @@ def history_versions(*texts):
         (tmp / "note.md").unlink()
         commit_all(tmp, "remove")
     return f
+
+
+def broken_textconv(tmp):
+    """模擬Git for Windows對PDF和md設了文字轉換、而且轉換程式會失敗的環境。"""
+    git(tmp, "init", "-q")
+    git(tmp, "config", "diff.boom.textconv", "false")
+    (tmp / ".gitattributes").write_text("*.pdf diff=boom\n*.md diff=boom\n", encoding="utf-8")
+
+
+def textconv_pdf(tmp):
+    broken_textconv(tmp)
+    (tmp / "a.pdf").write_bytes(b"%PDF")
+    commit_all(tmp, "pdf")
+    (tmp / "a.pdf").unlink()
+    commit_all(tmp, "rm")
+
+
+def textconv_key(tmp):
+    broken_textconv(tmp)
+    (tmp / "note.md").write_text("key=sk-" + "c" * 30 + "\n", encoding="utf-8")
+    commit_all(tmp, "leak")
+    (tmp / "note.md").unlink()
+    commit_all(tmp, "remove")
+
+
+def corrupt_history(tmp):
+    """刪掉Git裡一個檔案內容的物件，讓git log -p失敗。"""
+    git(tmp, "init", "-q")
+    (tmp / "note.md").write_text("hello\n", encoding="utf-8")
+    commit_all(tmp, "add")
+    blob = subprocess.run(["git", "rev-parse", "HEAD:note.md"], cwd=tmp, capture_output=True,
+                          text=True, check=True).stdout.strip()
+    obj = tmp / ".git" / "objects" / blob[:2] / blob[2:]
+    obj.chmod(0o644)
+    obj.unlink()
+
+
+def claim_add(tmp, text):
+    edit(C(tmp), "22台車繞230m的環。", "22台車繞230m的環。" + text)
+    rebuild(tmp)
 
 
 def rows(n, cell=None):
@@ -311,11 +351,82 @@ CASES = [
      lambda t: (edit(C(t), "22台車繞230m的環。", "22台車繞230m的環，見[本卡](demo2000-claim.md)。"), rebuild(t),
                 edit(t / "wiki" / "index.md", "見[本卡](cards/demo2000-claim.md)", "見[本卡](cards/demo2000-claim.md)")),
      None),
+    # 以下是第4輪工程審查的反例（2026-11-12，看到審查結果之後才加的）
+    ("偽表頭：資料列有SHA-256格，下一列同欄的雜湊不放行",
+     note("| 值 | 說明 |\n|---|---|\n| SHA-256 | x |\n" + f"| `{fake_hash(SID)}` | y |\n"), "像學號的9位數字"),
+    ("表頭後面沒有分隔列，不算表格，不放行",
+     note("| 檔案 | SHA-256 |\n" + f"| `a.md` | `{fake_hash(SID)}` |\n"), "像學號的9位數字"),
+    ("表頭寫SHA-256之外的字（SHA-256值或備註），不放行",
+     note("| 檔案 | SHA-256值或備註 |\n|---|---|\n" + f"| `a.md` | `{fake_hash(SID)}` |\n"), "像學號的9位數字"),
+    ("資料列的格數跟表頭不同，不放行",
+     note(SHA_TABLE + f"| `a.md` | `{fake_hash(SID)}` | 多一格 |\n"), "像學號的9位數字"),
+    ("SHA-256欄的雜湊後面接的不是括號說明，不放行",
+     note(SHA_TABLE + f"| `a.md` | `{fake_hash(SID)}`附註 |\n"), "像學號的9位數字"),
+    ("NotSHA-256這種標記不放行", note(f"NotSHA-256 `{fake_hash(PHONE)}`\n"), "手機號碼"),
+    ("SHA-256-old這種標記不放行", note(f"SHA-256-old `{fake_hash(PHONE)}`\n"), "手機號碼"),
+    ("偽表頭那列同一行的信箱照樣抓",
+     note("| 值 | 說明 |\n|---|---|\n| SHA-256 | someone@gmail.com |\n"), "電子郵件"),  # privacy-scan: ignore
+    ("索引的起訖標記重複要擋",
+     lambda t: (t / "wiki" / "index.md").write_text(
+         (t / "wiki" / "index.md").read_text(encoding="utf-8") + INDEX_BEGIN + "\n過期內容\n" + INDEX_END + "\n",
+         encoding="utf-8"), "標記要各出現一次"),
+    ("索引的標記沒有獨立成行要擋", lambda t: edit(t / "wiki" / "index.md", INDEX_END, "結尾" + INDEX_END), "標記要各出現一次"),
+    ("索引的結束標記在開始標記前面要擋",
+     lambda t: (t / "wiki" / "index.md").write_text(
+         INDEX_HEAD + INDEX_END + "\n" + INDEX_BEGIN + "\n", encoding="utf-8"), "標記要各出現一次"),
+    ("卡片有兩個「## 主張」要擋",
+     lambda t: edit(C(t), "## 主張\n", "## 主張\n插進來的另一段。\n\n## 主張\n"), "「## 主張」出現不只一次"),
+    ("卡片有兩個「## 限制」要擋", lambda t: edit(C(t), "## 限制\n", "## 限制\n第一段。\n\n## 限制\n"),
+     "「## 限制」出現不只一次"),
+    ("主張裡的錨點連結在索引裡指回那張卡", lambda t: claim_add(t, "見[限制](#限制)。"), None,
+     {"files": [("wiki/index.md", "見[限制](cards/demo2000-claim.md#限制)。", True)]}),
+    ("主張裡行內程式碼的連結字樣不改", lambda t: claim_add(t, "寫法是`[x](y.md)`。"), None,
+     {"files": [("wiki/index.md", "寫法是`[x](y.md)`。", True)]}),
+    ("主張裡程式碼區塊的連結字樣不改", lambda t: claim_add(t, "\n\n```\n[x](y.md)\n```"), None,
+     {"files": [("wiki/index.md", "```\n[x](y.md)\n```", True)]}),
+    ("Git設了會失敗的textconv，歷史裡的PDF照樣報（--strict）", textconv_pdf, "出現過PDF：a.pdf",
+     {"args": ["--strict"]}),
+    ("Git設了會失敗的textconv，歷史裡的金鑰照樣抓（--strict）", textconv_key, "金鑰或Token", {"args": ["--strict"]}),
+    ("Git指令失敗要報錯，不能當成沒問題", corrupt_history, "Git指令失敗"),
+    ("Git指令失敗在--strict也要報錯", corrupt_history, "Git指令失敗", {"args": ["--strict"]}),
+]
+
+
+def judge(code, out, expect, opt):
+    """判斷一個情境過不過。預期錯誤時，指定的訊息一定要出現在「[錯誤]」那一行，
+    不能靠警告行或其他無關的錯誤湊出結束代碼1。（2026-11-12第4輪審查指出原本只在整份輸出找關鍵字。）"""
+    lines = out.splitlines()
+    errs = [l for l in lines if l.startswith("[錯誤]")]
+    if opt.get("warn"):
+        warns = [l for l in lines if l.startswith("[警告]") and expect in l]
+        return code == 0 and not errs and bool(warns), f"沒有錯誤，警告裡有「{expect}」", out.strip().replace("\n", "；")
+    if opt.get("out"):
+        return code == 0 and not errs and expect in out, f"沒有錯誤，輸出裡有「{expect}」", lines[-2:]
+    if expect is None:
+        ok = code == 0 and not errs
+        return ok, "沒有錯誤", ("沒有錯誤" if ok else out.strip())
+    ok = code == 1 and any(expect in l for l in errs)
+    return ok, f"「[錯誤]」那一行裡有「{expect}」", "；".join(errs) or out.strip() or "沒有錯誤"
+
+
+# 檢查judge本身：故意給它會騙過舊寫法的輸出
+JUDGE_CASES = [
+    ("關鍵字只在警告行，另有無關錯誤：不能算通過",
+     (1, "[警告] x：疑似金鑰或Token\n[錯誤] y：無關的錯誤\n", "金鑰或Token", {}), False),
+    ("關鍵字在錯誤行：算通過", (1, "[錯誤] note.md:1：疑似金鑰或Token\n", "金鑰或Token", {}), True),
+    ("結束代碼1但沒有任何錯誤行（例如程式當掉）：不能算通過",
+     (1, "Traceback (most recent call last):\n  金鑰或Token\n", "金鑰或Token", {}), False),
+    ("預期沒有錯誤，卻有錯誤行：不能算通過", (0, "[錯誤] x：y\n", None, {}), False),
+    ("預期只有警告，卻也有錯誤行：不能算通過", (0, "[錯誤] a\n[警告] b：金鑰或Token\n", "金鑰或Token", {"warn": True}), False),
 ]
 
 
 def main():
     fails = 0
+    for name, args, want_ok in JUDGE_CASES:
+        ok = judge(*args)[0] == want_ok
+        fails += not ok
+        print(f"[{'PASS' if ok else 'FAIL'}] 判定規則：{name}")
     for case in CASES:
         name, breaker, expect = case[:3]
         opt = case[3] if len(case) > 3 else {}
@@ -324,23 +435,17 @@ def main():
             make_site(tmp)
             breaker(tmp)
             code, out = run(tmp, *opt.get("args", []))
-            if opt.get("warn"):
-                warns = [l for l in out.splitlines() if l.startswith("[警告]") and expect in l]
-                ok = code == 0 and bool(warns)
-                want, got = f"沒有錯誤，警告裡有「{expect}」", out.strip().replace("\n", "；")
-            elif opt.get("out"):
-                ok = code == 0 and expect in out
-                want, got = f"沒有錯誤，輸出裡有「{expect}」", out.strip().splitlines()[-2:]
-            elif expect is None:
-                ok = code == 0
-                want, got = "沒有錯誤", ("沒有錯誤" if code == 0 else out.strip())
-            else:
-                ok = code == 1 and expect in out
-                errs = [l for l in out.splitlines() if l.startswith("[錯誤]")]
-                want, got = f"錯誤裡有「{expect}」", "；".join(errs) or "沒有錯誤"
+            ok, want, got = judge(code, out, expect, opt)
+            for rel, text, present in opt.get("files", []):
+                content = (tmp / rel).read_text(encoding="utf-8")
+                if (text in content) != present:
+                    ok = False
+                    got = f"{got}；{rel}裡{'找不到' if present else '不該有'}「{text}」"
+                want = f"{want}；{rel}裡{'要有' if present else '不能有'}「{text}」"
             fails += not ok
             print(f"[{'PASS' if ok else 'FAIL'}] {name}\n    預期：{want}\n    實際：{got}")
-    print(f"\n共{len(CASES)}個情境，失敗{fails}個。")
+    total = len(CASES) + len(JUDGE_CASES)
+    print(f"\n共{total}個情境（其中判定規則{len(JUDGE_CASES)}個），失敗{fails}個。")
     return 1 if fails else 0
 
 

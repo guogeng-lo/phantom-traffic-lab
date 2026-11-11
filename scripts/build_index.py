@@ -25,7 +25,7 @@ def main():
     text = idx.read_text(encoding="utf-8")
     new = index_with_generated(text, render_index(root))
     if new is None:
-        print("[錯誤] wiki/index.md找不到自動產生區塊的兩行標記")
+        print("[錯誤] wiki/index.md自動產生區塊的標記要各出現一次、獨立成行，開始在結束前面")
         return 1
     if args.check:
         same = new == text

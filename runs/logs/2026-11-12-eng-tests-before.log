@@ -1,0 +1,314 @@
+[PASS] 判定規則：關鍵字只在警告行，另有無關錯誤：不能算通過
+[PASS] 判定規則：關鍵字在錯誤行：算通過
+[PASS] 判定規則：結束代碼1但沒有任何錯誤行（例如程式當掉）：不能算通過
+[PASS] 判定規則：預期沒有錯誤，卻有錯誤行：不能算通過
+[PASS] 判定規則：預期只有警告，卻也有錯誤行：不能算通過
+[PASS] 正常資料
+    預期：沒有錯誤
+    實際：沒有錯誤
+[PASS] 主張裡只有年份，units寫無數值
+    預期：沒有錯誤
+    實際：沒有錯誤
+[PASS] 文獻少一個欄位
+    預期：「[錯誤]」那一行裡有「缺少欄位 venue」
+    實際：[錯誤] wiki/sources/demo2000.md：缺少欄位 venue
+[PASS] 閱讀狀態亂寫
+    預期：「[錯誤]」那一行裡有「read_status 要是」
+    實際：[錯誤] wiki/sources/demo2000.md：read_status 要是 全文已讀、只讀摘要、尚未查證、部分章節 之一；[錯誤] wiki/index.md：跟文獻檔、證據卡不同步（自動產生的部分被手改，或卡片改了沒重建），請跑 python3 scripts/build_index.py
+[PASS] DOI格式錯
+    預期：「[錯誤]」那一行裡有「doi 格式不對」
+    實際：[錯誤] wiki/sources/demo2000.md：doi 格式不對（寫 10.xxxx/... 或「無」）
+[PASS] 網址不是https
+    預期：「[錯誤]」那一行裡有「url 要用 https://」
+    實際：[錯誤] wiki/sources/demo2000.md：url 要用 https://
+[PASS] 文獻少段落
+    預期：「[錯誤]」那一行裡有「缺少段落「## 限制」」
+    實際：[錯誤] wiki/sources/demo2000.md：缺少段落「## 限制」
+[PASS] 證據卡的文獻不存在
+    預期：「[錯誤]」那一行裡有「找不到」
+    實際：[錯誤] wiki/cards/demo2000-claim.md：source ghost1999 在 wiki/sources/ 裡找不到；[錯誤] wiki/index.md：跟文獻檔、證據卡不同步（自動產生的部分被手改，或卡片改了沒重建），請跑 python3 scripts/build_index.py
+[PASS] 文獻尚未查證，卡片卻是confirmed
+    預期：「[錯誤]」那一行裡有「不能是 confirmed」
+    實際：[錯誤] wiki/cards/demo2000-claim.md：demo2000 還是「尚未查證」，卡片不能是 confirmed；[錯誤] wiki/index.md：跟文獻檔、證據卡不同步（自動產生的部分被手改，或卡片改了沒重建），請跑 python3 scripts/build_index.py
+[PASS] 只讀摘要，locator沒寫摘要
+    預期：「[錯誤]」那一行裡有「locator 要寫「摘要」」
+    實際：[錯誤] wiki/cards/demo2000-claim.md：demo2000 只讀了摘要，locator 要寫「摘要」；[錯誤] wiki/index.md：跟文獻檔、證據卡不同步（自動產生的部分被手改，或卡片改了沒重建），請跑 python3 scripts/build_index.py
+[PASS] 科普當成實驗證據
+    預期：「[錯誤]」那一行裡有「科普或新聞只能當 expression」
+    實際：[錯誤] wiki/cards/demo2000-claim.md：科普或新聞只能當 expression，不能當研究證據；[錯誤] wiki/index.md：跟文獻檔、證據卡不同步（自動產生的部分被手改，或卡片改了沒重建），請跑 python3 scripts/build_index.py
+[PASS] expression引用論文
+    預期：「[錯誤]」那一行裡有「expression 只能引用」
+    實際：[錯誤] wiki/cards/demo2000-claim.md：expression 只能引用 kind: popular 的文獻；[錯誤] wiki/index.md：跟文獻檔、證據卡不同步（自動產生的部分被手改，或卡片改了沒重建），請跑 python3 scripts/build_index.py
+[PASS] 證據類型亂寫
+    預期：「[錯誤]」那一行裡有「type 要是」
+    實際：[錯誤] wiki/cards/demo2000-claim.md：type 要是 experiment、expression、model_theory、our_derivation、our_simulation、review 之一；[錯誤] wiki/index.md：跟文獻檔、證據卡不同步（自動產生的部分被手改，或卡片改了沒重建），請跑 python3 scripts/build_index.py
+[PASS] 有數字但units寫無數值
+    預期：「[錯誤]」那一行裡有「units 不能寫「無數值」」
+    實際：[錯誤] wiki/cards/demo2000-claim.md：主張裡有數字，units 不能寫「無數值」（要寫單位或「無因次」）
+[PASS] 英文原文引用太長
+    預期：「[錯誤]」那一行裡有「超過 50」
+    實際：[錯誤] wiki/cards/demo2000-claim.md：英文原文引用 60 個字，超過 50
+[PASS] 證據卡少原文依據
+    預期：「[錯誤]」那一行裡有「「## 原文依據」」
+    實際：[錯誤] wiki/cards/demo2000-claim.md：缺少段落或段落是空的「## 原文依據」
+[PASS] 自己的模擬指向不存在的檔案
+    預期：「[錯誤]」那一行裡有「source 要是repo裡存在的檔案」
+    實際：[錯誤] wiki/cards/demo2000-claim.md：source 要是repo裡存在的檔案（找不到 audition/nope.py）；[錯誤] wiki/index.md：跟文獻檔、證據卡不同步（自動產生的部分被手改，或卡片改了沒重建），請跑 python3 scripts/build_index.py
+[PASS] 自己的模擬用..跳出repo
+    預期：「[錯誤]」那一行裡有「source 要是repo裡存在的檔案」
+    實際：[錯誤] wiki/cards/demo2000-claim.md：source 要是repo裡存在的檔案（找不到 ../etc/passwd）；[錯誤] wiki/index.md：跟文獻檔、證據卡不同步（自動產生的部分被手改，或卡片改了沒重建），請跑 python3 scripts/build_index.py
+[PASS] related指到不存在的卡
+    預期：「[錯誤]」那一行裡有「related 的 nope-card 不存在」
+    實際：[錯誤] wiki/cards/demo2000-claim.md：related 的 nope-card 不存在
+[PASS] 卡片id跟檔名不同
+    預期：「[錯誤]」那一行裡有「跟檔名不一樣」
+    實際：[錯誤] wiki/cards/demo2000-claim.md：id other 跟檔名不一樣
+[PASS] 索引沒列卡片
+    預期：「[錯誤]」那一行裡有「沒有列出證據卡」
+    實際：[錯誤] wiki/index.md：跟文獻檔、證據卡不同步（自動產生的部分被手改，或卡片改了沒重建），請跑 python3 scripts/build_index.py；[錯誤] wiki/index.md：沒有列出證據卡 demo2000-claim
+[PASS] 放了PDF
+    預期：「[錯誤]」那一行裡有「PDF不能放進repo」
+    實際：[錯誤] raw.pdf：PDF不能放進repo
+[PASS] 檔案裡有像學號的數字
+    預期：「[錯誤]」那一行裡有「像學號」
+    實際：[錯誤] note.md:1：疑似像學號的9位數字
+[PASS] 檔案裡有個人信箱
+    預期：「[錯誤]」那一行裡有「電子郵件」
+    實際：[錯誤] note.md:1：疑似電子郵件
+[PASS] 檔案裡有本機路徑
+    預期：「[錯誤]」那一行裡有「本機路徑」
+    實際：[錯誤] note.md:1：疑似本機路徑
+[PASS] 檔案裡有金鑰
+    預期：「[錯誤]」那一行裡有「金鑰或Token」
+    實際：[錯誤] note.md:1：疑似金鑰或Token
+[PASS] 檔案裡有手機號碼
+    預期：「[錯誤]」那一行裡有「手機號碼」
+    實際：[錯誤] note.md:1：疑似手機號碼
+[PASS] log裡的小數不能誤判成學號或電話
+    預期：沒有錯誤
+    實際：沒有錯誤
+[PASS] 欄位重複
+    預期：「[錯誤]」那一行裡有「欄位 status 出現不只一次」
+    實際：[錯誤] wiki/cards/demo2000-claim.md：欄位 status 出現不只一次；[錯誤] wiki/index.md：跟文獻檔、證據卡不同步（自動產生的部分被手改，或卡片改了沒重建），請跑 python3 scripts/build_index.py
+[PASS] 索引列了不存在的卡
+    預期：「[錯誤]」那一行裡有「cards/deleted-card.md 不存在」
+    實際：[錯誤] wiki/index.md：列出的 cards/deleted-card.md 不存在
+[PASS] 有數字的主張，locator只寫全文
+    預期：「[錯誤]」那一行裡有「locator 要到頁碼」
+    實際：[錯誤] wiki/cards/demo2000-claim.md：主張裡有數字，locator 要到頁碼、章節、公式或圖表編號（或寫「摘要」）
+[PASS] 自己的模擬指向不會上傳的檔案
+    預期：「[錯誤]」那一行裡有「不會上傳的檔案」
+    實際：[錯誤] wiki/cards/demo2000-claim.md：source local/sim.py 是不會上傳的檔案，別人沒辦法核對；[錯誤] wiki/index.md：跟文獻檔、證據卡不同步（自動產生的部分被手改，或卡片改了沒重建），請跑 python3 scripts/build_index.py
+[PASS] 歷史裡有金鑰：平常是警告
+    預期：沒有錯誤，警告裡有「金鑰或Token」
+    實際：[警告] Git歷史 9c07708 note.md：疑似金鑰或Token；[警告] wiki/sources：實際讀過、而且有confirmed證據卡的獨立論文 1 篇，還不到 5 篇；；文獻 1 篇（算進5篇的獨立論文 1 篇），證據卡 1 張（pending 0 張）。；錯誤 0 個，警告 2 個。
+[PASS] 歷史裡有金鑰：--strict是錯誤
+    預期：「[錯誤]」那一行裡有「金鑰或Token」
+    實際：[錯誤] Git歷史 07932b5 note.md：疑似金鑰或Token
+[PASS] 歷史裡有PDF：--strict是錯誤
+    預期：「[錯誤]」那一行裡有「出現過PDF：a.pdf」
+    實際：[錯誤] Git歷史：出現過PDF：a.pdf
+[PASS] 有confirmed卡的論文才算進5篇
+    預期：沒有錯誤，輸出裡有「算進5篇的獨立論文 1 篇」
+    實際：['文獻 1 篇（算進5篇的獨立論文 1 篇），證據卡 1 張（pending 0 張）。', '錯誤 0 個，警告 1 個。']
+[PASS] 沒有confirmed卡的論文不算
+    預期：沒有錯誤，輸出裡有「算進5篇的獨立論文 0 篇」
+    實際：['文獻 1 篇（算進5篇的獨立論文 0 篇），證據卡 1 張（pending 1 張）。', '錯誤 0 個，警告 1 個。']
+[PASS] SHA-256表格裡的雜湊值不算學號
+    預期：沒有錯誤
+    實際：沒有錯誤
+[PASS] SHA-256表格裡的雜湊值不算手機
+    預期：沒有錯誤
+    實際：沒有錯誤
+[PASS] SHA-256欄的雜湊後面接說明也排除
+    預期：沒有錯誤
+    實際：沒有錯誤
+[PASS] 同一行有SHA-256標記的雜湊值不算學號
+    預期：沒有錯誤
+    實際：沒有錯誤
+[PASS] 學號緊接中文照樣偵測
+    預期：「[錯誤]」那一行裡有「像學號的9位數字」
+    實際：[錯誤] note.md:1：疑似像學號的9位數字
+[PASS] 學號夾在英文字母中照樣偵測
+    預期：「[錯誤]」那一行裡有「像學號的9位數字」
+    實際：[錯誤] note.md:1：疑似像學號的9位數字
+[PASS] 沒有分隔的手機號碼照樣偵測
+    預期：「[錯誤]」那一行裡有「手機號碼」
+    實際：[錯誤] note.md:1：疑似手機號碼
+[PASS] 一般句子裡的學號照樣偵測
+    預期：「[錯誤]」那一行裡有「像學號的9位數字」
+    實際：[錯誤] note.md:1：疑似像學號的9位數字
+[PASS] 沒有SHA-256標記的64位十六進位不放行
+    預期：「[錯誤]」那一行裡有「像學號的9位數字」
+    實際：[錯誤] note.md:1：疑似像學號的9位數字
+[PASS] SHA-256欄裡只有63位不放行
+    預期：「[錯誤]」那一行裡有「像學號的9位數字」
+    實際：[錯誤] note.md:3：疑似像學號的9位數字
+[PASS] SHA-256欄裡沒有反引號不放行
+    預期：「[錯誤]」那一行裡有「像學號的9位數字」
+    實際：[錯誤] note.md:3：疑似像學號的9位數字
+[PASS] 雜湊放在SHA-256以外的欄不放行
+    預期：「[錯誤]」那一行裡有「像學號的9位數字」
+    實際：[錯誤] note.md:3：疑似像學號的9位數字
+[PASS] 表格結束後的雜湊不放行
+    預期：「[錯誤]」那一行裡有「像學號的9位數字」
+    實際：[錯誤] note.md:5：疑似像學號的9位數字
+[PASS] SHA-256表格同一列的學號照樣偵測
+    預期：「[錯誤]」那一行裡有「像學號的9位數字」
+    實際：[錯誤] note.md:3：疑似像學號的9位數字
+[PASS] SHA-256表格同一列的金鑰照樣偵測
+    預期：「[錯誤]」那一行裡有「金鑰或Token」
+    實際：[錯誤] note.md:3：疑似金鑰或Token
+[PASS] 歷史裡SHA-256表格的雜湊不算學號（--strict）
+    預期：沒有錯誤
+    實際：沒有錯誤
+[PASS] 歷史裡沒有標記的雜湊照樣抓（--strict）
+    預期：「[錯誤]」那一行裡有「像學號的9位數字」
+    實際：[錯誤] Git歷史 fdde6ef note.md：疑似像學號的9位數字
+[PASS] 歷史：SHA-256表格中間加一列，diff看不到表頭也排除（--strict）
+    預期：沒有錯誤
+    實際：沒有錯誤
+[PASS] 歷史：SHA-256表格中間加的那列有金鑰照樣抓（--strict）
+    預期：「[錯誤]」那一行裡有「金鑰或Token」
+    實際：[錯誤] Git歷史 46ddabb note.md：疑似金鑰或Token
+[PASS] 歷史：SHA-256表格中間加的那列有學號照樣抓（--strict）
+    預期：「[錯誤]」那一行裡有「像學號的9位數字」
+    實際：[錯誤] Git歷史 e704b91 note.md：疑似像學號的9位數字
+[PASS] 歷史：表格結束很久之後加的雜湊照樣抓（--strict）
+    預期：「[錯誤]」那一行裡有「像學號的9位數字」
+    實際：[錯誤] Git歷史 1fa3282 note.md：疑似像學號的9位數字
+[PASS] 歷史：沒有SHA-256欄的表格加雜湊照樣抓（--strict）
+    預期：「[錯誤]」那一行裡有「像學號的9位數字」
+    實際：[錯誤] Git歷史 3a37528 note.md：疑似像學號的9位數字
+[PASS] 改了卡片的主張沒重建索引要擋
+    預期：「[錯誤]」那一行裡有「不同步」
+    實際：[錯誤] wiki/index.md：跟文獻檔、證據卡不同步（自動產生的部分被手改，或卡片改了沒重建），請跑 python3 scripts/build_index.py
+[PASS] 改了卡片的狀態沒重建索引要擋
+    預期：「[錯誤]」那一行裡有「不同步」
+    實際：[錯誤] wiki/index.md：跟文獻檔、證據卡不同步（自動產生的部分被手改，或卡片改了沒重建），請跑 python3 scripts/build_index.py
+[PASS] 改了卡片的條件沒重建索引要擋
+    預期：「[錯誤]」那一行裡有「不同步」
+    實際：[錯誤] wiki/index.md：跟文獻檔、證據卡不同步（自動產生的部分被手改，或卡片改了沒重建），請跑 python3 scripts/build_index.py
+[PASS] 改了文獻的閱讀狀態沒重建索引要擋
+    預期：「[錯誤]」那一行裡有「不同步」
+    實際：[錯誤] wiki/index.md：跟文獻檔、證據卡不同步（自動產生的部分被手改，或卡片改了沒重建），請跑 python3 scripts/build_index.py
+[PASS] 新增卡片沒重建索引要擋
+    預期：「[錯誤]」那一行裡有「不同步」
+    實際：[錯誤] wiki/index.md：跟文獻檔、證據卡不同步（自動產生的部分被手改，或卡片改了沒重建），請跑 python3 scripts/build_index.py；[錯誤] wiki/index.md：沒有列出證據卡 demo2000-second
+[PASS] 手改自動產生的摘要要擋
+    預期：「[錯誤]」那一行裡有「不同步」
+    實際：[錯誤] wiki/index.md：跟文獻檔、證據卡不同步（自動產生的部分被手改，或卡片改了沒重建），請跑 python3 scripts/build_index.py
+[PASS] 自動產生的標記被刪掉要擋
+    預期：「[錯誤]」那一行裡有「找不到自動產生區塊的標記」
+    實際：[錯誤] wiki/index.md：找不到自動產生區塊的標記，請照原本的格式放回兩行標記，再跑 python3 scripts/build_index.py
+[PASS] 改了卡片也重建索引就通過
+    預期：沒有錯誤
+    實際：沒有錯誤
+[PASS] 改人工寫的導覽不用重建
+    預期：沒有錯誤
+    實際：沒有錯誤
+[PASS] 主張裡的相對連結在索引裡改成從wiki出發
+    預期：沒有錯誤
+    實際：沒有錯誤
+[FAIL] 偽表頭：資料列有SHA-256格，下一列同欄的雜湊不放行
+    預期：「[錯誤]」那一行裡有「像學號的9位數字」
+    實際：[警告] wiki/sources：實際讀過、而且有confirmed證據卡的獨立論文 1 篇，還不到 5 篇
+
+文獻 1 篇（算進5篇的獨立論文 1 篇），證據卡 1 張（pending 0 張）。
+錯誤 0 個，警告 1 個。
+[FAIL] 表頭後面沒有分隔列，不算表格，不放行
+    預期：「[錯誤]」那一行裡有「像學號的9位數字」
+    實際：[警告] wiki/sources：實際讀過、而且有confirmed證據卡的獨立論文 1 篇，還不到 5 篇
+
+文獻 1 篇（算進5篇的獨立論文 1 篇），證據卡 1 張（pending 0 張）。
+錯誤 0 個，警告 1 個。
+[FAIL] 表頭寫SHA-256之外的字（SHA-256值或備註），不放行
+    預期：「[錯誤]」那一行裡有「像學號的9位數字」
+    實際：[警告] wiki/sources：實際讀過、而且有confirmed證據卡的獨立論文 1 篇，還不到 5 篇
+
+文獻 1 篇（算進5篇的獨立論文 1 篇），證據卡 1 張（pending 0 張）。
+錯誤 0 個，警告 1 個。
+[FAIL] 資料列的格數跟表頭不同，不放行
+    預期：「[錯誤]」那一行裡有「像學號的9位數字」
+    實際：[警告] wiki/sources：實際讀過、而且有confirmed證據卡的獨立論文 1 篇，還不到 5 篇
+
+文獻 1 篇（算進5篇的獨立論文 1 篇），證據卡 1 張（pending 0 張）。
+錯誤 0 個，警告 1 個。
+[FAIL] SHA-256欄的雜湊後面接的不是括號說明，不放行
+    預期：「[錯誤]」那一行裡有「像學號的9位數字」
+    實際：[警告] wiki/sources：實際讀過、而且有confirmed證據卡的獨立論文 1 篇，還不到 5 篇
+
+文獻 1 篇（算進5篇的獨立論文 1 篇），證據卡 1 張（pending 0 張）。
+錯誤 0 個，警告 1 個。
+[FAIL] NotSHA-256這種標記不放行
+    預期：「[錯誤]」那一行裡有「手機號碼」
+    實際：[警告] wiki/sources：實際讀過、而且有confirmed證據卡的獨立論文 1 篇，還不到 5 篇
+
+文獻 1 篇（算進5篇的獨立論文 1 篇），證據卡 1 張（pending 0 張）。
+錯誤 0 個，警告 1 個。
+[PASS] SHA-256-old這種標記不放行
+    預期：「[錯誤]」那一行裡有「手機號碼」
+    實際：[錯誤] note.md:1：疑似手機號碼
+[PASS] 偽表頭那列同一行的信箱照樣抓
+    預期：「[錯誤]」那一行裡有「電子郵件」
+    實際：[錯誤] note.md:3：疑似電子郵件
+[FAIL] 索引的起訖標記重複要擋
+    預期：「[錯誤]」那一行裡有「標記要各出現一次」
+    實際：[警告] wiki/sources：實際讀過、而且有confirmed證據卡的獨立論文 1 篇，還不到 5 篇
+
+文獻 1 篇（算進5篇的獨立論文 1 篇），證據卡 1 張（pending 0 張）。
+錯誤 0 個，警告 1 個。
+[FAIL] 索引的標記沒有獨立成行要擋
+    預期：「[錯誤]」那一行裡有「標記要各出現一次」
+    實際：[錯誤] wiki/index.md：跟文獻檔、證據卡不同步（自動產生的部分被手改，或卡片改了沒重建），請跑 python3 scripts/build_index.py
+[FAIL] 索引的結束標記在開始標記前面要擋
+    預期：「[錯誤]」那一行裡有「標記要各出現一次」
+    實際：[錯誤] wiki/index.md：找不到自動產生區塊的標記，請照原本的格式放回兩行標記，再跑 python3 scripts/build_index.py；[錯誤] wiki/index.md：沒有列出文獻 demo2000；[錯誤] wiki/index.md：沒有列出證據卡 demo2000-claim
+[FAIL] 卡片有兩個「## 主張」要擋
+    預期：「[錯誤]」那一行裡有「「## 主張」出現不只一次」
+    實際：[警告] wiki/sources：實際讀過、而且有confirmed證據卡的獨立論文 1 篇，還不到 5 篇
+
+文獻 1 篇（算進5篇的獨立論文 1 篇），證據卡 1 張（pending 0 張）。
+錯誤 0 個，警告 1 個。
+[FAIL] 卡片有兩個「## 限制」要擋
+    預期：「[錯誤]」那一行裡有「「## 限制」出現不只一次」
+    實際：[警告] wiki/sources：實際讀過、而且有confirmed證據卡的獨立論文 1 篇，還不到 5 篇
+
+文獻 1 篇（算進5篇的獨立論文 1 篇），證據卡 1 張（pending 0 張）。
+錯誤 0 個，警告 1 個。
+[FAIL] 主張裡的錨點連結在索引裡指回那張卡
+    預期：沒有錯誤；wiki/index.md裡要有「見[限制](cards/demo2000-claim.md#限制)。」
+    實際：沒有錯誤；wiki/index.md裡找不到「見[限制](cards/demo2000-claim.md#限制)。」
+[FAIL] 主張裡行內程式碼的連結字樣不改
+    預期：沒有錯誤；wiki/index.md裡要有「寫法是`[x](y.md)`。」
+    實際：[錯誤] wiki/index.md：列出的 cards/y.md 不存在
+[警告] wiki/sources：實際讀過、而且有confirmed證據卡的獨立論文 1 篇，還不到 5 篇
+
+文獻 1 篇（算進5篇的獨立論文 1 篇），證據卡 1 張（pending 0 張）。
+錯誤 1 個，警告 1 個。；wiki/index.md裡找不到「寫法是`[x](y.md)`。」
+[FAIL] 主張裡程式碼區塊的連結字樣不改
+    預期：沒有錯誤；wiki/index.md裡要有「```
+[x](y.md)
+```」
+    實際：[錯誤] wiki/index.md：列出的 cards/y.md 不存在
+[警告] wiki/sources：實際讀過、而且有confirmed證據卡的獨立論文 1 篇，還不到 5 篇
+
+文獻 1 篇（算進5篇的獨立論文 1 篇），證據卡 1 張（pending 0 張）。
+錯誤 1 個，警告 1 個。；wiki/index.md裡找不到「```
+[x](y.md)
+```」
+[FAIL] Git設了會失敗的textconv，歷史裡的PDF照樣報（--strict）
+    預期：「[錯誤]」那一行裡有「出現過PDF：a.pdf」
+    實際：沒有錯誤
+[FAIL] Git設了會失敗的textconv，歷史裡的金鑰照樣抓（--strict）
+    預期：「[錯誤]」那一行裡有「金鑰或Token」
+    實際：沒有錯誤
+[FAIL] Git指令失敗要報錯，不能當成沒問題
+    預期：「[錯誤]」那一行裡有「Git指令失敗」
+    實際：沒有錯誤
+[FAIL] Git指令失敗在--strict也要報錯
+    預期：「[錯誤]」那一行裡有「Git指令失敗」
+    實際：沒有錯誤
+
+共94個情境（其中判定規則5個），失敗18個。
+exit=1

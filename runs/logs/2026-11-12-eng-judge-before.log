@@ -1,0 +1,7 @@
+舊的判定寫法（第4輪前的tests/test_check_wiki.py）對判定規則情境的結果：
+[FAIL] 關鍵字只在警告行，另有無關錯誤：不能算通過：應該False，舊寫法True
+[PASS] 關鍵字在錯誤行：算通過：應該True，舊寫法True
+[FAIL] 結束代碼1但沒有任何錯誤行（例如程式當掉）：不能算通過：應該False，舊寫法True
+[FAIL] 預期沒有錯誤，卻有錯誤行：不能算通過：應該False，舊寫法True
+[FAIL] 預期只有警告，卻也有錯誤行：不能算通過：應該False，舊寫法True
+失敗4個
