@@ -149,7 +149,7 @@ PDF拿不到、引用找不到、結論有疑問時，不猜不補，記在紀�
 ```
 python3 scripts/check_wiki.py            # 文獻、證據卡、索引、個資掃描（Git歷史的問題只列警告）
 python3 scripts/check_wiki.py --strict   # push前用：Git歷史裡的PDF和疑似個資也算錯誤
-python3 scripts/check_quotes.py          # 證據卡的英文引用要在raw/的PDF裡找得到（需要pdftotext；掃描檔用OCR近似比對，要人對照頁面確認）
+python3 scripts/check_quotes.py          # 證據卡的英文引用要在raw/的PDF裡找得到；結果分成逐字、OCR逐字、OCR近似，後兩種要人對照頁面確認，報告不能混在一起寫
 python3 tests/test_check_wiki.py         # 故意弄壞資料，確認檢查程式擋得住
 python3 audition/test_ovm.py             # 選題階段的模型測試，輸出應該跟audition/run2.log一樣
 ```
