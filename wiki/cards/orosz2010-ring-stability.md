@@ -1,17 +1,17 @@
 ---
 id: orosz2010-ring-stability
-type: review
+type: model_theory
 source: orosz2010
 locator: 第4467頁第3段、第4475～4476頁附錄A式(A1)～(A8)
 conditions: 一般的跟車模型，沒有反應延遲；環上N台車；F、G、H大於0
-units: 無因次
+units: 保留物理量綱（F、G、H是有單位的係數）
 status: confirmed
 related: orosz2010-stability-approaches, ours-finite-n-threshold
 ---
 
 ## 主張
 
-在沒有反應延遲的跟車模型裡，環上N台車時，第k個波各有一條穩定分界；越過分界時最先失去穩定的是k=1（最長的波）。車數趨近無限多時，分界變成一個不分k的條件。
+（這是綜述附錄裡的數學推導，所以類型是model_theory。）在沒有反應延遲的跟車模型裡，環上N台車時，非零的波各有穩定分界，k和N−k是一對共軛、共用同一條分界；N是偶數時k=N/2沒有有限的分界。越過分界時最先失去穩定的是k=1（和它的共軛N−1，最長的波）。車數趨近無限多（均勻車距固定）時，分界變成一個不分k的條件(A8)。
 
 ## 原文依據
 
@@ -23,3 +23,4 @@ related: orosz2010-stability-approaches, ours-finite-n-threshold
 
 - 這是一般模型的公式，用F、G、H表示。代入Bando的模型（W=0、車長0）得到22台車分界的那一步是我們做的，見[ours-finite-n-threshold](ours-finite-n-threshold.md)。
 - 只適用沒有延遲的情況，見[orosz2010-delays](orosz2010-delays.md)。
+- (A6)含tan²(kπ/N)，k=N/2時發散，所以那個波沒有有限的Hopf分界；作者也寫只有k≤N/2的分界出現在F、G、H>0的範圍。

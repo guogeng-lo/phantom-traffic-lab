@@ -2,7 +2,7 @@
 id: stern2018-waves-emerge
 type: experiment
 source: stern2018
-locator: 第4頁第2.2節、第9頁實驗A～C的描述
+locator: 第4頁第2.2節、第9～10頁第4.2節、表1、表2、表4
 conditions: 所有車都由人開的時段
 units: s
 status: confirmed
@@ -15,7 +15,7 @@ related: stern2018-setup, sugiyama2008-jam-emerges
 
 ## 原文依據
 
-第4頁說每場實驗都出現交通波，並讓不穩定的車流至少持續45秒才打開控制器。第9頁記錄實驗A第79秒、實驗B第55秒、實驗C第161秒出現第一個波。
+第4頁說每場實驗都出現交通波，並讓不穩定的車流至少持續45秒才打開控制器。第9頁記錄實驗A第79秒出現第一個波，第10頁記錄實驗B第55秒、實驗C第161秒。
 
 > Traffic waves appear in all experiments
 

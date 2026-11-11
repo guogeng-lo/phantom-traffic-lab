@@ -3,8 +3,8 @@ id: bando1995-ovm-equation
 type: model_theory
 source: bando1995
 locator: 第1036頁式(1)～(4)
-conditions: 單車道環狀道路，N台車、環長L，所有駕駛敏感度a相同，沒有反應延遲，無因次
-units: 無因次
+conditions: 單車道環狀道路，N台車、環長L，所有駕駛敏感度a相同，沒有反應延遲
+units: 原文未指定物理單位（若用物理單位，a的單位是時間的倒數）
 status: confirmed
 related: bando1995-linear-stability, bando1995-velocity-function, bando1995-no-delay
 ---

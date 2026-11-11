@@ -21,4 +21,5 @@ related: ours-finite-n-threshold
 
 ## 限制
 
-- 沒有說多少台算「夠大」。2008年的實驗只有22台，是不是「夠大」要另外判斷，見[ours-finite-n-threshold](ours-finite-n-threshold.md)。
+- 沒有說多少台算「夠大」。
+- [ours-finite-n-threshold](ours-finite-n-threshold.md)比較的是同一個環道模型裡，有限車數的分界和車數很多時的分界；它不能拿來判斷Sugiyama 2008的22台真車實驗能不能忽略邊界的影響。

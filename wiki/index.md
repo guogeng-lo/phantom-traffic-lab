@@ -24,7 +24,7 @@
 |---|---|---|---|---|
 | orosz2010-ovm-family | review | confirmed | OV模型在跟車模型裡的位置；零延遲是Bando的設定 | [cards/orosz2010-ovm-family.md](cards/orosz2010-ovm-family.md) |
 | orosz2010-stability-approaches | review | confirmed | 三種分析穩定性的方法結果相同 | [cards/orosz2010-stability-approaches.md](cards/orosz2010-stability-approaches.md) |
-| orosz2010-ring-stability | review | confirmed | 環上N台車，沒有延遲時最先不穩定的是最長的波 | [cards/orosz2010-ring-stability.md](cards/orosz2010-ring-stability.md) |
+| orosz2010-ring-stability | model_theory | confirmed | 環上N台車，沒有延遲時最先不穩定的是最長的波 | [cards/orosz2010-ring-stability.md](cards/orosz2010-ring-stability.md) |
 | orosz2010-delays | review | confirmed | 延遲夠大時改成短的波先不穩定 | [cards/orosz2010-delays.md](cards/orosz2010-delays.md) |
 | stern2018-setup | experiment | confirmed | 260公尺環道、21～22台車、一台可自動控制速度 | [cards/stern2018-setup.md](cards/stern2018-setup.md) |
 | stern2018-waves-emerge | experiment | confirmed | 三場全部由人開時都出現走走停停波 | [cards/stern2018-waves-emerge.md](cards/stern2018-waves-emerge.md) |
