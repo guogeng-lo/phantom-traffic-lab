@@ -103,6 +103,48 @@ RECHECK = """# 審查包（第{round}輪）：確認上一輪的問題有沒有�
 """
 
 
+LIMITED = """# 審查包（第{round}輪，限定範圍）：第3輪問題的修正、自動產生的索引、檢查程式
+
+## 你的角色
+
+你是獨立審查者。這份Wiki的第3關（研究差異與忠實度審查）原本最多3輪，第3輪沒有通過；使用者另外授權這一輪限定範圍的複核，不是重新開始。第3輪的審查意見原文附在最後。請對照6篇論文PDF和這份審查包，只檢查下面四件事，不用重審其他沒改過的內容：
+
+1. **第3輪的6條修正**有沒有修好：`stern2018-wave-returns`、`tadaki2013-critical-density`、`tadaki2013-density-dependence`、`orosz2010-ring-stability`、`glossary.md`的「相變」、`sources/sugiyama2008.md`的限制。特別看`stern2018-wave-returns`裡實驗A、B、C的控制方式和速度調整，是否分開而且跟原文一致。
+2. **自動產生的`wiki/index.md`**：文獻表和39張證據卡的清單，現在由程式從文獻檔、證據卡產生（每張放類型、狀態、條件欄位原文和主張全文，不再另寫摘要）。請確認：
+   - 39張都在，類型、狀態、條件、主張跟附錄裡的卡片一致，文獻的種類和閱讀狀態跟文獻檔一致。
+   - 第3輪第三部分列的18條索引不一致，現在各自是否已解決。如果是卡片主張本身就缺條件，請標明是卡片的問題。
+   - 開頭的介紹和導覽是人工寫的，也看一下有沒有跟自動產生的內容矛盾。
+3. **這些修改有沒有引入新的錯誤**：讀錯原文、數字或頁碼錯、把模型講成實驗、語氣過度。
+4. **相關程式的回歸測試**：審查包附了`scripts/check_wiki.py`、`scripts/build_index.py`、`tests/test_check_wiki.py`的原始碼和最近一次實際執行的輸出。請看：
+   - 測試情境是否真的測到它名稱說的事（例如「改了卡片沒重建索引要擋」是不是真的會失敗）。
+   - 學號、手機、金鑰等個資檢查有沒有因為SHA-256雜湊值的排除而變鬆。
+   - 索引同步檢查有沒有漏洞。
+   - 如果你的環境能連到GitHub，可以clone公開repo `guogeng-lo/phantom-traffic-lab`，checkout到commit `{commit}`，跑 `python3 tests/test_check_wiki.py`、`python3 scripts/check_wiki.py --strict`、`python3 scripts/build_index.py --check`，貼上實際結果；論文PDF不在repo裡，`check_quotes.py`不用跑。不能跑就寫「沒有執行」，不要推測結果。
+
+{pdfs}
+
+## 請照這個格式回覆
+
+第一部分，第3輪的問題逐條回覆（6條修正和18條索引不一致，一條一列）：
+
+| 卡片id或檔案 | 第3輪的問題 | 修好了嗎（修好／部分修好／沒修好） | 說明 |
+
+第二部分，新發現的問題（沒有就寫「沒有」）：
+
+| 卡片id或檔案 | 問題類型 | 嚴重程度（會誤導讀者／不精確／小問題） | 原文在哪裡 | 問題是什麼 | 建議怎麼改 |
+
+第三部分，自動產生的索引：不一致或產生方式有問題的地方（沒有就寫「沒有」）。
+
+第四部分，回歸測試：有沒有執行、實際結果、測試有沒有漏洞。
+
+第五部分，無法確認的地方。
+
+最後兩行寫：
+- 第3輪問題修好幾條、部分修好幾條、沒修好幾條；新問題幾條（其中會誤導讀者幾條）；索引問題幾條；測試問題幾條。
+- 有沒有重大問題（會誤導讀者、科學錯誤、沒修好、索引不同步、測試沒通過或測不到它宣稱的事）：有／沒有。
+"""
+
+
 def changed_since(commit):
     out = subprocess.run(["git", "diff", "--name-only", commit, "--", "wiki"], cwd=ROOT,
                          capture_output=True, text=True, check=True).stdout.split()
@@ -126,11 +168,16 @@ def main():
     ap.add_argument("--since")
     ap.add_argument("--previous")
     ap.add_argument("--round", type=int, default=1)
+    ap.add_argument("--limited", action="store_true", help="限定範圍的複核（第3關第4輪）")
+    ap.add_argument("--extra", nargs="*", default=[], help="另外附上的程式或執行輸出（原文照放）")
     args = ap.parse_args()
     wiki = ROOT / "wiki"
     if args.since:
         files = changed_since(args.since)
-        head = RECHECK.replace("{round}", str(args.round)).replace("{pdfs}", PDFS)
+        template = LIMITED if args.limited else RECHECK
+        commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True,
+                                text=True, check=True).stdout.strip()
+        head = template.replace("{round}", str(args.round)).replace("{pdfs}", PDFS).replace("{commit}", commit)
         changed = set(files)
         appendix = sorted(p for d in ("sources", "cards") for p in (wiki / d).glob("*.md")
                           if p.name != "_template.md" and p not in changed)
@@ -144,7 +191,8 @@ def main():
         out_path = OUT
         appendix = []
     out = [head, "\n## 這份審查包包含的檔案版本\n", "| 檔案 | SHA-256 |", "|---|---|"]
-    out += [f"| `{p.relative_to(ROOT).as_posix()}` | `{sha(p)}` |" for p in files + appendix]
+    extra = [ROOT / e for e in args.extra]
+    out += [f"| `{p.relative_to(ROOT).as_posix()}` | `{sha(p)}` |" for p in files + appendix + extra]
     out.append("\n# 以下是要審查的Wiki內容\n")
     for p in files:
         out.append(f"\n\n========== 檔案：{p.relative_to(ROOT).as_posix()} ==========\n")
@@ -154,6 +202,9 @@ def main():
         for p in appendix:
             out.append(f"\n\n---------- {p.relative_to(ROOT).as_posix()} ----------\n")
             out.append(summary_only(p))
+    for p in extra:
+        out.append(f"\n\n========== 程式或執行輸出：{p.relative_to(ROOT).as_posix()} ==========\n")
+        out.append("```\n" + p.read_text(encoding="utf-8").strip() + "\n```")
     if args.previous:
         out.append("\n\n========== 上一輪的審查意見原文 ==========\n")
         out.append((ROOT / args.previous).read_text(encoding="utf-8").strip())
@@ -161,7 +212,7 @@ def main():
     out_path.write_text("\n".join(out) + "\n", encoding="utf-8", newline="\n")
     n_cards = sum(1 for p in files if "/cards/" in p.as_posix())
     print(f"已產生 {out_path.relative_to(ROOT).as_posix()}：完整檔案 {len(files)} 個（其中證據卡 {n_cards} 張），"
-          f"附錄 {len(appendix)} 個，{out_path.stat().st_size // 1024} KB")
+          f"附錄 {len(appendix)} 個，程式或輸出 {len(extra)} 個，{out_path.stat().st_size // 1024} KB")
 
 
 if __name__ == "__main__":
