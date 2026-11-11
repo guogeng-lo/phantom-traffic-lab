@@ -112,7 +112,7 @@ related: 其他卡id，用逗號分隔，可留空
 2. 建文獻檔，照實填`read_status`和`read_scope`。
 3. 每個值得用的主張建一張證據卡。
 4. 在`wiki/index.md`列出新的文獻和卡片；有新術語就加進`wiki/glossary.md`；有差異就照第6節處理。
-5. 跑`python3 scripts/check_wiki.py`，錯誤要是0。
+5. 跑`python3 scripts/check_wiki.py`，錯誤要是0；PDF在`raw/`的話，再跑`python3 scripts/check_quotes.py`，引用要全部找到。
 6. 在`runs/`寫一份ingest紀錄（格式見`runs/README.md`），包括檢查輸出原文、問題和修正。
 7. 前兩篇（Bando 1995、Sugiyama 2008）要先給使用者看整理結果，使用者確認後才commit。之後可以2～3篇一批，但每篇都要有自己的紀錄。
 
@@ -149,6 +149,7 @@ PDF拿不到、引用找不到、結論有疑問時，不猜不補，記在紀�
 ```
 python3 scripts/check_wiki.py            # 文獻、證據卡、索引、個資掃描（Git歷史的問題只列警告）
 python3 scripts/check_wiki.py --strict   # push前用：Git歷史裡的PDF和疑似個資也算錯誤
+python3 scripts/check_quotes.py          # 證據卡的英文引用要在raw/的PDF裡逐字找得到（需要pdftotext）
 python3 tests/test_check_wiki.py         # 故意弄壞資料，確認檢查程式擋得住
 python3 audition/test_ovm.py             # 選題階段的模型測試，輸出應該跟audition/run2.log一樣
 ```

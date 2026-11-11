@@ -7,7 +7,7 @@
 | # | 節點 | 讀 | 只能改 | 檢查 | 誰檢查 | 不通過退回 |
 |---|---|---|---|---|---|---|
 | 1 | 資料ingest | `raw/`、原文連結 | `wiki/sources/`、`wiki/cards/`、`wiki/index.md`、`wiki/glossary.md`、`wiki/disputes.md` | — | — | — |
-| 2 | 證據卡格式檢查 | `wiki/` | 不改檔案 | `scripts/check_wiki.py`錯誤0 | 程式 | 1，只修報告列出的檔案 |
+| 2 | 證據卡格式檢查 | `wiki/` | 不改檔案 | `scripts/check_wiki.py`錯誤0；有PDF時`scripts/check_quotes.py`引用全部找到 | 程式 | 1，只修報告列出的檔案 |
 | 3 | 研究差異與忠實度審查 | 證據卡、原文 | 不改檔案 | 卡片有沒有讀對原文、條件能不能比、單位對不對、模型推論有沒有被當成實驗結果 | ChatGPT獨立對話 | 1，只修有問題的卡 |
 | 4 | 教學大綱 | 證據卡、`pipeline/requirements.md` | `pipeline/outline.md`、`wiki/slide-map.md` | 教學順序、互動設計、深度、故事 | **使用者** | 4 |
 | 5 | 頁面和證據卡對應 | `wiki/slide-map.md`、證據卡 | 不改檔案 | 每頁核心主張都有證據卡；寫「真實道路」的主張要連到experiment卡；核心主張不能只靠pending或expression卡 | 程式（待寫） | 缺證據回1，對應錯回4 |

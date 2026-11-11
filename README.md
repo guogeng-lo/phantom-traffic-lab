@@ -28,6 +28,7 @@
 ```
 python3 scripts/check_wiki.py            # 檢查文獻、證據卡、索引，並掃描個資和金鑰
 python3 scripts/check_wiki.py --strict   # 連Git歷史一起嚴格檢查，push前用
+python3 scripts/check_quotes.py          # 引用的原文要在論文PDF裡逐字找得到（PDF不上傳，要自己放到raw/）
 python3 tests/test_check_wiki.py         # 故意弄壞資料，確認檢查程式擋得住
 ```
 
