@@ -78,11 +78,40 @@ def make_site(tmp):
     (tmp / "wiki" / "index.md").write_text(INDEX, encoding="utf-8")
 
 
-def run(tmp):
+def run(tmp, *args):
     env = dict(os.environ, PYTHONUTF8="1", PYTHONIOENCODING="utf-8")
-    r = subprocess.run([sys.executable, "-B", str(tmp / "scripts" / "check_wiki.py"), "--root", str(tmp)],
+    r = subprocess.run([sys.executable, "-B", str(tmp / "scripts" / "check_wiki.py"), "--root", str(tmp), *args],
                        capture_output=True, text=True, encoding="utf-8", env=env)
     return r.returncode, r.stdout
+
+
+def git(tmp, *args):
+    env = dict(os.environ, GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@example.com",
+               GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@example.com")
+    subprocess.run(["git", *args], cwd=tmp, env=env, check=True, capture_output=True)
+
+
+def commit_all(tmp, msg):
+    git(tmp, "add", "-A")
+    git(tmp, "commit", "-q", "-m", msg)
+
+
+def leak_then_remove(tmp):
+    """先commit一個有金鑰的檔案，再刪掉commit：現在的檔案乾淨，但歷史裡還有。"""
+    git(tmp, "init", "-q")
+    (tmp / "note.md").write_text("key=sk-" + "b" * 30 + "\n", encoding="utf-8")
+    commit_all(tmp, "leak")
+    (tmp / "note.md").unlink()
+    commit_all(tmp, "remove")
+
+
+def our_card_to_ignored(tmp):
+    git(tmp, "init", "-q")
+    (tmp / ".gitignore").write_text("local/\n", encoding="utf-8")
+    (tmp / "local").mkdir()
+    (tmp / "local" / "sim.py").write_text("print(1)\n", encoding="utf-8")
+    edit(C(tmp), "type: experiment", "type: our_simulation")
+    edit(C(tmp), "source: demo2000", "source: local/sim.py")
 
 
 def edit(path, old, new):
@@ -105,8 +134,9 @@ def add_popular(tmp):
     edit(tmp / "wiki" / "index.md", "- cards", "- sources/news2001.md\n- cards")
 
 
+# 第4個欄位是選項：args＝額外參數；warn＝預期只有警告（結束代碼0）且警告裡有這段字；
+# out＝預期結束代碼0且輸出裡有這段字。沒有選項時：None代表預期沒有錯誤，字串代表錯誤裡要有這段字。
 CASES = [
-    # (名稱, 怎麼弄壞, 預期要出現的字；None代表預期沒有錯誤)
     ("正常資料", lambda t: None, None),
     ("主張裡只有年份，units寫無數值", lambda t: (edit(C(t), "units: m", "units: 無數值"),
                                        edit(C(t), "22台車繞230m的環", "做了實驗")), None),
@@ -146,18 +176,47 @@ CASES = [
      "本機路徑"),
     ("檔案裡有金鑰", lambda t: (t / "note.md").write_text("key=sk-" + "a" * 30 + "\n", encoding="utf-8"),
      "金鑰或Token"),
+    ("檔案裡有手機號碼", lambda t: (t / "note.md").write_text("電話 0912-345-678\n", encoding="utf-8"),  # privacy-scan: ignore
+     "手機號碼"),
+    ("log裡的小數不能誤判成學號或電話", lambda t: (t / "run.log").write_text(
+        "rate 1.412345678 / 0.0912345678\n", encoding="utf-8"), None),
+    ("欄位重複", lambda t: edit(C(t), "status: confirmed", "status: confirmed\nstatus: pending"),
+     "欄位 status 出現不只一次"),
+    ("索引列了不存在的卡", lambda t: edit(t / "wiki" / "index.md", "- cards/demo2000-claim.md",
+                                    "- cards/demo2000-claim.md\n- cards/deleted-card.md"),
+     "cards/deleted-card.md 不存在"),
+    ("有數字的主張，locator只寫全文", lambda t: edit(C(t), "locator: p.3 圖2", "locator: 全文"),
+     "locator 要到頁碼"),
+    ("自己的模擬指向不會上傳的檔案", our_card_to_ignored, "不會上傳的檔案"),
+    ("歷史裡有金鑰：平常是警告", leak_then_remove, "金鑰或Token", {"warn": True}),
+    ("歷史裡有金鑰：--strict是錯誤", leak_then_remove, "金鑰或Token", {"args": ["--strict"]}),
+    ("歷史裡有PDF：--strict是錯誤", lambda t: (git(t, "init", "-q"), (t / "a.pdf").write_bytes(b"%PDF"),
+                                         commit_all(t, "pdf"), (t / "a.pdf").unlink(), commit_all(t, "rm")),
+     "出現過PDF：a.pdf", {"args": ["--strict"]}),
+    ("有confirmed卡的論文才算進5篇", lambda t: None, "算進5篇的獨立論文 1 篇", {"out": True}),
+    ("沒有confirmed卡的論文不算", lambda t: edit(C(t), "status: confirmed", "status: pending"),
+     "算進5篇的獨立論文 0 篇", {"out": True}),
 ]
 
 
 def main():
     fails = 0
-    for name, breaker, expect in CASES:
+    for case in CASES:
+        name, breaker, expect = case[:3]
+        opt = case[3] if len(case) > 3 else {}
         with tempfile.TemporaryDirectory() as d:
             tmp = Path(d)
             make_site(tmp)
             breaker(tmp)
-            code, out = run(tmp)
-            if expect is None:
+            code, out = run(tmp, *opt.get("args", []))
+            if opt.get("warn"):
+                warns = [l for l in out.splitlines() if l.startswith("[警告]") and expect in l]
+                ok = code == 0 and bool(warns)
+                want, got = f"沒有錯誤，警告裡有「{expect}」", out.strip().replace("\n", "；")
+            elif opt.get("out"):
+                ok = code == 0 and expect in out
+                want, got = f"沒有錯誤，輸出裡有「{expect}」", out.strip().splitlines()[-2:]
+            elif expect is None:
                 ok = code == 0
                 want, got = "沒有錯誤", ("沒有錯誤" if code == 0 else out.strip())
             else:

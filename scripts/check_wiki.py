@@ -1,7 +1,9 @@
 """檢查Wiki的文獻檔、證據卡、索引，並掃描個資和金鑰。
 
-用法：python3 scripts/check_wiki.py [--root 路徑]
+用法：python3 scripts/check_wiki.py [--root 路徑] [--strict]
 錯誤數 > 0 時結束代碼是1。只用標準函式庫。
+--strict：push前用。Git歷史裡的PDF和疑似個資也算錯誤（平常只算警告，
+因為歷史要改只能改寫歷史，必須先問使用者）。
 """
 import argparse
 import re
@@ -26,7 +28,8 @@ MAX_QUOTE_WORDS = 50
 
 # 個資和金鑰的樣式。這幾行本身會被掃到，所以行尾加了忽略標記。
 PRIVACY = [
-    (re.compile(r"\b4\d{8}\b"), "像學號的9位數字"),  # privacy-scan: ignore
+    (re.compile(r"(?<![\d.])4\d{8}(?![\d.])"), "像學號的9位數字"),  # privacy-scan: ignore
+    (re.compile(r"(?<![\d.])09\d{2}[- ]?\d{3}[- ]?\d{3}(?![\d.])"), "手機號碼"),  # privacy-scan: ignore
     (re.compile(r"[A-Za-z0-9._%+-]+@(?!users\.noreply\.github\.com)(?!example\.com)[A-Za-z0-9.-]+\.[A-Za-z]{2,}"), "電子郵件"),  # privacy-scan: ignore
     (re.compile(r"(/home/|/Users/|[A-Za-z]:\\Users|/tmp/claude|/mnt/user-data)"), "本機路徑"),  # privacy-scan: ignore
     (re.compile(r"\b(sk-[A-Za-z0-9]{16,}|ghp_[A-Za-z0-9]{20,}|gsk_[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_-]{30,})"), "金鑰或Token"),  # privacy-scan: ignore
@@ -64,7 +67,10 @@ def parse(path):
             meta.setdefault("__bad__", []).append(line)
             continue
         k, v = line.split(":", 1)
-        meta[k.strip()] = v.strip()
+        k = k.strip()
+        if k in meta:
+            meta.setdefault("__dup__", []).append(k)
+        meta[k] = v.strip()
     return meta, text[end + 5:]
 
 
@@ -86,13 +92,15 @@ def check_fields(rep, where, meta, fields):
         return False
     for bad in meta.get("__bad__", []):
         rep.err(where, f"欄位格式錯誤：{bad}")
+    for dup in meta.get("__dup__", []):
+        rep.err(where, f"欄位 {dup} 出現不只一次")
     for f in fields:
         if f not in meta:
             rep.err(where, f"缺少欄位 {f}")
         elif f != "related" and not meta[f]:
             rep.err(where, f"欄位 {f} 是空的")
     for f in meta:
-        if f != "__bad__" and f not in fields:
+        if f not in ("__bad__", "__dup__") and f not in fields:
             rep.err(where, f"不認得的欄位 {f}")
     return True
 
@@ -137,7 +145,7 @@ def quote_words(text):
     return len(re.findall(r"[A-Za-z0-9][A-Za-z0-9'\-]*", " ".join(lines)))
 
 
-def check_cards(root, rep, sources):
+def check_cards(root, rep, sources, tracked):
     cards = {}
     paths = [p for p in sorted((root / "wiki" / "cards").glob("*.md")) if p.name != "_template.md"]
     for p in paths:
@@ -160,6 +168,8 @@ def check_cards(root, rep, sources):
             f = root / src
             if not src or src.startswith("/") or ".." in src or not f.is_file():
                 rep.err(where, f"source 要是repo裡存在的檔案（找不到 {src}）")
+            elif f.resolve() not in tracked:
+                rep.err(where, f"source {src} 是不會上傳的檔案，別人沒辦法核對")
         elif t in TYPES:
             s = sources.get(src)
             if s is None:
@@ -179,8 +189,11 @@ def check_cards(root, rep, sources):
             if s_ not in secs or not secs[s_]:
                 rep.err(where, f"缺少段落或段落是空的「## {s_}」")
         claim = re.sub(r"(?<!\d)(19|20)\d{2}(?!\d)", "", secs.get("主張", ""))
-        if meta.get("units") == "無數值" and re.search(r"\d", claim):
-            rep.err(where, "主張裡有數字，units 不能寫「無數值」（要寫單位或「無因次」）")
+        if re.search(r"\d", claim):
+            if meta.get("units") == "無數值":
+                rep.err(where, "主張裡有數字，units 不能寫「無數值」（要寫單位或「無因次」）")
+            if t not in OURS and not re.search(r"\d|摘要", loc):
+                rep.err(where, "主張裡有數字，locator 要到頁碼、章節、公式或圖表編號（或寫「摘要」）")
         w = quote_words(body)
         if w > MAX_QUOTE_WORDS:
             rep.err(where, f"英文原文引用 {w} 個字，超過 {MAX_QUOTE_WORDS}")
@@ -196,6 +209,9 @@ def check_index(root, rep, sources, cards):
         rep.err("wiki/index.md", "檔案不存在")
         return
     text = idx.read_text(encoding="utf-8")
+    for kind, name in re.findall(r"\b(sources|cards)/([a-z0-9-]+)\.md", text):
+        if not (root / "wiki" / kind / f"{name}.md").is_file():
+            rep.err("wiki/index.md", f"列出的 {kind}/{name}.md 不存在")
     for sid in sources:
         if f"sources/{sid}.md" not in text:
             rep.err("wiki/index.md", f"沒有列出文獻 {sid}")
@@ -213,8 +229,38 @@ def tracked_files(root):
         return [p for p in root.rglob("*") if p.is_file() and ".git" not in p.parts]
 
 
-def check_privacy(root, rep):
-    for p in tracked_files(root):
+def scan_line(line):
+    if IGNORE_MARK in line:
+        return []
+    return [name for pat, name in PRIVACY if pat.search(line)]
+
+
+def check_history(root, rep, strict):
+    """掃Git歷史裡加進去過的每一行，以及出現過的PDF。"""
+    def git(*args):
+        return subprocess.run(["git", *args], cwd=root, capture_output=True, text=True,
+                              encoding="utf-8", errors="replace", check=True).stdout
+    try:
+        git("rev-parse", "--verify", "HEAD")
+    except (OSError, subprocess.CalledProcessError):
+        return
+    report = rep.err if strict else rep.warn
+    for name in sorted(set(git("log", "--all", "--name-only", "--format=").splitlines())):
+        if name.lower().endswith(".pdf"):
+            report("Git歷史", f"出現過PDF：{name}")
+    commit, path = "", ""
+    for line in git("log", "--all", "-p", "--no-color", "--format=commit %h").splitlines():
+        if line.startswith("commit "):
+            commit = line[7:]
+        elif line.startswith("+++ "):
+            path = line[6:] if line.startswith("+++ b/") else line[4:]
+        elif line.startswith("+"):
+            for name in scan_line(line[1:]):
+                report(f"Git歷史 {commit} {path}", f"疑似{name}")
+
+
+def check_privacy(root, rep, tracked):
+    for p in sorted(tracked):
         if not p.is_file():
             continue
         rel = p.relative_to(root).as_posix()
@@ -226,11 +272,8 @@ def check_privacy(root, rep):
         except (UnicodeDecodeError, OSError):
             continue
         for n, line in enumerate(text.splitlines(), 1):
-            if IGNORE_MARK in line:
-                continue
-            for pat, name in PRIVACY:
-                if pat.search(line):
-                    rep.err(f"{rel}:{n}", f"疑似{name}")
+            for name in scan_line(line):
+                rep.err(f"{rel}:{n}", f"疑似{name}")
 
 
 def check_spacing(root, rep):
@@ -253,21 +296,27 @@ def check_spacing(root, rep):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=Path(__file__).resolve().parent.parent)
-    root = Path(ap.parse_args().root).resolve()
+    ap.add_argument("--strict", action="store_true")
+    args = ap.parse_args()
+    root = Path(args.root).resolve()
     rep = Report()
+    tracked = {p.resolve() for p in tracked_files(root) if p.is_file()}
     sources = check_sources(root, rep)
-    cards = check_cards(root, rep, sources)
+    cards = check_cards(root, rep, sources, tracked)
     check_index(root, rep, sources, cards)
-    check_privacy(root, rep)
+    check_privacy(root, rep, tracked)
+    check_history(root, rep, args.strict)
     check_spacing(root, rep)
+    used = {m.get("source") for m, _, _ in cards.values() if m.get("status") == "confirmed"}
     papers = [s for s, m in sources.items() if m.get("kind") == "paper" and m.get("independent") == "是"
-              and m.get("read_status") in ("全文已讀", "部分章節")]
+              and m.get("read_status") in ("全文已讀", "部分章節") and s in used]
     if len(papers) < MIN_PAPERS:
-        rep.warn("wiki/sources", f"實際讀過的獨立論文 {len(papers)} 篇，還不到 {MIN_PAPERS} 篇")
+        rep.warn("wiki/sources", f"實際讀過、而且有confirmed證據卡的獨立論文 {len(papers)} 篇，"
+                                 f"還不到 {MIN_PAPERS} 篇")
     for line in rep.errors + rep.warnings:
         print(line)
     pending = sum(1 for m, _, _ in cards.values() if m.get("status") == "pending")
-    print(f"\n文獻 {len(sources)} 篇（實際讀過的獨立論文 {len(papers)} 篇），"
+    print(f"\n文獻 {len(sources)} 篇（算進5篇的獨立論文 {len(papers)} 篇），"
           f"證據卡 {len(cards)} 張（pending {pending} 張）。")
     print(f"錯誤 {len(rep.errors)} 個，警告 {len(rep.warnings)} 個。")
     return 1 if rep.errors else 0

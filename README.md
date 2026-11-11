@@ -26,8 +26,9 @@
 需要Python 3，只用標準函式庫。
 
 ```
-python3 scripts/check_wiki.py       # 檢查文獻、證據卡、索引，並掃描個資和金鑰
-python3 tests/test_check_wiki.py    # 故意弄壞資料，確認檢查程式擋得住
+python3 scripts/check_wiki.py            # 檢查文獻、證據卡、索引，並掃描個資和金鑰
+python3 scripts/check_wiki.py --strict   # 連Git歷史一起嚴格檢查，push前用
+python3 tests/test_check_wiki.py         # 故意弄壞資料，確認檢查程式擋得住
 ```
 
 選題階段的模型測試怎麼跑，見`audition/README.md`。

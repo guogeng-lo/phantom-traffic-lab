@@ -147,9 +147,10 @@ PDF拿不到、引用找不到、結論有疑問時，不猜不補，記在紀�
 ## 9. 指令
 
 ```
-python3 scripts/check_wiki.py          # 文獻、證據卡、索引、個資掃描
-python3 tests/test_check_wiki.py       # 故意弄壞資料，確認檢查程式擋得住
-python3 audition/test_ovm.py           # 選題階段的模型測試（在audition/裡執行）
+python3 scripts/check_wiki.py            # 文獻、證據卡、索引、個資掃描（Git歷史的問題只列警告）
+python3 scripts/check_wiki.py --strict   # push前用：Git歷史裡的PDF和疑似個資也算錯誤
+python3 tests/test_check_wiki.py         # 故意弄壞資料，確認檢查程式擋得住
+python3 audition/test_ovm.py             # 選題階段的模型測試，輸出應該跟audition/run2.log一樣
 ```
 
 ## 10. Commit
@@ -161,4 +162,6 @@ python3 audition/test_ovm.py           # 選題階段的模型測試（在auditi
 
 ## 11. 公開前檢查
 
-push前跑`check_wiki.py`，它會掃所有追蹤中的檔案找個資和金鑰。報告、log、截圖也要看過，Git歷史裡不能有PDF或個資。
+push前跑`check_wiki.py --strict`，錯誤要是0。它會掃所有要上傳的檔案和整個Git歷史，找PDF、學號、信箱、手機、本機路徑和金鑰。程式看不到圖片內容，截圖要人看過。
+
+`--strict`如果抓到歷史裡的問題，不能自己改寫歷史或強制推送，先停下來問使用者。
