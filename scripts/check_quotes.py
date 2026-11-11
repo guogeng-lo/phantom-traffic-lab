@@ -3,7 +3,7 @@
 用法：python3 scripts/check_quotes.py [--root 路徑]
 需要pdftotext（poppler-utils）。PDF放在raw/<文獻id>.pdf，不上傳，所以只有手上有PDF的人能跑；
 沒有PDF的文獻會列出「無法比對」，不算通過也不算失敗。
-比對前會把換行、連字號斷行、引號和空白統一，其他字必須完全一樣。
+比對前會把換行、連字號斷行、引號、空白和排版合字（ﬁ、ﬂ等）統一，其他字必須完全一樣。
 比對順序：
 1. 先在PDF的文字層逐字找，找到就是「逐字找到」。
 2. 找不到時才做OCR（需要pdftoppm和tesseract），並用「三個連續英文字」的重疊比例判斷文字層可不可靠
@@ -31,6 +31,8 @@ from check_wiki import parse  # noqa: E402
 
 def normalize(text):
     text = text.replace("‘", "'").replace("’", "'").replace("“", '"').replace("”", '"')
+    for lig, plain in (("\ufb00", "ff"), ("\ufb01", "fi"), ("\ufb02", "fl"), ("\ufb03", "ffi"), ("\ufb04", "ffl")):
+        text = text.replace(lig, plain)
     text = text.replace("—", "-").replace("–", "-").replace("−", "-")
     text = re.sub(r"-\s*\n\s*", "", text)
     return re.sub(r"\s+", " ", text).strip()

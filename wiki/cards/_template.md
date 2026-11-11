@@ -4,7 +4,7 @@ type: experiment、model_theory、review、expression、our_derivation、our_sim
 source: 文獻id，或我們自己的檔案路徑
 locator: 頁碼、章節、公式或圖表編號；我們自己的寫測試名稱
 conditions: 研究條件或適用範圍
-units: 單位、無因次，或無數值
+units: 單位、無因次，或無數值（主張裡只要有年份以外的阿拉伯數字，就不能寫無數值）
 status: confirmed或pending
 related: 
 ---

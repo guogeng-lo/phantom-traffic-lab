@@ -4,7 +4,7 @@ type: experiment
 source: tadaki2013
 locator: 第9頁圖7(c)、第10頁第2段
 conditions: 28～30台的場次
-units: 台
+units: 台、台/m
 status: confirmed
 related: tadaki2013-critical-density
 ---
@@ -21,6 +21,7 @@ related: tadaki2013-critical-density
 
 ## 限制
 
+- 介穩態的範圍跟臨界密度是兩件事：臨界密度是作者估的「在25台和28台之間」（每公尺0.08～0.09台），介穩態是在28～30台觀察到的。換算成密度約每公尺0.089～0.096台（環道314公尺，我們自己換算，論文沒有這樣寫）。不要跟Sugiyama 2008的230公尺環道混用。
 - 只有28、30台的幾場（表1：28台2場、30台2場）。
 - 「介穩態」是作者對資料的解讀。
 

@@ -5,6 +5,7 @@
 - 術語：[glossary.md](glossary.md)
 - 研究差異與未解問題：[disputes.md](disputes.md)
 - 簡報頁面和證據卡的對照：[slide-map.md](slide-map.md)
+- 我們自己的推導：[derivations/finite-n-threshold.md](derivations/finite-n-threshold.md)
 
 ## 文獻
 
@@ -13,12 +14,23 @@
 | bando1995 | paper | 全文已讀 | [sources/bando1995.md](sources/bando1995.md) |
 | nagel1992 | paper | 全文已讀 | [sources/nagel1992.md](sources/nagel1992.md) |
 | tadaki2013 | paper | 全文已讀 | [sources/tadaki2013.md](sources/tadaki2013.md) |
+| orosz2010 | paper | 部分章節 | [sources/orosz2010.md](sources/orosz2010.md) |
+| stern2018 | paper | 全文已讀（arXiv預印本） | [sources/stern2018.md](sources/stern2018.md) |
 | sugiyama2008 | paper | 全文已讀 | [sources/sugiyama2008.md](sources/sugiyama2008.md) |
 
 ## 證據卡
 
 | id | 類型 | 狀態 | 主張 | 檔案 |
 |---|---|---|---|---|
+| orosz2010-ovm-family | review | confirmed | OV模型在跟車模型裡的位置；零延遲是Bando的設定 | [cards/orosz2010-ovm-family.md](cards/orosz2010-ovm-family.md) |
+| orosz2010-stability-approaches | review | confirmed | 三種分析穩定性的方法結果相同 | [cards/orosz2010-stability-approaches.md](cards/orosz2010-stability-approaches.md) |
+| orosz2010-ring-stability | review | confirmed | 環上N台車，沒有延遲時最先不穩定的是最長的波 | [cards/orosz2010-ring-stability.md](cards/orosz2010-ring-stability.md) |
+| orosz2010-delays | review | confirmed | 延遲夠大時改成短的波先不穩定 | [cards/orosz2010-delays.md](cards/orosz2010-delays.md) |
+| stern2018-setup | experiment | confirmed | 260公尺環道、21～22台車、一台可自動控制速度 | [cards/stern2018-setup.md](cards/stern2018-setup.md) |
+| stern2018-waves-emerge | experiment | confirmed | 三場全部由人開時都出現走走停停波 | [cards/stern2018-waves-emerge.md](cards/stern2018-waves-emerge.md) |
+| stern2018-controllers | experiment | confirmed | 控制的想法：照車流平均速度開 | [cards/stern2018-controllers.md](cards/stern2018-controllers.md) |
+| stern2018-results | experiment | confirmed | 開控制後車速變動、急煞、油耗都降低 | [cards/stern2018-results.md](cards/stern2018-results.md) |
+| stern2018-wave-returns | experiment | confirmed | 目標速度太高或關掉控制，波又回來 | [cards/stern2018-wave-returns.md](cards/stern2018-wave-returns.md) |
 | nagel1992-rules | model_theory | confirmed | 格子模型的4條規則 | [cards/nagel1992-rules.md](cards/nagel1992-rules.md) |
 | nagel1992-randomization | model_theory | confirmed | 隨機減速是這個模型產生真實感的關鍵 | [cards/nagel1992-randomization.md](cards/nagel1992-randomization.md) |
 | nagel1992-circle-jams | model_theory | confirmed | 密度高時塞車隨機出現、往後移動 | [cards/nagel1992-circle-jams.md](cards/nagel1992-circle-jams.md) |
