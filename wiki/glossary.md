@@ -24,7 +24,7 @@
 | NaSch模型 | Nagel–Schreckenberg model | — | 指nagel1992提出的模型；這個簡稱是後來文獻的叫法 |
 | 隨機減速 | randomization | 隨機化 | nagel1992第2222頁第3步；暫定譯名 |
 | 介穩態 | metastable state | 亞穩態 | tadaki2013第10頁；同一個密度下兩種狀態都可能出現；台灣物理學常用「介穩態」，待確認 |
-| 相變 | phase transition | 相轉變 | tadaki2013、sugiyama2008；作者把順暢變塞車比喻成動態的相變 |
+| 相變 | phase transition | 相轉變 | sugiyama2008第3、7頁、tadaki2013第11頁；兩篇都用相變描述自由流變成塞車流：Sugiyama說是非平衡系統的相變，Tadaki說是動態相變，並說轉變似乎是一階 |
 | 反應延遲 | reaction time, delay | 反應時間 | orosz2010第4462頁；Bando 1995沒有加 |
 | 跟車模型 | car-following model | — | orosz2010第4461頁；每台車看前車決定怎麼開的模型 |
 | 自動駕駛車 | autonomous vehicle, AV | 自駕車 | stern2018；這篇的車只有速度自動控制，方向盤由人操作 |
