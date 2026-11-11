@@ -6,7 +6,7 @@
 
 | 候選 | 書目（查到的） | 全文 | 備註 |
 |---|---|---|---|
-| Bando等1995 | Dynamical model of traffic congestion and numerical simulation，Physical Review E，DOI 10.1103/PhysRevE.51.1035。Sugiyama 2008的參考文獻[4]寫Phys. Rev. E 51 1035，作者Bando、Hasebe、Nakayama、Shibata、Sugiyama（從別篇的引用看到，不是讀原文確認） | APS付費；11/11使用者確認大同沒有訂APS，拿不到全文。摘要可以看 | 摘要把V叫做「legal velocity function」，後來的文獻多叫optimal velocity，術語表要記 |
+| Bando等1995 | Dynamical model of traffic congestion and numerical simulation，Physical Review E，DOI 10.1103/PhysRevE.51.1035。Sugiyama 2008的參考文獻[4]寫Phys. Rev. E 51 1035，作者Bando、Hasebe、Nakayama、Shibata、Sugiyama（從別篇的引用看到，不是讀原文確認） | APS付費，大同沒有訂。11/11使用者後來提供了掃描版PDF，已經ingest | 摘要把V叫做「legal velocity function」，後來的文獻多叫optimal velocity，術語表要記 |
 | Bando等1995（備案） | Phenomenological Study of Dynamical Model of Traffic Flow，J. Phys. I France 5(11):1389–1399，DOI 10.1051/jp1:1995206 | 出版社頁面要付費；HAL上有沒有免費全文待查證 | 同一群作者、同一個模型。PRE那篇拿不到時再考慮 |
 | Sugiyama等2008 | Traffic jams without bottlenecks—experimental evidence for the physical mechanism of the formation of a jam，New Journal of Physics 10, 033001，DOI 10.1088/1367-2630/10/3/033001。作者8位：Sugiyama、Fukui、Kikuchi、Hasebe、Nakayama、Nishinari、Tadaki、Yukawa | 免費：大阪大學典藏庫PDF | 授權說法不一致：典藏庫寫CC BY 4.0，PDF首頁寫© IOP Publishing和DPG。我們只放連結，不影響 |
 | Nagel、Schreckenberg 1992 | A cellular automaton model for freeway traffic，J. Phys. I France 2(12):2221–2229，DOI 10.1051/jp1:1992277 | 出版社頁面要付費；HAL（jpa-00246697）有全文，但我這邊被擋，要用瀏覽器下載 | 隨機模型，跟Bando的機制不同，照AGENTS第6節第1類處理 |
