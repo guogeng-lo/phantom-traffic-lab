@@ -28,7 +28,7 @@ CRITERIA = """# 審查包：幽靈塞車Wiki的研究差異與忠實度審查
 | 文獻id | 檔案 | 注意 |
 |---|---|---|
 | bando1995 | bando.pdf | 掃描檔，頁碼看頁首的1035～1042 |
-| sugiyama2008 | NewJPhys_10_033001.pdf | 前面多一張典藏庫封面，頁碼看頁首的1～7 |
+| sugiyama2008 | NewJPhys_10_033001.pdf | 前面多兩頁（典藏庫封面和出版商的頁面），頁碼看頁首的1～7 |
 | nagel1992 | ajp-jp1v2p2221.pdf | 掃描檔，頁碼2221～2229 |
 | tadaki2013 | NewJPhys_15_103034.pdf | 前面多兩頁，頁碼看頁首 |
 | stern2018 | 1705.01693v1.pdf | arXiv預印本，頁碼就是PDF頁碼 |
@@ -110,7 +110,8 @@ def main():
         head = RECHECK.format(round=args.round)
         out_path = ROOT / "pipeline" / "review" / f"n3-package-r{args.round}.md"
     else:
-        files = [wiki / "glossary.md", wiki / "disputes.md", wiki / "derivations" / "finite-n-threshold.md"]
+        # index.md也要放：它的每張卡摘要是卡片主張的縮寫，卡片改了它常常沒跟著改（第2輪審查才發現）
+        files = [wiki / "index.md", wiki / "glossary.md", wiki / "disputes.md", wiki / "derivations" / "finite-n-threshold.md"]
         files += sorted(p for p in (wiki / "sources").glob("*.md") if p.name != "_template.md")
         files += sorted(p for p in (wiki / "cards").glob("*.md") if p.name != "_template.md")
         head = CRITERIA
