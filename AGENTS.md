@@ -148,7 +148,7 @@ PDF拿不到、引用找不到、結論有疑問時，不猜不補，記在紀�
 
 ```
 python3 scripts/check_wiki.py            # 文獻、證據卡、索引、個資掃描（Git歷史的問題只列警告）
-python3 scripts/check_wiki.py --strict   # push前用：Git歷史裡的PDF和疑似個資也算錯誤
+python3 scripts/check_wiki.py --strict   # commit之後、push之前用：Git歷史裡的PDF和疑似個資也算錯誤
 python3 scripts/check_quotes.py          # 證據卡的英文引用要在raw/的PDF裡找得到；結果分成逐字、OCR逐字、OCR近似，後兩種要人對照頁面確認，報告不能混在一起寫
 python3 tests/test_check_wiki.py         # 故意弄壞資料，確認檢查程式擋得住
 python3 audition/test_ovm.py             # 選題階段的模型測試，輸出應該跟audition/run2.log一樣
@@ -157,12 +157,18 @@ python3 audition/test_ovm.py             # 選題階段的模型測試，輸出�
 ## 10. Commit
 
 - 作者是使用者本人（Guo-Geng Lo，GitHub noreply信箱），不加Co-Authored-By或AI署名。
-- `check_wiki.py`錯誤是0才能commit。
+- `check_wiki.py`錯誤是0才能commit。看程式自己的結束代碼（0才算通過），不能接`| tail`之類只看最後幾行，管線會蓋掉結束代碼。
 - 一次commit只做一件事，訊息寫做了什麼。
 - 不強制推送。改歷史一定要先問使用者。
 
 ## 11. 公開前檢查
 
-push前跑`check_wiki.py --strict`，錯誤要是0。它會掃所有要上傳的檔案和整個Git歷史，找PDF、學號、信箱、手機、本機路徑和金鑰。程式看不到圖片內容，截圖要人看過。
+**commit之後、push之前**跑`check_wiki.py --strict`，結束代碼是0才能push：
+
+```
+python3 scripts/check_wiki.py --strict && git push
+```
+
+在commit之前跑不算數，因為那時新的commit還不在Git歷史裡，檢查不到它自己的diff。它會掃所有要上傳的檔案和整個Git歷史，找PDF、學號、信箱、手機、本機路徑和金鑰。程式看不到圖片內容，截圖要人看過。
 
 `--strict`如果抓到歷史裡的問題，不能自己改寫歷史或強制推送，先停下來問使用者。
