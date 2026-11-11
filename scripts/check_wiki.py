@@ -234,8 +234,10 @@ def tracked_files(root):
 # 2. 表格的表頭有一欄以「SHA-256」開頭，而且這一格以反引號包起來的64位小寫十六進位開頭。
 # 排除只套用在學號和手機兩條規則，信箱、路徑、金鑰、座號照原本那一行檢查。
 # （2026-11-11看到pipeline/review/n3-package-r2.md的雜湊被誤判成學號之後才加的，紀錄在
-#  runs/2026-11-11-check-wiki-hash-exclusion.md。）
+#  runs/2026-11-11-check-wiki-hash-exclusion.md。掃Git歷史時用那個commit的完整檔案判斷表頭，
+#  見runs/2026-11-11-check-wiki-history-fullfile.md。）
 HASH_TOKEN = "`[0-9a-f]{64}`"
+HASH_RE = re.compile(HASH_TOKEN)
 LABELED_HASH = re.compile(r"(SHA-256[:：]?\s*)" + HASH_TOKEN)
 HASH_CELL = re.compile(r"^(\s*)" + HASH_TOKEN)
 HASH_MASKED = {"像學號的9位數字", "手機號碼"}
@@ -295,19 +297,51 @@ def check_history(root, rep, strict):
     for name in sorted(set(git("log", "--all", "--name-only", "--format=").splitlines())):
         if name.lower().endswith(".pdf"):
             report("Git歷史", f"出現過PDF：{name}")
-    commit, path, table = "", "", ShaTable()
-    for line in git("log", "--all", "-p", "--no-color", "--format=commit %h").splitlines():
-        if line.startswith("commit "):
-            commit, table = line[7:], ShaTable()
-        elif line.startswith("+++ "):
-            path, table = (line[6:] if line.startswith("+++ b/") else line[4:]), ShaTable()
-        elif line.startswith("@@"):
-            table = ShaTable()  # 新的一段diff可能從檔案中間開始，看不到表頭就不排除
-        elif line.startswith("+"):
-            for name in scan_line(line[1:], table.feed(line[1:])):
+    def sha_cols(commit, path):
+        """讀這個commit裡這個檔案的完整內容，算出每一行是不是在SHA-256表格裡（行號從1開始）。
+        讀不到（例如檔名有特殊字元）就全部當成不在表格裡，也就是不排除。"""
+        try:
+            text = git("show", f"{commit}:{path}")
+        except subprocess.CalledProcessError:
+            return {}
+        table = ShaTable()
+        return {n: table.feed(line) for n, line in enumerate(text.splitlines(), 1)}
+
+    def flush(commit, path, added):
+        # 只有新增的行裡有反引號包起來的64位十六進位，排除才可能有作用，這時才去讀完整檔案
+        cols = sha_cols(commit, path) if any(HASH_RE.search(text) for _, text in added) else {}
+        for n, text in added:
+            for name in scan_line(text, cols.get(n)):
                 report(f"Git歷史 {commit} {path}", f"疑似{name}")
-        elif line.startswith(" "):
-            table.feed(line[1:])  # 沒改的上下文行也要追表頭，但它本身已經在別的commit掃過
+
+    # 只掃每個commit新增的行，但表頭用那個commit的完整檔案判斷，不靠diff前後幾行的上下文。
+    # 用@@標頭的行數判斷哪些行是內容，內容剛好以「+++」開頭也不會被當成檔名。
+    commit, path, added, n, old_left, new_left = "", "", [], 0, 0, 0
+    for line in git("log", "--all", "-p", "--no-color", "--format=commit %h").splitlines():
+        if old_left > 0 or new_left > 0:
+            if line.startswith("+"):
+                added.append((n, line[1:]))
+                n, new_left = n + 1, new_left - 1
+            elif line.startswith("-"):
+                old_left -= 1
+            elif line.startswith(" ") or line == "":
+                n, old_left, new_left = n + 1, old_left - 1, new_left - 1
+            continue
+        if line.startswith("commit "):
+            flush(commit, path, added)
+            commit, path, added = line[7:], "", []
+        elif line.startswith("diff --git "):
+            flush(commit, path, added)
+            path, added = "", []
+        elif line.startswith("+++ "):
+            path = line[6:] if line.startswith("+++ b/") else line[4:]
+        elif line.startswith("@@"):
+            m = re.match(r"@@ -\d+(?:,(\d+))? \+(\d+)(?:,(\d+))? @@", line)
+            if m:
+                old_left = int(m.group(1)) if m.group(1) is not None else 1
+                n = int(m.group(2))
+                new_left = int(m.group(3)) if m.group(3) is not None else 1
+    flush(commit, path, added)
 
 
 def check_privacy(root, rep, tracked):

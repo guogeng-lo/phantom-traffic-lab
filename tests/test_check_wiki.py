@@ -140,6 +140,22 @@ def history_note(text):
     return f
 
 
+def history_versions(*texts):
+    """同一個檔案依序commit好幾個版本，最後刪掉。後面版本的diff只看得到改動附近幾行。"""
+    def f(tmp):
+        git(tmp, "init", "-q")
+        for i, text in enumerate(texts):
+            (tmp / "note.md").write_text(text, encoding="utf-8")
+            commit_all(tmp, f"v{i}")
+        (tmp / "note.md").unlink()
+        commit_all(tmp, "remove")
+    return f
+
+
+def rows(n, cell=None):
+    return "".join(f"| `f{i}.md` | `{cell or fake_hash()}` |\n" for i in range(n))
+
+
 def edit(path, old, new):
     t = path.read_text(encoding="utf-8")
     assert old in t, f"測試寫錯了：{path.name} 裡找不到 {old!r}"
@@ -248,6 +264,24 @@ CASES = [
      history_note(SHA_TABLE + f"| `a.md` | `{fake_hash(SID)}` |\n"), None, {"args": ["--strict"]}),
     ("歷史裡沒有標記的雜湊照樣抓（--strict）",
      history_note(f"commit `{fake_hash(SID)}`\n"), "像學號的9位數字", {"args": ["--strict"]}),
+    # 以下是歷史掃描改讀完整檔案（2026-11-11，看到4462639的diff看不到表頭、雜湊被誤判之後才加的）
+    ("歷史：SHA-256表格中間加一列，diff看不到表頭也排除（--strict）",
+     history_versions(SHA_TABLE + rows(10), SHA_TABLE + rows(10) + f"| `x.md` | `{fake_hash(SID)}` |\n"),
+     None, {"args": ["--strict"]}),
+    ("歷史：SHA-256表格中間加的那列有金鑰照樣抓（--strict）",
+     history_versions(SHA_TABLE + rows(10), SHA_TABLE + rows(10) + f"| `sk-{'a' * 30}` | `{fake_hash(SID)}` |\n"),
+     "金鑰或Token", {"args": ["--strict"]}),
+    ("歷史：SHA-256表格中間加的那列有學號照樣抓（--strict）",
+     history_versions(SHA_TABLE + rows(10), SHA_TABLE + rows(10) + f"| `學號{SID}` | `{fake_hash()}` |\n"),
+     "像學號的9位數字", {"args": ["--strict"]}),
+    ("歷史：表格結束很久之後加的雜湊照樣抓（--strict）",
+     history_versions(SHA_TABLE + rows(10) + "\n說明\n" * 5,
+                      SHA_TABLE + rows(10) + "\n說明\n" * 5 + f"`{fake_hash(SID)}`\n"),
+     "像學號的9位數字", {"args": ["--strict"]}),
+    ("歷史：沒有SHA-256欄的表格加雜湊照樣抓（--strict）",
+     history_versions("| 檔案 | 備註 |\n|---|---|\n" + rows(10),
+                      "| 檔案 | 備註 |\n|---|---|\n" + rows(10) + f"| `x.md` | `{fake_hash(SID)}` |\n"),
+     "像學號的9位數字", {"args": ["--strict"]}),
 ]
 
 
