@@ -11,12 +11,26 @@
 | id | 種類 | 閱讀狀態 | 檔案 |
 |---|---|---|---|
 | bando1995 | paper | 全文已讀 | [sources/bando1995.md](sources/bando1995.md) |
+| nagel1992 | paper | 全文已讀 | [sources/nagel1992.md](sources/nagel1992.md) |
+| tadaki2013 | paper | 全文已讀 | [sources/tadaki2013.md](sources/tadaki2013.md) |
 | sugiyama2008 | paper | 全文已讀 | [sources/sugiyama2008.md](sources/sugiyama2008.md) |
 
 ## 證據卡
 
 | id | 類型 | 狀態 | 主張 | 檔案 |
 |---|---|---|---|---|
+| nagel1992-rules | model_theory | confirmed | 格子模型的4條規則 | [cards/nagel1992-rules.md](cards/nagel1992-rules.md) |
+| nagel1992-randomization | model_theory | confirmed | 隨機減速是這個模型產生真實感的關鍵 | [cards/nagel1992-randomization.md](cards/nagel1992-randomization.md) |
+| nagel1992-circle-jams | model_theory | confirmed | 密度高時塞車隨機出現、往後移動 | [cards/nagel1992-circle-jams.md](cards/nagel1992-circle-jams.md) |
+| nagel1992-transition | model_theory | confirmed | 轉變在每格約0.08台附近，確切位置不清楚 | [cards/nagel1992-transition.md](cards/nagel1992-transition.md) |
+| nagel1992-real-units | model_theory | confirmed | 一格7.5公尺、一步約0.5～1秒 | [cards/nagel1992-real-units.md](cards/nagel1992-real-units.md) |
+| nagel1992-bottleneck | model_theory | confirmed | 瓶頸情境下車流自己穩定在某個狀態 | [cards/nagel1992-bottleneck.md](cards/nagel1992-bottleneck.md) |
+| tadaki2013-setup | experiment | confirmed | 名古屋巨蛋314公尺環道，10～40台車 | [cards/tadaki2013-setup.md](cards/tadaki2013-setup.md) |
+| tadaki2013-density-dependence | experiment | confirmed | 車少順、車多塞，塞車團約20 km/h往後 | [cards/tadaki2013-density-dependence.md](cards/tadaki2013-density-dependence.md) |
+| tadaki2013-critical-density | experiment | confirmed | 臨界密度在每公尺0.08到0.09台之間 | [cards/tadaki2013-critical-density.md](cards/tadaki2013-critical-density.md) |
+| tadaki2013-metastable | experiment | confirmed | 中間密度時順暢和塞車都會出現 | [cards/tadaki2013-metastable.md](cards/tadaki2013-metastable.md) |
+| tadaki2013-expressway-consistency | experiment | confirmed | 作者說跟高速公路的臨界密度一致 | [cards/tadaki2013-expressway-consistency.md](cards/tadaki2013-expressway-consistency.md) |
+| tadaki2013-high-density | experiment | confirmed | 40台時反而均勻，但作者說還不確定 | [cards/tadaki2013-high-density.md](cards/tadaki2013-high-density.md) |
 | bando1995-ovm-equation | model_theory | confirmed | 跟車方程式：加速度＝a×(想開的速度－現在速度) | [cards/bando1995-ovm-equation.md](cards/bando1995-ovm-equation.md) |
 | bando1995-linear-stability | model_theory | confirmed | V'(b)<a/2時均勻車流穩定，對任何速度函數都成立 | [cards/bando1995-linear-stability.md](cards/bando1995-linear-stability.md) |
 | bando1995-large-n-note | model_theory | confirmed | 作者：車數和環長夠大時邊界條件不重要 | [cards/bando1995-large-n-note.md](cards/bando1995-large-n-note.md) |
