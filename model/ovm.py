@@ -7,6 +7,9 @@ h_n = x_{n+1} - x_n，最後一台的前車是第0台（車距加L）
 跟audition/ovm.py不同的地方：
 - 位置用不取餘數的累積位置，畫圖時才對L取餘數。
 - 煞車寫在微分方程式裡（f_n(t) = -β），跟RK4一起積分，不是每一步之後硬改速度。
+- 煞車用整數步數判定（2026-11-12第3版標準）：(車, t0, τ, β)換算成開始步t0/dt、步數τ/dt，
+  兩個都要是整數，否則報錯。一個煞車步裡RK4的四次評估都加煞車，其他步都不加。
+  不用浮點時間比大小，避免像第399步最後一個子步算成20.000000000000004而提早生效。
 - 每一步都做物理檢查（車距 > 0、車速 >= -1e-9、車距總和 = L）。
 - 可以把某一台車換成平滑車（M8、M9用）。
 測試標準在model/CRITERIA.md，寫程式之前就commit了。
@@ -46,7 +49,8 @@ class Ring:
         self.x = list(x) if x is not None else [n * b for n in range(N)]
         self.v = list(v) if v is not None else [V(b)] * N
         self.t = 0.0
-        self.brake = None          # (車, 開始時間, 持續時間τ, 減速β)
+        self._steps = 0
+        self.brake = None          # (車, 開始時間t0, 持續時間τ, 減速β)；t0/dt、τ/dt都要是整數
         self.smooth = None         # (車, 規則函式)：規則函式(ring, n, x, v, h) -> 加速度
         self.min_h = min(self.headways(self.x))
         self.min_v = min(self.v)
@@ -56,35 +60,46 @@ class Ring:
         N, L = self.N, self.L
         return [x[n + 1] - x[n] for n in range(N - 1)] + [x[0] + L - x[N - 1]]
 
-    def accel(self, x, v, t):
+    def brake_window(self):
+        """煞車換算成(車, 開始步, 結束步（不含）, β)；沒有煞車回傳None。"""
+        if self.brake is None:
+            return None
+        n, t0, tau, beta = self.brake
+        k0, m = t0 / DT, tau / DT
+        if abs(k0 - round(k0)) > 1e-9 or abs(m - round(m)) > 1e-9:
+            raise ValueError(f"煞車的開始時間{t0}和持續時間{tau}都要是dt={DT}的整數倍")
+        return n, int(round(k0)), int(round(k0)) + int(round(m)), beta
+
+    def accel(self, x, v, braking):
         h = self.headways(x)
         a = self.a
         acc = [a * (V(h[n]) - v[n]) for n in range(self.N)]
         if self.smooth is not None:
             n, rule = self.smooth
             acc[n] = rule(self, n, x, v, h)
-        if self.brake is not None:
-            n, t0, tau, beta = self.brake
-            if t0 <= t < t0 + tau:
-                acc[n] -= beta
+        if braking is not None:
+            n, beta = braking
+            acc[n] -= beta
         return acc
 
     def step(self, dt=DT):
-        x, v, t = self.x, self.v, self.t
-        k1x, k1v = v, self.accel(x, v, t)
+        x, v = self.x, self.v
+        w = self.brake_window()
+        braking = (w[0], w[3]) if w is not None and w[1] <= self._steps < w[2] else None
+        k1x, k1v = v, self.accel(x, v, braking)
         x2 = [xi + 0.5 * dt * k for xi, k in zip(x, k1x)]
         v2 = [vi + 0.5 * dt * k for vi, k in zip(v, k1v)]
-        k2x, k2v = v2, self.accel(x2, v2, t + 0.5 * dt)
+        k2x, k2v = v2, self.accel(x2, v2, braking)
         x3 = [xi + 0.5 * dt * k for xi, k in zip(x, k2x)]
         v3 = [vi + 0.5 * dt * k for vi, k in zip(v, k2v)]
-        k3x, k3v = v3, self.accel(x3, v3, t + 0.5 * dt)
+        k3x, k3v = v3, self.accel(x3, v3, braking)
         x4 = [xi + dt * k for xi, k in zip(x, k3x)]
         v4 = [vi + dt * k for vi, k in zip(v, k3v)]
-        k4x, k4v = v4, self.accel(x4, v4, t + dt)
+        k4x, k4v = v4, self.accel(x4, v4, braking)
         self.x = [xi + dt / 6 * (p + 2 * q + 2 * r + s) for xi, p, q, r, s in zip(x, k1x, k2x, k3x, k4x)]
         self.v = [vi + dt / 6 * (p + 2 * q + 2 * r + s) for vi, p, q, r, s in zip(v, k1v, k2v, k3v, k4v)]
         # 步數乘dt算時間，避免一直加0.05累積誤差
-        self._steps = getattr(self, "_steps", 0) + 1
+        self._steps += 1
         self.t = self._steps * dt
         h = self.headways(self.x)
         self.min_h = min(self.min_h, min(h))
