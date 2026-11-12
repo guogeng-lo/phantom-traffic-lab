@@ -8,6 +8,7 @@
 | 自由流 | free flow | — | sugiyama2008第2～3頁；所有車用差不多的速度、保持安全距離前進 |
 | 塞車團 | jam cluster | 阻塞團、壅塞團 | sugiyama2008第5頁；暫定譯名，待查繁體中文學術用法 |
 | 走走停停波 | stop-and-go wave | 停走波 | sugiyama2008第4頁；暫定譯名，待查 |
+| 時空圖 | time-space diagram | 時空軌跡圖 | sugiyama2008第6頁圖4畫的是每台車在環道上的軌跡（位置對時間）；簡報裡橫軸是位置、縱軸是時間、時間往下增加 |
 | 瓶頸 | bottleneck | — | sugiyama2008第2頁；例如匝道、隧道、上坡 |
 | 臨界密度 | critical density | — | sugiyama2008第2～3頁 |
 | 基本圖 | fundamental diagram | 流量密度圖 | sugiyama2008第2頁；密度和流量的關係圖；暫定，待查台灣交通工程用法 |

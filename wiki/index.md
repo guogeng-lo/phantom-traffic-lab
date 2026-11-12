@@ -24,7 +24,7 @@
 
 ## 證據卡
 
-共39張。每張的條件取自卡片的conditions欄位，主張直接取自卡片的「## 主張」，都沒有另外縮寫；原文依據和限制請點進卡片看。
+共52張。每張的條件取自卡片的conditions欄位，主張直接取自卡片的「## 主張」，都沒有另外縮寫；原文依據和限制請點進卡片看。
 
 ### bando1995
 
@@ -355,5 +355,109 @@
 - 條件：bando1995的模型；環狀道路N台車，N≥3；只看很小的擾動
 
 車數有限時，非零的第k個波只有在a < 2V'(b)cos²(πk/N)時才會變大（k=0是整體平移，不算；k和N−k是一對共軛，分界相同；N是偶數時k=N/2要直接用式(10)，它在a>0、V'(b)>0時不會失穩）。N≥3時，a往下調時最先變不穩定的是k=1這一對，所以N台車的實際分界是a = 2V'(b)cos²(π/N) = V'(b)(1+cos(2π/N))。22台車、車距2時是1.9595，不是a/2條件給的2；車距b固定、車數越多（環長跟著變長），越接近2V'(b)。
+
+#### [ours-model-click-brake](cards/ours-model-click-brake.md)
+
+- 類型：our_simulation
+- 狀態：confirmed
+- 條件：model/ovm.py第3版（煞車用整數步數判定）；N=22、L=44、a=1；點擊前用解析解；煞車β=0.25、持續τ=0.5（剛好10步）
+
+第2頁的展示做法：讀者點擊之前，均勻車流用公式算，永遠保持等距等速；點擊那一刻才開始數值積分並讓那台車短暫減速。用最輕的煞車（β=0.25、τ=0.5），點擊後模型時間89.3出現塞車；不論在20還是500點擊，結果都一樣。切換時位置、速度、時間都連續。
+
+#### [ours-model-fast-adjust](cards/ours-model-fast-adjust.md)
+
+- 類型：our_simulation
+- 狀態：confirmed
+- 條件：model/ovm.py第3版；N=22、L=44；a=2.2、2.5、3.0；跟第2頁一樣的煞車
+
+每台車調整速度夠快（a=2.2、2.5、3.0）時，同樣點一下，不會形成塞車，擾動在300模型時間內衰減到0.01以下（4e−4、1e−4、2e−5）。
+
+#### [ours-model-n-sweep](cards/ours-model-n-sweep.md)
+
+- 類型：our_simulation
+- 狀態：confirmed
+- 條件：model/ovm.py；L=44、a=1；N=3～60；k=1的小擾動；RK4，dt=0.05；量法照model/CRITERIA.md第2、3版
+
+環長44、a=1時，解析推導預測16～39台會放大。正式模型的數值驗證：58個N裡57個量測資料足夠，全部跟理論相符；其中會放大的是16～20、22～39台。21台因為成長太快、量測區間不到事先規定的200，標為數值無法判定，不能說已經通過數值驗證。
+
+#### [ours-model-near-threshold](cards/ours-model-near-threshold.md)
+
+- 類型：our_simulation
+- 狀態：confirmed
+- 條件：model/ovm.py第3版；N=22、L=44；a=1.90～2.10；第2頁的煞車和三倍煞車；跑到點擊後1500
+
+分界（約1.96）附近變化很慢。a=1.90、1.94理論上會放大，但點擊後1500模型時間內都還沒形成塞車，擾動只是慢慢變大；a=1.98～2.10的擾動慢慢變小。這次測的煞車大小，沒有看到理論說穩定、卻出現塞車的情況。
+
+#### [ours-model-offset-jam](cards/ours-model-offset-jam.md)
+
+- 類型：our_simulation
+- 狀態：confirmed
+- 條件：model/ovm.py；N=22、L=44、a=1；一開始均勻，只把第0台車往前移ε；RK4，dt=0.05
+
+模型裡，只把一台車往前偏一點點，也會長成塞車（有車的速度低於0.1）。偏0.1時在模型時間92出現，偏0.01時在120.5，偏0.2時在87。
+
+#### [ours-model-propagation](cards/ours-model-propagation.md)
+
+- 類型：our_simulation
+- 狀態：confirmed
+- 條件：model/ovm.py第3版；N=22、L=44；第2頁的煞車；a=1和a=2.5對照
+
+同樣點一下，a=1時擾動在200模型時間內放大28倍，a=2.5時縮到0.03倍。a=1時，被點那台後面21台的最低速度，有19台比前一台低，但不是每一台都更低。
+
+#### [ours-model-threshold](cards/ours-model-threshold.md)
+
+- 類型：our_simulation
+- 狀態：confirmed
+- 條件：model/ovm.py；V=tanh(h−2)+tanh2；N=22、L=44（車距2）；RK4，dt=0.05；只加k=1的小擾動（10^−6）；沒有延遲
+
+正式模型用二分法量出22台、車距2的分界a是1.959494，公式是1.959493。分界附近7個a值，量到的成長率跟理論的差都在1e−5以下，而且正負號一致。
+
+#### [ours-model-uniform-dense](cards/ours-model-uniform-dense.md)
+
+- 類型：our_simulation
+- 狀態：confirmed
+- 條件：model/ovm.py；N=44、L=44（車距1）、a=1；RK4，dt=0.05
+
+44台擠在環長44的環上時，均勻車流的速度是0.2024（V(1)），模擬跑到1000一直維持這個速度，誤差2e−11；加上小擾動也會衰減，衰減率跟理論一樣。也就是大家一起很慢地走，但小擾動不會放大。
+
+#### [ours-model-wave-direction](cards/ours-model-wave-direction.md)
+
+- 類型：our_simulation
+- 狀態：confirmed
+- 條件：model/ovm.py第3版；N=22、L=44、a=1；第2頁的煞車；取樣間隔0.5和0.05；追同一團塞車（至少3台相鄰的車速度低於0.1才開始）
+
+模型裡，車的平均速度是+0.9632（往前），塞車團的移動速度是−0.1505（往後）。兩種取樣間隔量到的一樣，畫時空圖時跨越起點的處理沒有錯誤。
+
+#### [ours-smoothing-r1](cards/ours-smoothing-r1.md)
+
+- 類型：our_simulation
+- 狀態：confirmed
+- 條件：model/ovm.py；N=22、L=44、a=1；同R3的情境；規則：a_s·(min(U_avg, V(h))−v)，U_avg是自己過去50的平均速度，a_s=1
+
+在我們的模型裡，平滑車改成照自己過去的平均速度開時，分三方面看：車速波動完全消失（剩0%），整條車流變成均勻；但平均車速從0.966降到0.763，少了約21%；安全方面，最小車距0.325，沒有撞車。
+
+#### [ours-smoothing-r2-collision](cards/ours-smoothing-r2-collision.md)
+
+- 類型：our_simulation
+- 狀態：confirmed
+- 條件：model/ovm.py；N=22、L=44、a=1；同R3的情境；規則：照原本的模型，但加速度限制在±0.05
+
+在我們的模型裡，只限制平滑車的加速度、沒有安全機制時會撞車（最小車距變成−14.5，物理檢查失敗）。車速波動雖然剩50%，但這是失敗的規則，不能當可用的策略。
+
+#### [ours-smoothing-r3](cards/ours-smoothing-r3.md)
+
+- 類型：our_simulation
+- 狀態：confirmed
+- 條件：model/ovm.py；N=22、L=44、a=1；先讓塞車形成，t=300把第0台換成平滑車；比較區間[1000, 1500]；規則：a_s·(min(U, V(h))−v)，U=V(2)=0.9640，a_s=1
+
+在我們的模型裡，把一台車換成「固定目標速度、但車距不夠就照模型減速」的平滑車後，分三方面看：車速波動剩原本的42%，比較區間裡沒有車慢到0.1以下；平均車速從0.966變成0.887；安全方面，最小車距0.326，沒有撞車。
+
+#### [ours-smoothing-target-speed](cards/ours-smoothing-target-speed.md)
+
+- 類型：our_simulation
+- 狀態：confirmed
+- 條件：model/ovm.py；同R3的情境；目標速度U=V(2)×0.9、1.0、1.05、1.1、1.2
+
+在我們的模型裡，R3平滑車的目標速度設得越快，剩下的車速波動越大：U=V(2)時是原本的42%，×1.05是49%，×1.1是55%，×1.2是63%；但這幾組都沒有重新形成塞車。U設得比大家慢（×0.9）時，車流反而完全均勻，平均車速0.868。
 
 <!-- 自動產生結束 -->
