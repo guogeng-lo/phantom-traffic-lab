@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>幽靈塞車：沒有車禍，為什麼也會塞？</title>
+<meta name="description" content="自己點一台車煞一下，看小擾動怎麼一台傳一台地長成塞車。給完全沒有交通流背景的人看的互動簡報。">
+<meta name="color-scheme" content="light">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- 字型不擋住第一次畫面：先用系統字型，字型下載好再換上 -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@600;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@600;800&family=Noto+Sans+TC:wght@400;500;700&display=swap"></noscript>
+<style>
+{{CSS}}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1 class="brand">幽靈塞車</h1>
+  <details class="toc">
+    <summary>目錄</summary>
+    <ol id="toc"></ol>
+  </details>
+</header>
+<main id="deck">
+{{PAGES}}
+</main>
+<nav class="pager" aria-label="換頁">
+  <button class="nav-btn" type="button" data-go="prev">上一頁</button>
+  <div class="dots" id="dots"></div>
+  <p class="where" id="where" aria-live="polite"></p>
+  <button class="nav-btn next" type="button" data-go="next">下一頁</button>
+</nav>
+<p class="sr" id="live" aria-live="polite"></p>
+<noscript><p class="noscript">這份簡報的模擬要用JavaScript在你的瀏覽器裡即時計算。請開啟JavaScript再看。</p></noscript>
+<script id="ovm-src">
+{{OVM}}
+</script>
+<script>
+window.DECK_DATA = {"titles": {{TITLES}}, "sources": {{SOURCES}}, "bars": {{BARS}}, "repo": "{{REPO}}"};
+</script>
+<script>
+{{DECK}}
+</script>
+</body>
+</html>
