@@ -1,0 +1,559 @@
+<title>幽靈塞車風格樣本</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@400;600;800&family=Chiron+Hei+HK:wght@400;600;800&family=Noto+Sans+TC:wght@400;700;900&family=IBM+Plex+Mono:wght@400;600&family=Outfit:wght@500;700&family=Unbounded:wght@600;800&display=swap">
+<style>
+/* 外框：標題列和分頁，跟著讀者的深淺色設定；三種風格各自固定一套配色（風格本身就是比較的對象） */
+:root {
+  --chrome-bg: #eef1f4; --chrome-fg: #18212b; --chrome-muted: #55626f; --chrome-line: #c9d1d9; --chrome-tab: #ffffff; --chrome-on: #18212b; --chrome-on-fg: #ffffff;
+  --cjk: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Heiti TC", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --chrome-bg: #11161c; --chrome-fg: #e6ebf0; --chrome-muted: #9aa7b4; --chrome-line: #2b3540; --chrome-tab: #1a222b; --chrome-on: #e6ebf0; --chrome-on-fg: #11161c; color-scheme: dark } }
+:root[data-theme="dark"] { --chrome-bg: #11161c; --chrome-fg: #e6ebf0; --chrome-muted: #9aa7b4; --chrome-line: #2b3540; --chrome-tab: #1a222b; --chrome-on: #e6ebf0; --chrome-on-fg: #11161c; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--chrome-bg); color: var(--chrome-fg); font-family: var(--cjk); font-size: 17px; line-height: 1.6 }
+.chrome { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 14px; max-width: 1280px; margin: 0 auto }
+.chrome .kicker { margin: 0; font-size: 14px; letter-spacing: .08em; color: var(--chrome-muted) }
+.chrome h1 { margin: 4px 0 6px; font-size: clamp(24px, 4vw, 34px); font-weight: 900; text-wrap: balance }
+.chrome p.note { margin: 0 0 14px; max-width: 70ch; color: var(--chrome-muted); font-size: 16px }
+.tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px }
+.tab { appearance: none; border: 2px solid var(--chrome-line); background: var(--chrome-tab); color: var(--chrome-fg); border-radius: 10px; padding: 10px 12px; text-align: left; font: inherit; cursor: pointer; min-width: 0 }
+.tab b { display: block; font-size: 18px }
+.tab span { display: block; font-size: 14px; color: var(--chrome-muted); line-height: 1.4 }
+.tab[aria-selected="true"] { background: var(--chrome-on); color: var(--chrome-on-fg); border-color: var(--chrome-on) }
+.tab[aria-selected="true"] span { color: inherit; opacity: .8 }
+.tab:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px solid #f0b400; outline-offset: 2px }
+@media (max-width: 640px) { .tabs { grid-template-columns: 1fr } .tab span { display: none } }
+
+/* 共同：投影片外框、互動元件 */
+.slide { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px }
+.slide-in { max-width: 1280px; margin: 0 auto; display: grid; gap: 18px }
+.ring-svg { width: 100%; height: auto; display: block; touch-action: manipulation; cursor: pointer; user-select: none; -webkit-user-select: none }
+.ring-svg:focus { outline: none }
+.ring-svg:focus-visible { outline: 3px solid #f0b400; outline-offset: 2px }
+.ts-wrap { position: relative; width: 100% }
+.ts-canvas { width: 100%; display: block }
+.btn { appearance: none; font: inherit; cursor: pointer; border-radius: 8px; padding: 10px 16px; min-height: 44px }
+.btn[disabled] { opacity: .45; cursor: default }
+.opts { display: grid; gap: 8px }
+details.src summary { cursor: pointer; font-weight: 700; list-style: none }
+details.src summary::-webkit-details-marker { display: none }
+details.src ul { margin: 8px 0 0; padding-left: 0; list-style: none; display: grid; gap: 4px }
+details.src li { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap }
+details.src code { font-size: 14px; word-break: break-all }
+.hide { display: none !important }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0) }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important } }
+
+/* ========== A：互動科學館 ========== */
+/* 版面：每頁一張大展板，左邊大型環道佔滿，右邊是操作台；標題一句重點 */
+.sa {
+  --bg: #e8f0f4; --panel: #ffffff; --ink: #14232f; --muted: #4f6372; --line: #cfdde6; --act: #0a6e78; --act-ink: #ffffff;
+  --road: #dbe5ec; --road-mid: #ffffff;
+  --exp: #1d8a4c; --mod: #6b4fc8; --sim: #14232f; --der: #9a5b00;
+  --f-cjk: "Chiron GoRound TC", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif; --f-num: "Outfit", "Chiron GoRound TC", sans-serif;
+  background: var(--bg); color: var(--ink); font-family: var(--f-cjk)
+}
+.sa .slide-in { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); align-items: start }
+.sa .head { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px }
+.sa .pgno { font-family: var(--f-num); font-weight: 700; font-size: 18px; color: var(--muted) }
+.sa h2 { margin: 0; font-size: clamp(30px, 5vw, 52px); font-weight: 800; line-height: 1.15; text-wrap: balance; flex-basis: 100% }
+.sa .stage { background: var(--panel); border-radius: 28px; padding: 14px; box-shadow: 0 10px 30px rgba(20, 60, 80, .10); min-width: 0 }
+.sa .desk { display: grid; gap: 14px; min-width: 0 }
+.sa .tile { background: var(--panel); border-radius: 20px; padding: 16px 18px; min-width: 0 }
+.sa .clock { font-family: var(--f-num); font-weight: 700; font-size: clamp(40px, 6vw, 60px); line-height: 1; font-variant-numeric: tabular-nums }
+.sa .clock-l { font-size: 15px; color: var(--muted) }
+.sa .say { font-size: clamp(20px, 2.4vw, 26px); font-weight: 600; line-height: 1.45; margin: 0 }
+.sa .tag { display: inline-flex; align-items: center; gap: 6px; font-weight: 800; font-size: 15px; padding: 2px 12px; border-radius: 999px; color: #fff; white-space: nowrap }
+.sa .tag.exp { background: var(--exp) } .sa .tag.mod { background: var(--mod) } .sa .tag.sim { background: var(--sim) } .sa .tag.der { background: var(--der) }
+.sa .btn { background: var(--act); color: var(--act-ink); border: 0; font-weight: 800; font-size: 18px; border-radius: 14px }
+.sa .btn.ghost { background: transparent; color: var(--act); border: 2px solid var(--act) }
+.sa .row { display: flex; flex-wrap: wrap; gap: 10px }
+.sa .legend { display: grid; gap: 6px; font-size: 16px }
+.sa .legend i { display: inline-block; width: 26px; height: 14px; border-radius: 7px; vertical-align: middle; margin-right: 8px; border: 1px solid rgba(0,0,0,.25) }
+.sa .fine { font-size: 15px; color: var(--muted); margin: 0 }
+.sa .opts .btn { text-align: left; background: #f0f6f8; color: var(--ink); border: 2px solid var(--line) }
+.sa .opts .btn.chosen { border-color: var(--act); background: #dff1f2 }
+.sa details.src { background: var(--panel); border-radius: 16px; padding: 12px 16px; grid-column: 1 / -1 }
+.sa .text { grid-column: 1 / -1; display: grid; gap: 10px }
+.sa .text p { margin: 0; font-size: 19px; max-width: 75ch }
+@media (max-width: 760px) { .sa .slide-in { grid-template-columns: 1fr } .sa .stage { border-radius: 20px; padding: 8px } }
+
+/* ========== B：交通觀測室 ========== */
+/* 版面：監控室儀表板，上方一條即時讀數，下面兩塊大儀表（環道、時空圖），文字縮在側欄 */
+.sb {
+  --bg: #08131f; --panel: #0e1f31; --panel2: #12283f; --ink: #dbe8f4; --muted: #8aa1b8; --line: #1f3b57; --act: #e6eef6; --act-ink: #08131f;
+  --road: #16324d; --road-tick: #2c5276;
+  --exp: #4fd18b; --mod: #c39bff; --sim: #e6eef6; --der: #ffc46b;
+  --f-cjk: "Chiron Hei HK", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif; --f-mono: "IBM Plex Mono", ui-monospace, monospace;
+  background: var(--bg); color: var(--ink); font-family: var(--f-cjk)
+}
+.sb .slide { border-top: 1px solid var(--line) }
+.sb .slide-in { grid-template-columns: minmax(0, 1fr) minmax(0, 340px) }
+.sb .bar { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: baseline; font-family: var(--f-mono); color: var(--muted); font-size: 14px; letter-spacing: .06em }
+.sb .bar b { color: var(--ink); font-weight: 600 }
+.sb h2 { grid-column: 1 / -1; margin: 0; font-size: clamp(28px, 4.4vw, 46px); font-weight: 800; line-height: 1.2; text-wrap: balance }
+.sb .stage { background: radial-gradient(circle at 50% 50%, #10263c 0%, var(--panel) 70%); border: 1px solid var(--line); border-radius: 6px; padding: 10px; min-width: 0; position: relative }
+.sb .stage .corner { position: absolute; top: 10px; left: 12px; font-family: var(--f-mono); font-size: 13px; color: var(--muted); letter-spacing: .08em }
+.sb .side { display: grid; gap: 12px; align-content: start; min-width: 0 }
+.sb .tile { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; min-width: 0 }
+.sb .clock { font-family: var(--f-mono); font-weight: 600; font-size: clamp(38px, 5vw, 54px); line-height: 1; font-variant-numeric: tabular-nums; color: #ffffff }
+.sb .clock-l { font-family: var(--f-mono); font-size: 13px; color: var(--muted); letter-spacing: .06em }
+.sb .say { font-size: 21px; font-weight: 600; line-height: 1.45; margin: 0 }
+.sb .tag { display: inline-flex; align-items: center; gap: 6px; font-family: var(--f-mono); font-weight: 600; font-size: 13px; letter-spacing: .04em; padding: 2px 10px; border: 1px solid currentColor; border-radius: 3px; white-space: nowrap }
+.sb .tag.exp { color: var(--exp) } .sb .tag.mod { color: var(--mod) } .sb .tag.sim { color: var(--sim) } .sb .tag.der { color: var(--der) }
+.sb .tag::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor }
+.sb .btn { background: var(--act); color: var(--act-ink); border: 0; font-weight: 700; font-size: 17px; border-radius: 4px }
+.sb .btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--muted) }
+.sb .row { display: flex; flex-wrap: wrap; gap: 8px }
+.sb .legend { display: grid; gap: 6px; font-size: 15px }
+.sb .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: middle; margin-right: 8px; box-shadow: 0 0 8px currentColor }
+.sb .fine { font-size: 14px; color: var(--muted); margin: 0 }
+.sb .opts .btn { text-align: left; background: var(--panel2); color: var(--ink); border: 1px solid var(--line) }
+.sb .opts .btn.chosen { border-color: #ffffff }
+.sb details.src { grid-column: 1 / -1; border: 1px dashed var(--line); border-radius: 6px; padding: 10px 14px; font-size: 15px }
+.sb .text p { margin: 0; font-size: 18px }
+.sb .text { display: grid; gap: 8px }
+@media (max-width: 860px) { .sb .slide-in { grid-template-columns: 1fr } }
+
+/* ========== C：現代資訊圖鑑 ========== */
+/* 版面：12欄網格的圖鑑頁，超大標題壓在左上，圖表佔大面積；顏色只用來表示車速，證據種類用圖樣區分 */
+.sc {
+  --bg: #fbfbfa; --ink: #111111; --muted: #4a4a4a; --line: #111111; --soft: #ececea;
+  --act: #111111; --act-ink: #fbfbfa;
+  --f-cjk: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif; --f-num: "Unbounded", "Noto Sans TC", sans-serif;
+  background: var(--bg); color: var(--ink); font-family: var(--f-cjk)
+}
+.sc .slide { border-bottom: 6px solid var(--ink) }
+.sc .slide-in { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px 22px }
+.sc .pgno { grid-column: span 12; font-family: var(--f-num); font-weight: 800; font-size: 15px; letter-spacing: .1em; display: flex; justify-content: space-between; border-bottom: 2px solid var(--ink); padding-bottom: 6px }
+.sc h2 { grid-column: span 12; margin: 0; font-size: clamp(34px, 6.4vw, 76px); font-weight: 900; line-height: 1.05; letter-spacing: -.01em; text-wrap: balance }
+.sc .stage { grid-column: span 7; min-width: 0 }
+.sc .side { grid-column: span 5; display: grid; gap: 16px; align-content: start; min-width: 0 }
+.sc .big { font-family: var(--f-num); font-weight: 800; font-size: clamp(44px, 7vw, 84px); line-height: .95; font-variant-numeric: tabular-nums }
+.sc .big-l { font-size: 16px; font-weight: 700; border-top: 2px solid var(--ink); padding-top: 6px; margin-top: 6px }
+.sc .say { font-size: clamp(20px, 2.3vw, 26px); font-weight: 700; line-height: 1.4; margin: 0 }
+.sc .tag { display: inline-flex; align-items: center; font-weight: 900; font-size: 15px; padding: 1px 10px; border: 2px solid var(--ink); white-space: nowrap }
+.sc .tag.exp { background: var(--ink); color: var(--bg) }
+.sc .tag.mod { background: var(--bg); color: var(--ink) }
+.sc .tag.sim { background: repeating-linear-gradient(135deg, var(--soft) 0 4px, var(--bg) 4px 8px); color: var(--ink) }
+.sc .tag.der { border-style: dashed }
+.sc .btn { background: var(--act); color: var(--act-ink); border: 2px solid var(--ink); font-weight: 900; font-size: 18px; border-radius: 0 }
+.sc .btn.ghost { background: var(--bg); color: var(--ink) }
+.sc .row { display: flex; flex-wrap: wrap; gap: 10px }
+.sc .legend { display: grid; gap: 4px; font-size: 16px; font-weight: 700 }
+.sc .legend i { display: inline-block; width: 36px; height: 12px; vertical-align: middle; margin-right: 10px }
+.sc .fine { font-size: 15px; color: var(--muted); margin: 0 }
+.sc .opts .btn { text-align: left; background: var(--bg); color: var(--ink) }
+.sc .opts .btn.chosen { background: var(--ink); color: var(--bg) }
+.sc details.src { grid-column: span 12; border-top: 2px solid var(--ink); padding-top: 10px }
+.sc .text { grid-column: span 12; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px 28px }
+.sc .text p { margin: 0; font-size: 18px; border-left: 6px solid var(--ink); padding-left: 12px }
+@media (max-width: 860px) { .sc .stage, .sc .side { grid-column: span 12 } }
+</style>
+
+<header class="chrome">
+  <p class="kicker">節點7｜視覺風格樣本（還沒選定）</p>
+  <h1>同一段內容，三種視覺語言</h1>
+  <p class="note">三個分頁都放第2頁的22台車環道和第3頁的時空圖，文字和資料完全一樣，只有色彩、字體、排版、車子和控制元件不同。車子的位置來自Python參考模型事先算好的資料（點擊後0到400模型時間），不是正式的瀏覽器模擬。</p>
+  <div class="tabs" role="tablist" aria-label="風格">
+    <button class="tab" role="tab" id="tab-a" data-style="a" aria-selected="true"><b>A　互動科學館</b><span>明亮、圓潤、像展覽的展板</span></button>
+    <button class="tab" role="tab" id="tab-b" data-style="b" aria-selected="false"><b>B　交通觀測室</b><span>深色儀表板，車流和時空圖像監控畫面</span></button>
+    <button class="tab" role="tab" id="tab-c" data-style="c" aria-selected="false"><b>C　現代資訊圖鑑</b><span>網格、大字、顏色只表示車速</span></button>
+  </div>
+</header>
+<main id="main"></main>
+
+<script src="sample-data.js"></script>
+<script>
+(() => {
+  const S = window.SAMPLE;
+  const N = S.N, L = S.L, B = L / N, VB = S.vb, EV = S.every, FR = S.d.length, SMAX = (FR - 1) * EV;
+  const RATE = 6;            // 播放速度：每秒6個模型時間（逐頁稿第1、2頁的顯示設定）
+  const TS_RATE = 16;        // 時空圖逐步畫一台車：每秒16個模型時間
+  // 時空圖畫的時間範圍（顯示設定）：塞車團開始被追蹤（至少3台相鄰的車速度低於0.1）之前50開始，畫110模型時間。
+  // 樣本第一版畫了點擊後0～400，每台車繞了9圈，線幾乎是水平的，看不出方向，所以縮短。
+  const TS_S0 = Math.max(0, Math.round((S.track[0][0] - 50) / EV) * EV), TS_S1 = Math.min(SMAX, TS_S0 + 110);
+  // 先畫的那一台：塞車團開始被追蹤的那一刻，速度最低的車（資料裡的編號，點第j台時要轉j格）
+  const HL = (() => { const k = Math.round(S.track[0][0] / EV); let m = 0; for (let n = 1; n < N; n++) if (S.v[k][n] < S.v[k][m]) m = n; return m; })();
+  const K0 = Math.round(TS_S0 / EV), K1 = Math.round(TS_S1 / EV);
+  const JAM_V = 0.1;         // 「幾乎停住」：model/CRITERIA.md的門檻
+
+  // ---------- 三種風格的設定：顏色的意思三套都一樣，只換色票 ----------
+  const STYLES = {
+    a: { speed: ["#e0452b", "#c3ccd4", "#2563d9"], ink: "#14232f", muted: "#4f6372", grid: "#dfe8ee", tsBg: "#ffffff", jamArrow: "#e0452b", car: "pill", road: "#dbe5ec", roadMid: "#ffffff", label: "#14232f", font: '"Chiron GoRound TC","Noto Sans TC",sans-serif', num: '"Outfit","Chiron GoRound TC",sans-serif' },
+    b: { speed: ["#ff5d73", "#6f839a", "#38bdf8"], ink: "#dbe8f4", muted: "#8aa1b8", grid: "#173049", tsBg: "#0b1a2a", jamArrow: "#ff5d73", car: "dot", road: "#16324d", roadMid: "#2c5276", label: "#ffffff", font: '"Chiron Hei HK","Noto Sans TC",sans-serif', num: '"IBM Plex Mono",monospace' },
+    c: { speed: ["#e8412c", "#bdbdbb", "#1f4fe0"], ink: "#111111", muted: "#4a4a4a", grid: "#e2e2df", tsBg: "#fbfbfa", jamArrow: "#e8412c", car: "bar", road: "#111111", roadMid: "#111111", label: "#111111", font: '"Noto Sans TC",sans-serif', num: '"Unbounded","Noto Sans TC",sans-serif' }
+  };
+
+  // ---------- 內容：三種風格共用同一份文字（取自pipeline/pages/p02.md、p03.md） ----------
+  const SRC2 = [["sim", "ours-model-click-brake"], ["mod", "bando1995-ovm-equation"], ["mod", "bando1995-velocity-function"], ["mod", "bando1995-spontaneous-jam"], ["exp", "sugiyama2008-jam-emerges"]];
+  const SRC3 = [["exp", "sugiyama2008-setup"], ["exp", "sugiyama2008-backward-wave"], ["exp", "tadaki2013-density-dependence"], ["mod", "bando1995-spontaneous-jam"], ["sim", "ours-model-wave-direction"]];
+  const TAGNAME = { exp: "實驗", mod: "模型", sim: "我們的模擬", der: "我們的推導" };
+  const tag = k => `<span class="tag ${k}">${TAGNAME[k]}</span>`;
+  const srcBox = list => `<details class="src"><summary>出處（${list.length}張證據卡）</summary><ul>${list.map(([k, id]) => `<li>${tag(k)}<code>${id}</code></li>`).join("")}</ul><p class="fine">檢查狀態：這是風格樣本，還沒接上檢查報告，所以這裡不顯示任何檢查結果。正式版由建置程式從slide-map、證據卡和runs/的報告產生。</p></details>`;
+  const legend = st => `<div class="legend" aria-label="顏色的意思">
+      <div><i style="background:${st.speed[0]};color:${st.speed[0]}"></i>幾乎停住（車速低於0.1）</div>
+      <div><i style="background:${st.speed[1]};color:${st.speed[1]}"></i>均勻車流的速度</div>
+      <div><i style="background:${st.speed[2]};color:${st.speed[2]}"></i>比均勻車流快</div></div>`;
+  const TIME_NOTE = "動畫已加速。模型時間沒有單位，不是秒。";
+  const P2_TEXT = [`${tag("sim")} 在這組條件下，輕踩煞車造成的小擾動逐漸放大，最後形成塞車。這是這組模擬裡的事，條件不同時，同樣的煞車不一定會塞。`,
+                   `${tag("exp")} 真實實驗沒有說是誰踩了煞車，它看到的是車距的小波動自然出現、慢慢變大。`];
+  const P3_ONE = "每一條線是一台車。往右下斜是在往前開；幾乎直直往下，是幾乎停住了。";
+  const P3_ALL = "塞住的地方連成一條帶子。這條帶子往哪邊移？";
+  const P3_REVEAL = [`${tag("sim")} 帶子往<strong>左</strong>下斜，跟車子前進的方向相反。車子一台一台從後面開進去、從前面開出來，塞住的位置卻一直往後退。在我們的參考測試裡，車的平均速度是+0.9632，塞車團是−0.1505（沒有單位，不能換成km/h）。`,
+                     `${tag("exp")} 2008年那個230公尺、22台車的真實環道實驗裡，塞住的那一團車以大約20 km/h往後移。`];
+  const OPTS = [["right", "往右，跟車子同方向"], ["left", "往左，跟車子反方向"], ["still", "不動"]];
+  const optBtns = () => `<div class="opts" data-opts>${OPTS.map(([k, t]) => `<button class="btn" data-opt="${k}">${t}</button>`).join("")}</div>`;
+
+  const ringSvg = '<svg class="ring-svg" data-ring viewBox="0 0 100 100" role="img" aria-label="22台車的環狀道路。點一台車讓它輕踩一下煞車"></svg>';
+  const tsBox = '<div class="ts-wrap"><canvas class="ts-canvas" data-ts aria-label="時空圖：橫軸是位置，縱軸是時間，時間往下增加"></canvas></div>';
+
+  const TPL = {
+    a: st => `
+<section class="slide"><div class="slide-in">
+  <div class="head"><span class="pgno">2 / 10</span>${tag("sim")}<h2>輕踩一下煞車，會怎樣？</h2></div>
+  <div class="stage">${ringSvg}</div>
+  <div class="desk">
+    <div class="tile"><p class="say" data-say>點任何一台車，讓它輕輕踩一下煞車。</p></div>
+    <div class="tile"><div class="clock-l">模型時間 t</div><div class="clock" data-clock>0.0</div><p class="fine">${TIME_NOTE}</p></div>
+    <div class="row"><button class="btn" data-act="pause">暫停</button><button class="btn ghost" data-act="reset">重來</button></div>
+    <div class="tile">${legend(st)}</div>
+  </div>
+  <div class="text">${P2_TEXT.map(p => `<p>${p}</p>`).join("")}</div>
+  ${srcBox(SRC2)}
+</div></section>
+<section class="slide"><div class="slide-in">
+  <div class="head"><span class="pgno">3 / 10</span>${tag("sim")}${tag("exp")}<h2>車往前開，塞車卻往後跑</h2></div>
+  <div class="stage">${tsBox}</div>
+  <div class="desk">
+    <div class="tile"><p class="say" data-ts-say>${P3_ONE}</p><p class="fine" data-auto></p></div>
+    <div class="row"><button class="btn" data-act="ts-one">畫一台車的軌跡</button><button class="btn ghost" data-act="ts-all" disabled>疊上其他車</button></div>
+    <div class="tile hide" data-ask><p class="say">${P3_ALL}</p>${optBtns()}</div>
+    <div class="tile hide" data-reveal>${P3_REVEAL.map(p => `<p class="say" style="font-size:19px">${p}</p>`).join("")}</div>
+    <div class="tile">${legend(st)}</div>
+  </div>
+  ${srcBox(SRC3)}
+</div></section>`,
+
+    b: st => `
+<section class="slide"><div class="slide-in">
+  <div class="bar"><span>PAGE <b>02</b></span><span>N <b>22</b></span><span>L <b>44</b></span><span>a <b>1</b></span><span>BRAKE <b>β 0.25 · τ 0.5</b></span>${tag("sim")}</div>
+  <h2>輕踩一下煞車，會怎樣？</h2>
+  <div class="stage"><span class="corner">RING VIEW · 環道</span>${ringSvg}</div>
+  <div class="side">
+    <div class="tile"><div class="clock-l">MODEL TIME · 模型時間 t</div><div class="clock" data-clock>0.0</div><p class="fine">${TIME_NOTE}</p></div>
+    <div class="tile"><p class="say" data-say>點任何一台車，讓它輕輕踩一下煞車。</p></div>
+    <div class="row"><button class="btn" data-act="pause">暫停</button><button class="btn ghost" data-act="reset">重來</button></div>
+    <div class="tile">${legend(st)}</div>
+    <div class="text">${P2_TEXT.map(p => `<p>${p}</p>`).join("")}</div>
+  </div>
+  ${srcBox(SRC2)}
+</div></section>
+<section class="slide"><div class="slide-in">
+  <div class="bar"><span>PAGE <b>03</b></span><span>X 位置 <b>0–44</b></span><span>Y 時間 <b>往下增加</b></span><span>取樣 <b>0.5</b></span>${tag("sim")}${tag("exp")}</div>
+  <h2>車往前開，塞車卻往後跑</h2>
+  <div class="stage"><span class="corner">TIME–SPACE · 時空圖</span>${tsBox}</div>
+  <div class="side">
+    <div class="tile"><p class="say" data-ts-say>${P3_ONE}</p><p class="fine" data-auto></p></div>
+    <div class="row"><button class="btn" data-act="ts-one">畫一台車的軌跡</button><button class="btn ghost" data-act="ts-all" disabled>疊上其他車</button></div>
+    <div class="tile hide" data-ask><p class="say">${P3_ALL}</p>${optBtns()}</div>
+    <div class="tile hide text" data-reveal>${P3_REVEAL.map(p => `<p>${p}</p>`).join("")}</div>
+    <div class="tile">${legend(st)}</div>
+  </div>
+  ${srcBox(SRC3)}
+</div></section>`,
+
+    c: st => `
+<section class="slide"><div class="slide-in">
+  <div class="pgno"><span>02 — 點一下</span>${tag("sim")}</div>
+  <h2>輕踩一下煞車，<br>會怎樣？</h2>
+  <div class="stage">${ringSvg}</div>
+  <div class="side">
+    <p class="say" data-say>點任何一台車，讓它輕輕踩一下煞車。</p>
+    <div><div class="big" data-clock>0.0</div><div class="big-l">模型時間 t　<span class="fine">${TIME_NOTE}</span></div></div>
+    <div class="row"><button class="btn" data-act="pause">暫停</button><button class="btn ghost" data-act="reset">重來</button></div>
+    ${legend(st)}
+    <div><div class="big">89.3</div><div class="big-l">${tag("sim")} 從點擊起算，經過約89.3個模型時間，有車幾乎停住（參考測試）</div></div>
+  </div>
+  <div class="text">${P2_TEXT.map(p => `<p>${p}</p>`).join("")}</div>
+  ${srcBox(SRC2)}
+</div></section>
+<section class="slide"><div class="slide-in">
+  <div class="pgno"><span>03 — 方向</span><span>${tag("sim")} ${tag("exp")}</span></div>
+  <h2>車往前開，<br>塞車卻往後跑</h2>
+  <div class="stage">${tsBox}</div>
+  <div class="side">
+    <p class="say" data-ts-say>${P3_ONE}</p><p class="fine" data-auto></p>
+    <div class="row"><button class="btn" data-act="ts-one">畫一台車的軌跡</button><button class="btn ghost" data-act="ts-all" disabled>疊上其他車</button></div>
+    <div class="hide" data-ask><p class="say">${P3_ALL}</p>${optBtns()}</div>
+    <div class="hide" data-reveal style="display:grid;gap:14px">
+      <div style="display:flex;gap:18px;flex-wrap:wrap"><div><div class="big" style="color:${st.speed[2]}">+0.9632</div><div class="big-l">車的平均速度</div></div><div><div class="big" style="color:${st.speed[0]}">−0.1505</div><div class="big-l">塞車團的速度</div></div></div>
+      ${P3_REVEAL.map(p => `<p class="say" style="font-size:18px;font-weight:500">${p}</p>`).join("")}
+    </div>
+    ${legend(st)}
+  </div>
+  ${srcBox(SRC3)}
+</div></section>`
+  };
+
+  // ---------- 狀態 ----------
+  const st0 = () => ({ t: 0, click: null, s: 0, playing: true, done: false, auto: false });
+  let state = st0(), styleKey = "a", root = null, raf = 0, last = 0;
+  const trails = Array.from({ length: N }, () => []);
+  let ts = { mode: "idle", prog: 0, answered: false };
+
+  // ---------- 資料：均勻車流對每台車都一樣，所以點第j台、在t_c點，就是把資料轉j格、平移V(b)·t_c ----------
+  function car(n) {
+    if (!state.click) return { x: n * B + VB * state.t, v: VB };
+    const { j, tc } = state.click, m = (n - j + N) % N;
+    const q = Math.min(state.s / EV, FR - 1), i = Math.floor(q), f = q - i, i2 = Math.min(i + 1, FR - 1);
+    const d = S.d[i][m] * (1 - f) + S.d[i2][m] * f, v = S.v[i][m] * (1 - f) + S.v[i2][m] * f;
+    return { x: n * B + VB * (tc + state.s) + d, v };
+  }
+  const frameCar = (k, n) => { const { j, tc } = state.click, m = (n - j + N) % N; return { x: n * B + VB * (tc + k * EV) + S.d[k][m], v: S.v[k][m] }; };
+  const now = () => state.click ? state.click.tc + state.s : state.t;
+
+  // ---------- 顏色：三段，幾乎停住→均勻車流→比較快 ----------
+  const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const mix = (a, b, f) => { const A = hex(a), Bc = hex(b); return `rgb(${A.map((x, i) => Math.round(x + (Bc[i] - x) * f)).join(",")})`; };
+  function speedColor(v) {
+    const sp = STYLES[styleKey].speed;
+    if (v <= JAM_V) return sp[0];
+    if (v <= VB) return mix(sp[0], sp[1], Math.pow((v - JAM_V) / (VB - JAM_V), 0.7));
+    return mix(sp[1], sp[2], Math.min(1, (v - VB) / 0.8));
+  }
+
+  // ---------- 環道（SVG） ----------
+  const NS = "http://www.w3.org/2000/svg";
+  const R = 38, CX = 50, CY = 50;
+  const el = (n, a) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); return e; };
+  let ringEls = null;
+  function buildRing(svg) {
+    const st = STYLES[styleKey];
+    svg.innerHTML = "";
+    if (st.car === "dot") {
+      svg.appendChild(el("circle", { cx: CX, cy: CY, r: R, fill: "none", stroke: st.road, "stroke-width": 7 }));
+      for (let i = 0; i < 44; i++) { const a = i / 44 * 2 * Math.PI, r1 = R + 4.6, r2 = R + (i % 11 === 0 ? 7 : 5.6);
+        svg.appendChild(el("line", { x1: CX + r1 * Math.sin(a), y1: CY - r1 * Math.cos(a), x2: CX + r2 * Math.sin(a), y2: CY - r2 * Math.cos(a), stroke: st.roadMid, "stroke-width": i % 11 === 0 ? .5 : .3 })); }
+      const f = el("filter", { id: "glow", x: "-50%", y: "-50%", width: "200%", height: "200%" }); f.appendChild(el("feGaussianBlur", { stdDeviation: .7 }));
+      const defs = el("defs", {}); defs.appendChild(f); svg.appendChild(defs);
+    } else if (st.car === "bar") {
+      svg.appendChild(el("circle", { cx: CX, cy: CY, r: R + 3.6, fill: "none", stroke: st.road, "stroke-width": .9 }));
+      svg.appendChild(el("circle", { cx: CX, cy: CY, r: R - 3.6, fill: "none", stroke: st.road, "stroke-width": .9 }));
+    } else {
+      svg.appendChild(el("circle", { cx: CX, cy: CY, r: R, fill: "none", stroke: st.road, "stroke-width": 9 }));
+      svg.appendChild(el("circle", { cx: CX, cy: CY, r: R, fill: "none", stroke: st.roadMid, "stroke-width": .5, "stroke-dasharray": "2 2" }));
+    }
+    // 前進方向
+    const ar = el("g", { "aria-hidden": "true" });
+    const a0 = -0.42, a1 = -0.18, rr = R - (st.car === "dot" ? 8 : 9);
+    ar.appendChild(el("path", { d: `M ${CX + rr * Math.sin(a0)} ${CY - rr * Math.cos(a0)} A ${rr} ${rr} 0 0 1 ${CX + rr * Math.sin(a1)} ${CY - rr * Math.cos(a1)}`, fill: "none", stroke: st.muted, "stroke-width": .7 }));
+    const tx = CX + rr * Math.sin(a1), ty = CY - rr * Math.cos(a1);
+    ar.appendChild(el("path", { d: `M ${tx} ${ty} l -2 -1.2 l .2 2.4 z`, fill: st.muted }));
+    const lab = el("text", { x: CX, y: CY - rr + 6, "text-anchor": "middle", "font-size": 3.4, fill: st.muted, "font-family": st.font }); lab.textContent = "車子前進的方向";
+    ar.appendChild(lab); svg.appendChild(ar);
+    const trailG = el("g", {}); svg.appendChild(trailG);
+    const cars = [];
+    for (let n = 0; n < N; n++) {
+      let shape;
+      if (st.car === "dot") shape = el("circle", { r: 1.25, filter: "url(#glow)" });
+      else if (st.car === "bar") shape = el("rect", { x: -0.55, y: -3.4, width: 1.1, height: 6.8 });
+      else shape = el("rect", { x: -0.9, y: -2.6, width: 1.8, height: 5.2, rx: .9, stroke: "#14232f", "stroke-width": .3 });
+      const g = el("g", {}); g.appendChild(shape); svg.appendChild(g); cars.push({ g, shape });
+    }
+    const halo = el("circle", { r: 4.4, fill: "none", stroke: st.label, "stroke-width": .5, "stroke-dasharray": st.car === "bar" ? "" : "1.2 .8", opacity: 0 });
+    svg.appendChild(halo);
+    const mkLabel = () => { const t = el("text", { "font-size": 3.6, "font-weight": 700, fill: st.label, "font-family": st.font, "text-anchor": "middle", opacity: 0 }); svg.appendChild(t); return t; };
+    ringEls = { svg, cars, halo, trailG, lab1: mkLabel(), lab2: mkLabel() };
+    ringEls.lab1.textContent = "你剛剛讓這台車慢了一下";
+    ringEls.lab2.textContent = "這裡幾乎停住了";
+    svg.onclick = ev => onRingClick(ev, svg);
+    svg.onkeydown = ev => { if ((ev.key === "Enter" || ev.key === " ") && !state.click) { ev.preventDefault(); doClick(0); } };
+    svg.setAttribute("tabindex", "0");
+  }
+  const polar = (x, r) => { const a = (((x % L) + L) % L) / L * 2 * Math.PI; return [CX + r * Math.sin(a), CY - r * Math.cos(a), a * 180 / Math.PI]; };
+  function onRingClick(ev, svg) {
+    if (state.click) return;
+    const p = svg.createSVGPoint(); p.x = ev.clientX; p.y = ev.clientY;
+    const q = p.matrixTransform(svg.getScreenCTM().inverse());
+    let ang = Math.atan2(q.x - CX, -(q.y - CY)); if (ang < 0) ang += 2 * Math.PI;
+    const xs = ang / (2 * Math.PI) * L;
+    let best = 0, bd = 1e9;
+    for (let n = 0; n < N; n++) { const x = ((car(n).x % L) + L) % L; let dd = Math.abs(x - xs); dd = Math.min(dd, L - dd); if (dd < bd) { bd = dd; best = n; } }
+    doClick(best);
+  }
+  function doClick(n, auto) { state.click = { j: n, tc: state.t }; state.s = 0; state.done = false; state.auto = !!auto; state.playing = true; ts = { mode: "idle", prog: 0, answered: false }; resetTsUI(); }
+
+  // 標籤放在環道內側，靠右邊的往內對齊、靠左邊的往外對齊，才不會壓到車
+  function placeLabel(t, x) {
+    const a = (((x % L) + L) % L) / L * 2 * Math.PI, s = Math.sin(a), r = R - 7.5;
+    t.setAttribute("x", CX + r * s); t.setAttribute("y", CY - r * Math.cos(a) + 1.2);
+    t.setAttribute("text-anchor", s > 0.45 ? "end" : s < -0.45 ? "start" : "middle");
+  }
+  function drawRing() {
+    if (!ringEls) return;
+    const st = STYLES[styleKey];
+    let minV = 1e9, slow = 0;
+    for (let n = 0; n < N; n++) {
+      const c = car(n), [px, py, deg] = polar(c.x, R);
+      ringEls.cars[n].g.setAttribute("transform", `translate(${px} ${py}) rotate(${deg})`);
+      ringEls.cars[n].shape.setAttribute("fill", speedColor(c.v));
+      if (c.v < minV) { minV = c.v; slow = n; }
+      if (st.car === "dot") { const tr = trails[n]; tr.push([px, py, c.v]); if (tr.length > 7) tr.shift(); }
+    }
+    if (st.car === "dot") {
+      ringEls.trailG.innerHTML = "";
+      trails.forEach(tr => tr.forEach(([x, y, v], i) => { if (i < tr.length - 1) ringEls.trailG.appendChild(el("circle", { cx: x, cy: y, r: .55, fill: speedColor(v), opacity: (i + 1) / tr.length * .5 })); }));
+    }
+    const say = root.querySelector("[data-say]");
+    if (state.click) {
+      const c0 = car(state.click.j), [hx, hy] = polar(c0.x, R);
+      placeLabel(ringEls.lab1, c0.x);
+      ringEls.halo.setAttribute("cx", hx); ringEls.halo.setAttribute("cy", hy); ringEls.halo.setAttribute("opacity", state.s < 30 ? 1 : 0);
+      ringEls.lab1.setAttribute("opacity", state.s < 30 ? 1 : 0);
+      const jam = minV < JAM_V;
+      if (jam) placeLabel(ringEls.lab2, car(slow).x);
+      ringEls.lab2.setAttribute("opacity", jam ? 1 : 0);
+      if (say) say.textContent = state.done ? "樣本資料到此為止（點擊後400模型時間）。按「重來」可以點別台再試。" :
+        jam ? "你只是讓一台車慢了一下，後面的車卻一台接一台慢下來，最後有一段幾乎停住。" :
+        state.s < 0.5 ? "煞車中……" : "看後面的車。";
+    } else {
+      ringEls.halo.setAttribute("opacity", 0); ringEls.lab1.setAttribute("opacity", 0); ringEls.lab2.setAttribute("opacity", 0);
+      if (say) say.textContent = "點任何一台車，讓它輕輕踩一下煞車。";
+    }
+    root.querySelectorAll("[data-clock]").forEach(e => e.textContent = now().toFixed(1));
+  }
+
+  // ---------- 時空圖（canvas） ----------
+  function tsGeom(cv) {
+    const w = cv.clientWidth, h = Math.round(Math.min(w * (w < 600 ? 1.15 : 0.82), 760));
+    const dpr = window.devicePixelRatio || 1;
+    if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); cv.style.height = h + "px"; }
+    const pad = { l: w < 500 ? 46 : 64, r: 14, t: 72, b: 20 };
+    return { w, h, dpr, pad, W: w - pad.l - pad.r, H: h - pad.t - pad.b };
+  }
+  function drawTS() {
+    const cv = root && root.querySelector("[data-ts]"); if (!cv) return;
+    const st = STYLES[styleKey], g = tsGeom(cv), ctx = cv.getContext("2d");
+    ctx.setTransform(g.dpr, 0, 0, g.dpr, 0, 0);
+    ctx.fillStyle = st.tsBg; ctx.fillRect(0, 0, g.w, g.h);
+    const X = x => g.pad.l + ((((x % L) + L) % L) / L) * g.W, Y = s => g.pad.t + ((s - TS_S0) / (TS_S1 - TS_S0)) * g.H;
+    // 格線和軸
+    ctx.strokeStyle = st.grid; ctx.lineWidth = 1; ctx.font = `600 13px ${st.num}`; ctx.fillStyle = st.muted;
+    for (let x = 0; x <= 44; x += 11) { const px = g.pad.l + x / L * g.W; ctx.beginPath(); ctx.moveTo(px, g.pad.t); ctx.lineTo(px, g.pad.t + g.H); ctx.stroke(); ctx.textAlign = "center"; ctx.fillText(String(x), px, g.pad.t - 8); }
+    ctx.strokeStyle = st.muted; ctx.strokeRect(g.pad.l, g.pad.t, g.W, g.H);
+    const tc = state.click ? state.click.tc : 0;
+    for (let T = Math.ceil((tc + TS_S0) / 20) * 20; T <= tc + TS_S1; T += 20) { const py = Y(T - tc); ctx.beginPath(); ctx.moveTo(g.pad.l, py); ctx.lineTo(g.pad.l + g.W, py); ctx.stroke(); ctx.textAlign = "right"; ctx.fillText(String(T), g.pad.l - 6, py + 4); }
+    ctx.font = `600 13px ${st.font}`; ctx.textAlign = "left"; ctx.fillStyle = st.muted;
+    ctx.fillText("位置（0和44是同一點）", g.pad.l, 16);
+    ctx.save(); ctx.translate(14, g.pad.t + g.H / 2); ctx.rotate(-Math.PI / 2); ctx.textAlign = "center"; ctx.fillText("模型時間 t（往下增加）", 0, 0); ctx.restore();
+    // 車子前進方向
+    ctx.strokeStyle = st.ink; ctx.fillStyle = st.ink; ctx.lineWidth = 2; const ay = 40, ax0 = g.pad.l + g.W - 120, ax1 = g.pad.l + g.W - 8;
+    ctx.beginPath(); ctx.moveTo(ax0, ay); ctx.lineTo(ax1, ay); ctx.stroke(); ctx.beginPath(); ctx.moveTo(ax1, ay); ctx.lineTo(ax1 - 9, ay - 5); ctx.lineTo(ax1 - 9, ay + 5); ctx.fill();
+    ctx.font = `700 13px ${st.font}`; ctx.textAlign = "right"; ctx.fillText("車子前進的方向", ax0 - 6, ay + 4);
+    if (!state.click || ts.mode === "idle") {
+      ctx.font = `600 16px ${st.font}`; ctx.textAlign = "center"; ctx.fillStyle = st.muted;
+      ctx.fillText("按「畫一台車的軌跡」開始", g.pad.l + g.W / 2, g.pad.t + g.H / 2); return;
+    }
+    const hl = (HL + state.click.j) % N;
+    const line = (n, kEnd, width, colorBySpeed, alpha) => {
+      ctx.lineWidth = width; ctx.globalAlpha = alpha; ctx.lineCap = "round";
+      let prev = frameCar(K0, n);
+      for (let k = K0 + 1; k <= kEnd; k++) {
+        const c = frameCar(k, n), pa = ((prev.x % L) + L) % L, pb = ((c.x % L) + L) % L;
+        if (Math.abs(pb - pa) < L / 2) { ctx.strokeStyle = colorBySpeed ? speedColor(c.v) : st.muted; ctx.beginPath(); ctx.moveTo(X(prev.x), Y((k - 1) * EV)); ctx.lineTo(X(c.x), Y(k * EV)); ctx.stroke(); }
+        prev = c;
+      }
+      ctx.globalAlpha = 1;
+    };
+    const kAll = K1;
+    if (ts.mode !== "one") for (let n = 0; n < N; n++) if (n !== hl) line(n, kAll, styleKey === "b" ? 1.4 : 1.6, true, styleKey === "c" ? 1 : .9);
+    line(hl, ts.mode === "one" ? Math.min(kAll, Math.floor(ts.prog / EV)) : kAll, ts.mode === "one" ? 4.5 : 3.5, true, 1);
+    if (ts.mode === "one" || ts.mode === "all" || ts.mode === "reveal") {
+      // 標出那一台車
+      const kk = ts.mode === "one" ? Math.max(K0, Math.min(kAll, Math.floor(ts.prog / EV))) : K0 + 10;
+      const c = frameCar(kk, hl); ctx.fillStyle = st.ink; ctx.font = `700 13px ${st.font}`; ctx.textAlign = "left";
+      ctx.beginPath(); ctx.arc(X(c.x), Y(kk * EV), 5, 0, 2 * Math.PI); ctx.fill();
+      if (ts.mode === "one") ctx.fillText(`第${hl}台車`, Math.min(X(c.x) + 8, g.pad.l + g.W - 60), Y(kk * EV) + 4);
+    }
+    if (ts.mode === "reveal") {
+      // 塞車團的軌跡：用model/run_v2.py的track_wave從同一份資料算的
+      const off = state.click.j * B + VB * state.click.tc;
+      ctx.strokeStyle = st.jamArrow; ctx.lineWidth = 7; ctx.globalAlpha = .9; ctx.lineCap = "round";
+      let pv = null, lastPt = null, prevPt = null;
+      for (const [s, p] of S.track.filter(([s]) => s >= TS_S0 && s <= TS_S1)) { const x = p + off, px = X(x), py = Y(s);
+        if (pv !== null && Math.abs((((x % L) + L) % L) - (((pv % L) + L) % L)) < L / 2) { ctx.beginPath(); ctx.moveTo(lastPt[0], lastPt[1]); ctx.lineTo(px, py); ctx.stroke(); }
+        prevPt = lastPt; pv = x; lastPt = [px, py]; }
+      ctx.globalAlpha = 1;
+      if (lastPt && prevPt) { const ang = Math.atan2(lastPt[1] - prevPt[1], lastPt[0] - prevPt[0]); ctx.fillStyle = st.jamArrow; ctx.beginPath();
+        ctx.moveTo(lastPt[0] + 14 * Math.cos(ang), lastPt[1] + 14 * Math.sin(ang)); ctx.lineTo(lastPt[0] + 12 * Math.cos(ang + 2.4), lastPt[1] + 12 * Math.sin(ang + 2.4)); ctx.lineTo(lastPt[0] + 12 * Math.cos(ang - 2.4), lastPt[1] + 12 * Math.sin(ang - 2.4)); ctx.fill(); }
+      const inWin = S.track.filter(([s]) => s >= TS_S0 && s <= TS_S1), mid = inWin[Math.floor(inWin.length * .5)]; const mx = X(mid[1] + off), my = Y(mid[0]);
+      ctx.font = `800 16px ${st.font}`; ctx.textAlign = mx > g.pad.l + g.W / 2 ? "right" : "left";
+      const tx = mx > g.pad.l + g.W / 2 ? mx - 14 : mx + 14;
+      ctx.fillStyle = st.tsBg; const tw = ctx.measureText("塞車團往後移").width; ctx.fillRect(ctx.textAlign === "right" ? tx - tw - 4 : tx - 4, my - 17, tw + 8, 24);
+      ctx.fillStyle = st.jamArrow; ctx.fillText("塞車團往後移", tx, my);
+    }
+  }
+  function resetTsUI() {
+    if (!root) return;
+    const one = root.querySelector('[data-act="ts-one"]'), all = root.querySelector('[data-act="ts-all"]');
+    if (one) one.disabled = false; if (all) all.disabled = true;
+    root.querySelector("[data-ask]")?.classList.add("hide"); root.querySelector("[data-reveal]")?.classList.add("hide");
+    root.querySelectorAll("[data-opt]").forEach(b => { b.classList.remove("chosen"); b.disabled = false; });
+    const say = root.querySelector("[data-ts-say]"); if (say) say.textContent = P3_ONE;
+    const au = root.querySelector("[data-auto]"); if (au) au.textContent = "";
+  }
+
+  // ---------- 主迴圈 ----------
+  function tick(ts0) {
+    const dt = last ? Math.min(.1, (ts0 - last) / 1000) : 0; last = ts0;
+    if (state.playing) {
+      if (!state.click) state.t += RATE * dt;
+      else if (!state.done) { state.s += RATE * dt; if (state.s >= SMAX) { state.s = SMAX; state.done = true; } }
+    }
+    if (ts.mode === "one") { ts.prog += TS_RATE * dt; if (ts.prog >= TS_S1) { ts.prog = TS_S1; root.querySelector('[data-act="ts-all"]').disabled = false; } }
+    drawRing(); if (ts.mode === "one" || ts.dirty) { drawTS(); ts.dirty = false; }
+    raf = requestAnimationFrame(tick);
+  }
+
+  function mount(key) {
+    styleKey = key; cancelAnimationFrame(raf); last = 0;
+    state = st0(); ts = { mode: "idle", prog: 0, answered: false };   // 換風格就從頭開始，三種比較的是同一個起點
+    trails.forEach(t => t.length = 0);
+    const main = document.getElementById("main");
+    main.innerHTML = `<div class="s${key}">${TPL[key](STYLES[key])}</div>`;
+    root = main.firstElementChild;
+    buildRing(root.querySelector("[data-ring]"));
+    root.addEventListener("click", ev => {
+      const b = ev.target.closest("button"); if (!b) return;
+      const act = b.dataset.act, opt = b.dataset.opt;
+      if (act === "pause") { state.playing = !state.playing; b.textContent = state.playing ? "暫停" : "繼續"; }
+      if (act === "reset") { state = st0(); ts = { mode: "idle", prog: 0, answered: false, dirty: true }; resetTsUI(); root.querySelector('[data-act="pause"]').textContent = "暫停"; }
+      if (act === "ts-one") {
+        if (!state.click) { doClick(0, true); }
+        const au = root.querySelector("[data-auto]"); if (au && state.auto) au.textContent = "你在第2頁還沒點車，這次由我們替你點了一台車（第0台）。";
+        ts.mode = "one"; ts.prog = TS_S0; b.disabled = true; root.querySelector('[data-act="ts-all"]').disabled = true;
+        root.querySelector("[data-ts-say]").textContent = P3_ONE;
+      }
+      if (act === "ts-all") { ts.mode = "all"; ts.dirty = true; b.disabled = true; root.querySelector("[data-ask]").classList.remove("hide"); root.querySelector("[data-ts-say]").textContent = "現在22台車都畫上去了。"; }
+      if (opt) {
+        root.querySelectorAll("[data-opt]").forEach(x => { x.disabled = true; x.classList.toggle("chosen", x === b); });
+        const ok = opt === "left";
+        root.querySelector("[data-ts-say]").textContent = ok ? "對，往左。" : "再看一次：帶子往左下斜。";
+        ts.mode = "reveal"; ts.dirty = true; root.querySelector("[data-reveal]").classList.remove("hide");
+      }
+    });
+    document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", String(t.dataset.style === key)));
+    ts.dirty = true; drawTS();
+    raf = requestAnimationFrame(tick);
+  }
+
+  document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => { if (location.hash !== "#" + t.dataset.style) location.hash = t.dataset.style; else mount(t.dataset.style); }));
+  const fromHash = () => { const k = (location.hash || "#a").slice(1); mount(STYLES[k] ? k : "a"); };
+  window.addEventListener("hashchange", fromHash);
+  let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { ts.dirty = true; }, 120); });
+  fromHash();
+})();
+</script>
