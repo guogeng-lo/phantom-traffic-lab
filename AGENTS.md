@@ -154,6 +154,9 @@ python3 scripts/check_quotes.py          # 證據卡的英文引用要在raw/的
 python3 tests/test_check_wiki.py         # 故意弄壞資料，確認檢查程式擋得住
 python3 scripts/check_slide_map.py       # 節點5：每頁的核心主張跟證據卡的對應
 python3 tests/test_check_slide_map.py    # 故意弄壞slide-map，確認節點5的檢查擋得住
+python3 scripts/check_pages.py           # 節點6送審前：逐頁稿的段落、證據卡、數字、術語、標示
+python3 tests/test_check_pages.py        # 故意弄壞逐頁稿，確認檢查擋得住
+python3 tests/mutation_check_pages.py .  # 把check_pages.py的規則各拿掉一次，確認測試抓得到（跑完會還原）
 python3 audition/test_ovm.py             # 選題階段的模型測試，輸出應該跟audition/run2.log一樣
 ```
 
