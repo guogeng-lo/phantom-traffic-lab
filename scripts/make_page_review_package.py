@@ -3,6 +3,8 @@
 用法：
   python3 scripts/make_page_review_package.py                                   # 第1輪，輸出pipeline/review/n6-package-r1.md
   python3 scripts/make_page_review_package.py --round 2 --previous <上一輪審查原文>  # 第2輪以後，附上上一輪的審查意見
+  python3 scripts/make_page_review_package.py --round 4 --previous <上一輪審查原文> --limited --since <commit>
+      # 使用者授權的限定範圍複核：多放pipeline/review/n6-criteria-r4.md和<commit>之後逐頁稿的修改前後對照
 
 審查包放：判定標準（pipeline/review/n6-criteria.md原文）、逐頁稿的共同規則、十頁逐頁稿、
 逐頁稿用到的全部證據卡全文、術語表、slide-map。
@@ -61,6 +63,30 @@ FORMAT = """
 
 RECHECK_NOTE = """這是第{round}輪。上一輪的審查意見原文附在最後。寫逐頁稿的人逐條核對後改了一些地方。請確認上一輪的每一條有沒有改好，也檢查修改有沒有引入新的問題。"""
 
+LIMITED_NOTE = """這是第{round}輪，是使用者在第3輪不通過之後**授權的限定範圍複核**，不是重新開始。範圍和判定寫在下面的「第{round}輪的範圍和判定標準」（送審前commit）。上一輪的審查意見原文附在最後，這一輪的修改前後對照（git diff）也附在後面。
+
+請只做兩件事：
+1. 上一輪第一部分列的每一條，有沒有改好。
+2. 這些修改有沒有引入新的錯誤或誤導。沒有修改的文字不用重審；但如果你發現**修改直接造成**的新重大錯誤，一定要指出。"""
+
+LIMITED_FORMAT = """
+## 請照這個格式回覆
+
+第零部分，上一輪的問題逐條回覆：
+
+| 頁 | 上一輪的問題 | 改好了嗎（改好／部分改好／沒改好） | 說明 |
+
+第一部分，修改直接造成的新問題（沒有就寫「沒有」）：
+
+| 頁 | 段落 | 問題類型 | 嚴重程度（會誤導讀者／不精確／小問題） | 頁面原文（短句） | 證據卡怎麼說 | 建議怎麼改 |
+
+第二部分，你沒辦法確認的地方，列出來就好，不要猜。
+
+最後兩行寫：
+- 上一輪問題改好幾條、部分改好幾條、沒改好幾條；新問題幾條（其中會誤導讀者幾條）。
+- 照「第{round}輪的範圍和判定標準」，這一輪通過還是不通過。
+"""
+
 RECHECK_FORMAT = """另外，第零部分（放在最前面），上一輪的問題逐條回覆：
 
 | 頁 | 上一輪的問題 | 改好了嗎（改好／部分改好／沒改好） | 說明 |
@@ -97,7 +123,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--round", type=int, default=1)
     ap.add_argument("--previous")
+    ap.add_argument("--limited", action="store_true", help="使用者授權的限定範圍複核")
+    ap.add_argument("--since", help="--limited時：從這個commit之後的逐頁稿修改做前後對照")
     args = ap.parse_args()
+    if args.limited and not (args.since and args.previous):
+        sys.exit("--limited要同時給--since和--previous")
     if args.round > 1 and not args.previous:
         sys.exit("第2輪以後要用--previous附上上一輪的審查原文")
 
@@ -117,14 +147,29 @@ def main():
     commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True,
                             text=True, check=True).stdout.strip()
 
-    note = RECHECK_NOTE.replace("{round}", str(args.round)) if args.round > 1 else ""
+    if args.limited:
+        note = LIMITED_NOTE.replace("{round}", str(args.round))
+    else:
+        note = RECHECK_NOTE.replace("{round}", str(args.round)) if args.round > 1 else ""
     out = [HEAD.replace("{round}", str(args.round)).replace("{previous_note}", note)]
-    out.append(FORMAT.replace("{recheck_format}", RECHECK_FORMAT if args.round > 1 else ""))
-    out.append("\n## 請逐條回答\n\n逐頁稿的「要小心」裡，寫的人標了要在審查時確認的地方：\n")
-    out += to_confirm(pages) or ["（沒有）"]
+    if args.limited:
+        out.append(LIMITED_FORMAT.replace("{round}", str(args.round)))
+        scope = ROOT / "pipeline" / "review" / f"n6-criteria-r{args.round}.md"
+        out.append(f"\n## 第{args.round}輪的範圍和判定標準\n")
+        out.append(scope.read_text(encoding="utf-8").strip())
+        diff = subprocess.run(["git", "-c", "core.quotePath=false", "diff", "--no-color", args.since, "--", "pipeline/pages"],
+                              cwd=ROOT, capture_output=True, text=True, check=True).stdout
+        out.append(f"\n## 這一輪的修改前後對照（`git diff {args.since} -- pipeline/pages`）\n")
+        out.append("```diff\n" + diff.strip() + "\n```")
+    else:
+        out.append(FORMAT.replace("{recheck_format}", RECHECK_FORMAT if args.round > 1 else ""))
+        out.append("\n## 請逐條回答\n\n逐頁稿的「要小心」裡，寫的人標了要在審查時確認的地方：\n")
+        out += to_confirm(pages) or ["（沒有）"]
     out.append(f"\n## 這份審查包包含的檔案版本\n\n產生時的commit：`{commit}`（公開repo `guogeng-lo/phantom-traffic-lab`）\n")
     out += ["| 檔案 | SHA-256 |", "|---|---|"]
     files = [criteria, readme] + pages + cards + others
+    if args.limited:
+        files.insert(1, ROOT / "pipeline" / "review" / f"n6-criteria-r{args.round}.md")
     out += [f"| `{p.relative_to(ROOT).as_posix()}` | `{sha(p)}` |" for p in files]
     for title, group in (("判定標準", [criteria]), ("逐頁稿的共同規則", [readme]), ("逐頁稿", pages),
                          ("證據卡", cards), ("術語表和頁面對照表", others)):
