@@ -1,0 +1,23 @@
+$ node tests/visual_regression.js <tmp>/vr-base
+（commit e615728，2026-11-12T18:35:49Z）
+已截圖 desktop-p01.png
+已截圖 desktop-p02.png
+已截圖 desktop-p03.png
+已截圖 desktop-p04.png
+已截圖 desktop-p05.png
+已截圖 desktop-p06.png
+已截圖 desktop-p07.png
+已截圖 desktop-p08.png
+已截圖 desktop-p09.png
+已截圖 desktop-p10.png
+已截圖 m375-p01.png
+已截圖 m375-p02.png
+已截圖 m375-p03.png
+已截圖 m375-p04.png
+已截圖 m375-p05.png
+已截圖 m375-p06.png
+已截圖 m375-p07.png
+已截圖 m375-p08.png
+已截圖 m375-p09.png
+已截圖 m375-p10.png
+結束代碼：0

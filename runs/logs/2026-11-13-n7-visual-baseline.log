@@ -1,0 +1,4 @@
+$ python3 tests/compare_shots.py --update tests/visual-baseline <tmp>/vr-base
+（commit e615728，2026-11-12T18:36:55Z）
+已把20張截圖存成基準：tests/visual-baseline
+結束代碼：0
