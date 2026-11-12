@@ -1,0 +1,67 @@
+# 第1次正式執行的原始輸出。錯誤訊息裡的本機路徑已換成<repo>（個資掃描規則），其他沒改。
+[通過] J1 煞車步數 (t0=0, τ=0.5)：Python 0～10；JS 0～10
+[通過] J1 煞車步數 (t0=20, τ=0.5)：Python 400～410；JS 400～410
+[通過] J1 煞車步數 (t0=19.95, τ=0.5)：Python 399～409；JS 399～409
+[通過] J1 煞車步數 (t0=500, τ=0.5)：Python 10000～10010；JS 10000～10010
+[通過] J1 煞車步數 (t0=0.07, τ=0.5)：Python報錯；JS 也報錯
+[通過] J1 煞車步數 (t0=20, τ=0.33)：Python報錯；JS 也報錯
+[通過] J2 第2頁點擊 (t_c=0, 第0台)：取樣 801/801 個；位置最大差 0.00e+0，車速最大差 5.55e-17（容許1e−6）
+[通過] J3 塞車形成 (t_c=0, 第0台)：Python第1786步（89.30）；JS第1786步
+[通過] J10 物理檢查 J2 (t_c=0)：Python true；JS true
+[通過] J2 第2頁點擊 (t_c=20, 第0台)：取樣 801/801 個；位置最大差 0.00e+0，車速最大差 5.55e-17（容許1e−6）
+[通過] J3 塞車形成 (t_c=20, 第0台)：Python第1786步（89.30）；JS第1786步
+[通過] J10 物理檢查 J2 (t_c=20)：Python true；JS true
+[通過] J2 第2頁點擊 (t_c=123.45, 第7台)：取樣 801/801 個；位置最大差 0.00e+0，車速最大差 2.22e-16（容許1e−6）
+[通過] J3 塞車形成 (t_c=123.45, 第7台)：Python第1786步（89.30）；JS第1786步
+[通過] J10 物理檢查 J2 (t_c=123.45)：Python true；JS true
+[通過] J2 第2頁點擊 (t_c=500, 第21台)：取樣 801/801 個；位置最大差 0.00e+0，車速最大差 0.00e+0（容許1e−6）
+[通過] J3 塞車形成 (t_c=500, 第21台)：Python第1786步（89.30）；JS第1786步
+[通過] J10 物理檢查 J2 (t_c=500)：Python true；JS true
+[通過] J2 第2頁點擊 (t_c=3000, 第13台)：取樣 801/801 個；位置最大差 0.00e+0，車速最大差 1.11e-16（容許1e−6）
+[通過] J3 塞車形成 (t_c=3000, 第13台)：Python第1786步（89.30）；JS第1786步
+[通過] J10 物理檢查 J2 (t_c=3000)：Python true；JS true
+[通過] J4 第1頁 ε=0.01：塞車：Python第2385步（119.25），JS第2385步；t=150狀態最大差 0.00e+0
+[通過] J10 物理檢查 J4 ε=0.01：Python true；JS true
+[通過] J4 第1頁 ε=0.1：塞車：Python第1834步（91.70），JS第1834步；t=150狀態最大差 0.00e+0
+[通過] J10 物理檢查 J4 ε=0.1：Python true；JS true
+[通過] J4 第1頁 ε=0.2：塞車：Python第1737步（86.85），JS第1737步；t=150狀態最大差 0.00e+0
+[通過] J10 物理檢查 J4 ε=0.2：Python true；JS true
+[通過] J5 第4頁 a=1：四條線車速最大差 0.00e+0；擾動 點擊後5 Python 3.28e-2 JS 3.28e-2（相對差 0.00e+0），點擊後200 Python 9.25e-1 JS 9.25e-1（相對差 0.00e+0）；比值 28.21
+[通過] J10 物理檢查 J5 a=1：Python true；JS true
+[通過] J5 第4頁 a=2.5：四條線車速最大差 0.00e+0；擾動 點擊後5 Python 8.02e-3 JS 8.02e-3（相對差 0.00e+0），點擊後200 Python 2.40e-4 JS 2.40e-4（相對差 0.00e+0）；比值 0.03
+[通過] J10 物理檢查 J5 a=2.5：Python true；JS true
+[通過] J6 第5頁 a=1.0：塞車：Python第1786步，JS第1786步
+[通過] J10 物理檢查 J6 a=1：Python true；JS true
+[通過] J6 第5頁 a=1.9：點擊後300 Python 2.90e-3 JS 2.90e-3（相對差 0.00e+0）；點擊後1500 Python 9.25e-3 JS 9.25e-3（相對差 0.00e+0）
+[通過] J10 物理檢查 J6 a=1.9：Python true；JS true
+[通過] J6 第5頁 a=1.98：點擊後300 Python 1.56e-3 JS 1.56e-3（相對差 0.00e+0）；點擊後1500 Python 8.62e-4 JS 8.62e-4（相對差 0.00e+0）
+[通過] J10 物理檢查 J6 a=1.98：Python true；JS true
+[通過] J6 第5頁 a=2.2：點擊後300 Python 4.08e-4 JS 4.08e-4（相對差 0.00e+0）
+[通過] J10 物理檢查 J6 a=2.2：Python true；JS true
+[通過] J6 第5頁 a=2.5：點擊後300 Python 1.02e-4 JS 1.02e-4（相對差 0.00e+0）
+[通過] J10 物理檢查 J6 a=2.5：Python true；JS true
+[通過] J6 第5頁 a=3：點擊後300 Python 1.79e-5 JS 1.79e-5（相對差 0.00e+0）
+[通過] J10 物理檢查 J6 a=3：Python true；JS true
+[通過] J8 第3頁波速（M6v2）：追蹤 Python 212～620（817點），JS 212～620（817點）；波速 Python -0.150486 JS -0.150486（差 0.00e+0）；平均車速 Python 0.963159 JS 0.963159
+[通過] J10 物理檢查 J8：Python true；JS true
+[通過] J9 第8頁 R0：標準差 Python 0.792554 JS 0.792554；平均 0.965661／0.965661；最低 0.031746／0.031746；最小車距 0.324391／0.324391；最大差 4.33e-15；塞車比例 1／1；物理檢查 true／true
+[通過] J9 第8頁 R1：標準差 Python 0.000000 JS 0.000000；平均 0.763182／0.763182；最低 0.763182／0.763182；最小車距 0.325477／0.325477；最大差 1.69e-13；塞車比例 0／0；物理檢查 true／true
+[通過] J9 第8頁 R2：標準差 Python 0.393669 JS 0.393669；平均 0.971066／0.971066；最低 0.249696／0.249696；最小車距 -14.506475／-14.506475；最大差 9.99e-16；塞車比例 0／0；物理檢查 false／false
+[通過] J9 第8頁 R3：標準差 Python 0.334195 JS 0.334195；平均 0.886781／0.886781；最低 0.216254／0.216254；最小車距 0.325956／0.325956；最大差 1.33e-15；塞車比例 0／0；物理檢查 true／true
+[通過] J9 第8頁 U0.9：標準差 Python 0.000000 JS 0.000000；平均 0.867625／0.867625；最低 0.867625／0.867625；最小車距 0.325561／0.325561；最大差 6.97e-14；塞車比例 0／0；物理檢查 true／true
+<repo>/tests/test_js_parity.js:106
+    const P = REF.J9[key], J = O.smoothingRun(mk[key](), 0.1);
+                                                     ^
+
+TypeError: mk[key] is not a function
+    at Object.<anonymous> (<repo>/tests/test_js_parity.js:106:54)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49
+
+Node.js v22.23.4
+exit=1
