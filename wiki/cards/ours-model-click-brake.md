@@ -3,7 +3,7 @@ id: ours-model-click-brake
 type: our_simulation
 source: runs/2026-11-12-model-v3-r1.md
 locator: 測試M5a v2、M5b（model/run_v2.py、model/run_core.py）
-conditions: model/ovm.py第3版（煞車用整數步數判定）；N=22、L=44、a=1；點擊前用解析解；煞車β=0.25、持續τ=0.5（剛好10步）
+conditions: model/ovm.py第3版（煞車用整數步數判定）；N=22、L=44、a=1；點擊前用解析解；煞車β=0.25、持續τ=0.5（剛好10步）；「塞車」照model/CRITERIA.md的定義：有任何一台車的車速低於0.1；RK4，dt=0.05
 units: 無因次
 status: confirmed
 related: ours-model-offset-jam, ours-model-propagation, bando1995-ovm-equation

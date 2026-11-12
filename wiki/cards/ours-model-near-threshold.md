@@ -3,7 +3,7 @@ id: ours-model-near-threshold
 type: our_simulation
 source: runs/logs/2026-11-12-model-v3-core-rerun.log
 locator: 測試M5d（model/run_core.py）
-conditions: model/ovm.py第3版；N=22、L=44；a=1.90～2.10；第2頁的煞車和三倍煞車；跑到點擊後1500
+conditions: model/ovm.py第3版；N=22、L=44；a=1.90～2.10；第2頁的煞車和三倍煞車；跑到點擊後1500；「塞車」照model/CRITERIA.md的定義：有任何一台車的車速低於0.1
 units: 無因次
 status: confirmed
 related: ours-model-threshold, ours-model-fast-adjust

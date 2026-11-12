@@ -3,7 +3,7 @@ id: ours-model-propagation
 type: our_simulation
 source: runs/logs/2026-11-12-model-v3-core-rerun.log
 locator: 測試M7（model/run_core.py）
-conditions: model/ovm.py第3版；N=22、L=44；第2頁的煞車；a=1和a=2.5對照
+conditions: model/ovm.py第3版；N=22、L=44；第2頁的煞車；a=1和a=2.5對照；平均車距2（L/N）；在t0=20點第0台；整體擾動是所有車裡車速跟均勻車流差最多的值，比較點擊後5和200模型時間的大小；逐台的最低速度取點擊後100模型時間內
 units: 無因次
 status: confirmed
 related: bando1995-linear-stability, bando1995-no-delay, ours-model-fast-adjust

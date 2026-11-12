@@ -3,7 +3,7 @@ id: ours-model-offset-jam
 type: our_simulation
 source: runs/logs/2026-11-12-model-core.log
 locator: 測試M4（model/run_core.py）
-conditions: model/ovm.py；N=22、L=44、a=1；一開始均勻，只把第0台車往前移ε；RK4，dt=0.05
+conditions: model/ovm.py；N=22、L=44、a=1；一開始均勻，只把第0台車往前移ε；RK4，dt=0.05；平均車距2（L/N）
 units: 無因次
 status: confirmed
 related: bando1995-spontaneous-jam, ours-model-click-brake
