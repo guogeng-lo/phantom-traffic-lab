@@ -1,0 +1,10 @@
+# 用比較寬的寫法掃正式repo，確認審查找到的漏判路徑有沒有真的藏了東西（只印位置，不印內容）
+學號後接句點：目前檔案 0 處 []；歷史新增行 0 行
+手機後接句點：目前檔案 0 處 []；歷史新增行 0 行
+座號（不限前後字元）：目前檔案 0 處 []；歷史新增行 0 行
+金鑰（不限前後字元）：目前檔案 0 處 []；歷史新增行 0 行
+Windows路徑（不分大小寫）：目前檔案 3 處 ['pipeline/review/n3-engineering-review.md:924', 'pipeline/review/n3-package-r4.md:2174', 'tests/test_check_wiki.py:267']；歷史新增行 3 行
+信箱（不排除任何網域）：目前檔案 11 處 ['pipeline/review/n3-engineering-review.md:756', 'pipeline/review/n3-engineering-review.md:757', 'pipeline/review/n3-engineering-review.md:922', 'pipeline/review/n3-engineering-review.md:1025', 'pipeline/review/n3-package-r4.md:2046', 'pipeline/review/n3-package-r4.md:2047', 'pipeline/review/n3-package-r4.md:2172', 'tests/test_check_wiki.py:99', 'tests/test_check_wiki.py:100', 'tests/test_check_wiki.py:265', 'tests/test_check_wiki.py:368']；歷史新增行 12 行
+Git歷史裡非ASCII檔名： 0
+merge commit數： 0
+信箱命中的實際值：只有測試檔用的兩個假地址（tests/test_check_wiki.py第99、265、368行，以及兩份審查包裡的副本），沒有真實信箱。

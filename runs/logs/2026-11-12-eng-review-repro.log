@@ -1,0 +1,20 @@
+審查者A1 privacy-scan: ignore跳過整行： [] （對照） ['金鑰或Token']
+A2/B 程式碼區塊裡的假表格： [] （對照，只有那一列） ['像學號的9位數字']
+B 全形前綴ＮｏｔSHA-256： [] （對照NotSHA-256） ['手機號碼']
+B 六類變體 學號接句點： []
+B 六類變體 手機接句點： []
+B 六類變體 信箱example.com.invalid： []
+B 六類變體 Windows小寫users： []
+B 六類變體 金鑰緊接中文： []
+B 六類變體 座號緊接中文： []
+B judge把無關錯誤判成目標錯誤（應該False）： True
+B 「##  主張」兩個空格：sections取到 '第二段' ；重複檢查報錯 []
+B 主張的程式碼區塊裡有## example：sections取到 '```'
+B 帶title的錨點： 見[限制](#限制 "提示")
+B 雙反引號： ``[x](cards/y.md)`` ；~~~區塊： ~~~
+[x](cards/y.md)
+~~~
+A3/B HEAD指向不存在的分支，歷史還在： []
+A4 中文檔名PDF進過歷史： []
+B 只在merge commit加的金鑰： []
+B quotePath下中文檔名的金鑰（目前檔案）： []

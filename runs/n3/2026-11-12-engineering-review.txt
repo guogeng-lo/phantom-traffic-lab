@@ -1,0 +1,147 @@
+我依照 n3-engineering-review.md 的限定範圍完成了獨立程式審查，沒有重審論文或證據卡的科學內容。
+
+結論：原本的 94 個測試確實全部通過，但我另外重現了 4 個重大漏判，因此這次工程驗收仍不通過。
+
+先說明版本：我從審查包還原三份 Python 原始碼，SHA-256 與審查包完全相同，Git blob hash 也與 GitHub 上指定的 2cb460b 版本一致。以下新問題均使用這份原始碼實測，沒有修改正式 Repo。
+第一部分｜7 項問題逐項複核
+問題	修好了嗎	根據
+1. SHA-256 偽表頭	部分修好	ShaTable 已要求表頭、分隔列及欄數一致；原本的偽表頭測試通過。但程式碼區塊內的假表格仍會觸發排除，見第二部分
+2. NotSHA-256 偽標記	修好	LABELED_HASH 限制標記前後不能緊接英數、底線或連字號。NotSHA-256、SHA-256-old 的反例都通過
+3. 測試只搜尋整份輸出	修好	新版 judge() 要求指定訊息出現在 [錯誤] 行，且結束碼符合預期。5 個判定規則測試全部通過
+4. 索引標記重複	修好	index_with_generated() 檢查標記數量、獨立成行及順序。重複、位置錯誤的測試都被擋下
+5. 重複 ## 主張	修好	dup_sections() 會回報重複章節；兩個「主張」或「限制」的測試均正確失敗
+6. 錨點及程式碼裡的連結	修好	fix_links() 對卡片內錨點補上卡片路徑，並略過測試中的行內及區塊程式碼；三項測試通過
+7. Git textconv 與指令失敗	部分修好	--no-textconv 和 Git 物件損壞時的錯誤回報通過測試，但 HEAD 無法解析時會直接跳過歷史掃描，見第二部分
+
+前述 SHA-256、索引和 Git 檢查邏輯可對照審查包原始碼。n3-engineering-review.md
+n3-engineering-review.md
+
+第二部分｜新發現的問題
+四個問題都已使用假資料，在隔離的暫存 Git Repo 中重現。
+問題	嚴重程度	重現方式	建議怎麼改
+1. privacy-scan: ignore 可以跳過整行安全檢查	重大	在含假金鑰的行尾加上 privacy-scan: ignore，--strict 回傳 0、錯誤 0。刪除標記則正確抓到金鑰	不要讓任意檔案內容自行宣告免檢。改用受控的例外清單，明列檔案、位置、原因，且排除範圍應受限制
+2. 程式碼區塊裡的假 SHA-256 表格能遮蔽學號格式	重大	把合法格式的 SHA-256 表格文字放入 Markdown 的三反引號程式碼區塊，雖然它不是實際表格，掃描器仍將其中的 64 位字串排除；--strict 回傳 0	ShaTable 必須追蹤 fenced code block 狀態；只有真正位於 Markdown 表格中的欄位才能觸發排除
+3. Git HEAD 異常時，歷史掃描直接略過	重大	先提交包含假金鑰的檔案，再提交刪除，之後把 .git/HEAD 指向不存在的分支。git log --all 仍能讀到歷史，但 check_history() 直接返回，--strict 回傳 0	rev-parse --verify HEAD 失敗時，先判斷是否真的是沒有任何 commit；若 Repo 仍有歷史或狀態無法確認，應報錯並阻擋
+4. Git 歷史中的中文檔名 PDF 會漏判	重大	提交 論文.pdf，之後刪除。Git 預設把非 ASCII 檔名轉成帶引號的跳脫格式，導致 .endswith(".pdf") 不成立。--strict 回傳 0	歷史檔名建議以 git log -z --name-only 取得並依 NUL 分隔解析，避免 Git 路徑引號及跳脫格式造成漏判實際執行的反例
+使用指定版本程式，執行 check_wiki.py --strict
+普通假金鑰（對照組）	exit 1	正確攔截
+普通含學號格式的字串（對照組）	exit 1	正確攔截
+加上 privacy-scan: ignore	exit 0	漏判
+程式碼區塊內假表格	exit 0	漏判
+Git HEAD 異常，歷史仍存在	exit 0	漏判
+中文名稱 PDF 曾進入 Git 歷史	exit 0	漏判
+
+四個漏判案例均回報錯誤 0 個。全部使用人造測試資料，並非在正式 Repo 發現真實個資外洩。
+其中第一項的直接原因是：
+def scan_line(line, sha_col=None):    if IGNORE_MARK in line:        return []
+
+
+
+這會跳過整行的所有個資與金鑰規則，而不只是跳過已經確認的測試字串。n3-engineering-review.md
+
+
+第四項則是 Git 輸出格式的問題，不是 PDF 內容解析錯誤。它尤其值得修正，因為公開 Repo 使用中文檔名相當正常。
+第三部分｜實際執行與結果
+A. 原始碼版本確認
+透過 GitHub 連線確認指定 commit 存在：
+GitHub commit 2cb460b檔案	SHA-256 與審查包	Git blob hash 與 GitHub
+scripts/check_wiki.py	相同	相同
+scripts/build_index.py	相同	相同
+tests/test_check_wiki.py	相同	相同
+
+B. 正式測試程式
+我直接使用審查包還原的未修改原始碼執行：
+$ python3 tests/test_check_wiki.py
+
+共94個情境（其中判定規則5個），失敗0個。
+
+exit=0
+
+
+這次是實際重新執行，不是複製審查包原有的測試紀錄。C. 索引與 Strict 檢查
+因為容器無法從 GitHub clone 完整 Repo，我使用同一套程式建立最小測試 Wiki，在獨立 Git Repo 執行：
+
+```
+$ python3 scripts/build_index.py --check
+
+index.md跟文獻檔、證據卡同步
+
+exit=0
+```
+
+
+```
+$ python3 scripts/check_wiki.py --strict
+
+[警告] wiki/sources：實際讀過、而且有confirmed證據卡的獨立論文 1 篇，還不到 5 篇
+
+文獻 1 篇（算進5篇的獨立論文 1 篇），證據卡 1 張（pending 0 張）。
+錯誤 0 個，警告 1 個。
+
+exit=0
+```
+
+這不是指定 commit 的完整 6 篇、39 張證據卡 Repo 的執行結果；只是驗證程式在最小完整測試環境中能執行。
+D. 額外反例
+額外建立隔離 Repo，測試上述四個新問題。結果均能重現漏判，且沒有修改正式專案的檔案或 Git 歷史。
+第四部分｜無法確認的地方
+
+* **指定 commit 的完整 Repo：**容器執行 `git clone` 時發生 `Could not resolve host: github.com`，結束碼 `128`。我能透過 GitHub 連線確認 commit 與三份原始碼，但不能把整個 Repo clone 下來。因此未在完整 Repo 執行指定的 `build_index.py --check` 與 `check_wiki.py --strict`。
+* **Windows 原生環境：**已驗證審查包中使用模擬失敗 textconv 的測試通過，但沒有在 Windows Git for Windows 環境實測。
+* **修改前版本：**審查包記錄修改前 94 個情境失敗 18 個，修改後失敗 0 個；我獨立執行的是修改後版本，沒有重新執行舊版，因此不把修改前的數據稱為我的實測結果。
+* **真實 Repo 是否含個資：**這次發現的是程式存在可重現的漏判路徑，不能由此認定正式 Repo 已經含有個資或金鑰。
+
+這次獨立審查最主要的發現是：原本七項修正中的多數確實有效，但新的邊界情況仍能繞過安全檢查。 依審查包事先訂好的標準，這些屬於重大問題，因此不應宣稱節點 3 已通過。
+建議下一步只處理這四個已重現的反例，並保留原本 94 項測試全部通過的紀錄；不需要因此重啟文獻審查。
+7 項中修好 5 項、部分修好 2 項、沒修好 0 項；新問題 4 個（其中重大 4 個）；有沒有重大問題：有。以下CODEX:## 第一部分｜七項修正逐項判定
+
+**工程審查不通過。** 新版回歸套件的 94 個情境全數通過，但獨立反例仍能讓個資、金鑰、索引不同步及 Git 失敗漏報。
+
+| 問題 | 修好了嗎 | 根據 |
+|---|---|---|
+| SHA-256 偽表頭 | 部分修好 | `ShaTable.feed()` 已擋下包內的偽表頭、缺分隔列、欄數不符等反例。放在 Markdown 程式碼區塊內的表格範例仍會啟用排除，實測漏掉學號樣式。 |
+| `NotSHA-256` 這類偽標記 | 部分修好 | `LABELED_HASH` 已擋下 ASCII 的 `NotSHA-256` 和 `SHA-256-old`。換成 `ＮｏｔSHA-256` 後，實測仍會遮蔽手機樣式。 |
+| 測試只在整份輸出找關鍵字 | 部分修好 | `judge()` 已限定在對應嚴重程度的行內搜尋，包內 5 個判定情境全過。但實際輸出只有「`related` 的 `金鑰或Token` 不存在」時，預期偵測金鑰的判定仍回傳 `True`。 |
+| 索引標記重複 | 修好 | `index_with_generated()` 要求兩個標記各出現一次、獨立成行且順序正確。實測追加第二組標記後，`check_wiki.py`、`build_index.py --check` 和直接重建均回傳 `1`，索引內容也未被改寫。 |
+| 證據卡有重複的 `## 主張` | 部分修好 | 兩個完全相同的標題會讓 `check_wiki.py` 回傳 `1`，但 `build_index.py --check` 仍回傳 `0`。其中一個標題改用兩個空格後，兩支檢查都回傳 `0`，第一段主張未進入索引。 |
+| 錨點和程式碼裡的連結 | 部分修好 | 包內三個案例確實驗證了普通錨點、單反引號及三反引號區塊的輸出。實測帶 title 的錨點仍指向索引本頁，雙反引號和 `~~~` 區塊裡的連結字樣仍會被改寫。 |
+| Git textconv 和 Git 指令失敗 | 部分修好 | 新版在 Git for Windows 預設環境通過 textconv 與損毀 blob 測試。但 `git rev-parse --verify HEAD` 回傳 `128` 時，程式仍可能略過歷史掃描並回傳 `0`，一般模式與 `--strict` 都可重現。 |
+
+以修復前的 `7506be9` 兩支程式搭配同一份新版測試套件重跑。停用系統層 Git attributes 後，舊版重現包內的 **18 個失敗**，新版在預設環境 **0 個失敗**。`SHA-256-old` 和偽表頭同列信箱兩個案例在舊版也通過，與包內把它們列為對照組的紀錄一致。
+
+## 第二部分｜新發現的問題
+
+下列是本輪新確認的問題。已用修復前版本對照的漏判也能在舊版重現，因此沒有把它們歸因於這次修正。審查包已明列的合規 SHA-256 表格排除屬既定行為，未計入。
+
+| 問題 | 嚴重程度 | 重現方式 | 建議怎麼改 |
+|---|---|---|---|
+| 程式碼區塊裡的偽表頭啟用 SHA-256 排除 | 重大 | 把表頭、分隔列及含測試學號的雜湊列包進三反引號區塊，回傳 `0`。單獨保留同一資料列會報學號。 | 判斷 SHA-256 表格時排除 fenced code block 內的內容，區塊內照常掃原文。 |
+| 全形前綴繞過 SHA-256 標記邊界 | 重大 | `ＮｏｔSHA-256` 後接含測試手機的雜湊，回傳 `0`。改用 ASCII `NotSHA-256` 會報手機。 | 用支援 Unicode 的英數邊界，並保留專案使用的中文標記寫法作為對照測試。 |
+| `judge()` 把無關錯誤判成目標錯誤 | 重大 | 無金鑰的卡片填 `related: 金鑰或Token`。實際只報 `related` 不存在，預期金鑰錯誤的 `judge()` 卻回傳 `True`。 | 斷言診斷類型與位置，或比對完整的預期錯誤訊息。 |
+| 主張段落解析會漏掉索引內容 | 重大 | 新增 `##  主張`，或在主張的程式碼區塊放 `## example` 再修改區塊後的正文。兩支檢查均回傳 `0`，索引缺段。完全相同的重複標題也能單獨通過 `build_index.py --check`。 | 讓兩支程式共用同一套段落驗證，辨識標題空格和程式碼區塊，遇到重複主張就停止。 |
+| 索引會保留錯誤的錨點目的地、改寫程式碼字面值 | 重大 | 在主張加入 `[限制](#限制 "提示")`、雙反引號包裹的連結字樣及 `~~~` 區塊。重建後兩支檢查均回傳 `0`，實際產物仍有錯誤的錨點和被改寫的程式碼。 | 依 Markdown 的連結與程式碼語法解析，只改寫實際連結的目的地。 |
+| Git HEAD 驗證失敗會跳過可掃描的歷史 | 重大 | 歷史金鑰刪除後，保留一條指向該歷史的分支，再損毀目前分支的參照。`rev-parse --verify HEAD` 回傳 `128`，兩種檢查模式均回傳 `0`。 | 區分全新且無歷史的 repo 與參照損壞。有其他 refs 時仍須掃描，Git 驗證失敗須報錯。 |
+| Git 歷史漏掃只出現在合併 commit 的金鑰 | 重大 | 使用 `git merge --no-ff --no-commit`，在合併 commit 中首次加入測試金鑰，再於下一個 commit 刪掉。與第一個父 commit 的 diff 有新增金鑰，`--strict` 回傳 `0`。 | 明確要求 Git 輸出合併 commit 的差異，並加入只在合併時新增資料的測試。 |
+| Git 引號路徑使中文檔名被略過 | 重大 | `core.quotePath=true` 時，在未被忽略的 `中文.md` 放測試金鑰。`git ls-files` 回傳轉義名稱，`--strict` 回傳 `0`。改成 `english.md` 即報金鑰。 | 使用 `git ls-files -z` 並按 NUL 切分路徑。 |
+| 六類個資規則均有可重現的格式漏判 | 重大 | 學號、手機接 ASCII 句點，信箱網域用 `example.com.invalid`，Windows 路徑用小寫 `users`，金鑰和座號緊接中文。六個變體一起掃是 **0 錯誤**，六個普通格式的對照是 **6 錯誤**。 | 分別測試句尾標點、完整網域白名單、Windows 路徑大小寫，以及中文相鄰時的識別邊界。 |
+| 任意檔案可自行停用整行個資掃描 | 重大 | 將 `privacy-scan: ignore` 附加到上述六個會報錯的對照行，重新掃描後 **0 錯誤**。 | 將豁免限制於已核准的檔案與測試字面值。 |
+| 索引把程式碼字面值當成連結檢查 | 一般 | 在主張的行內程式碼放入 `[x](cards/absent.md)`。索引保留了字面值，`check_wiki.py` 仍報 `cards/absent.md` 不存在並回傳 `1`。 | 讓索引的目標檢查只處理 Markdown 實際連結。 |
+
+## 第三部分｜實際執行結果
+
+環境為 Python 3.10.11、Git for Windows 2.52.0。從 GitHub 取得的三份程式與審查包的 SHA-256 全部相符。索引檢查使用指定 commit 的 `wiki/index.md`、6 份文獻檔及 39 張卡片。完整輸出含新舊版測試與獨立反例。[n3-engineering-review-output.txt](https://chatgpt.com/library?file_id=libfile_d2ecd11e05e481919c68917ce3ce7b77&account_id=personal)
+
+| 指令或情境 | 實際輸出摘錄 | 結束代碼 |
+|---|---|---:|
+| `git clone` | `fatal: unable to access 'https://github.com/guogeng-lo/phantom-traffic-lab.git/': getaddrinfo() thread failed to start` | `128` |
+| `python3 tests/test_check_wiki.py`，指定 commit 的程式 | `共94個情境（其中判定規則5個），失敗0個。` | `0` |
+| `python3 scripts/build_index.py --check`，指定 commit 的檔案 | `index.md跟文獻檔、證據卡同步` | `0` |
+| `python3 scripts/check_wiki.py --strict`，指定 commit 的完整 repo | **沒有執行** | — |
+| 修復前程式搭配新版測試，預設環境 | `共94個情境（其中判定規則5個），失敗19個。`，多失敗一項原有的 PDF 歷史測試 | `1` |
+| 修復前程式搭配新版測試，`GIT_ATTR_NOSYSTEM=1` | `共94個情境（其中判定規則5個），失敗18個。` | `1` |
+
+## 第四部分｜無法確認
+
+- 無法確認指定 commit `2cb460b` 的完整 Git 歷史在本機 `--strict` 下的結果。審查包附的完整驗證紀錄標示為 `0afb1ed`。本次獨立執行的 `--strict` 結果來自暫存反例 repo。
+
+7項中修好1項；新問題11個（其中重大10個）；有沒有重大問題：有。
