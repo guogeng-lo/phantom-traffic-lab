@@ -158,6 +158,15 @@ python3 scripts/check_pages.py           # 節點6送審前：逐頁稿的段落
 python3 tests/test_check_pages.py        # 故意弄壞逐頁稿，確認檢查擋得住
 python3 tests/mutation_check_pages.py .  # 把check_pages.py的規則各拿掉一次，確認測試抓得到（跑完會還原）
 python3 audition/test_ovm.py             # 選題階段的模型測試，輸出應該跟audition/run2.log一樣
+python3 scripts/build_site.py            # 節點7：建置簡報docs/index.html（會實際執行上面的檢查和JS對答案，結果寫進每頁的「出處」）
+python3 scripts/check_stale.py           # 比對runs/紀錄裡的SHA-256和現在的檔案，列出過期的紀錄
+node tests/test_js_parity.js             # 節點7：瀏覽器求解器web/ovm.js跟Python參考答案對答案（標準在web/PARITY.md）
+node tests/test_js_parity_browser.js     # 節點7：在Chromium裡用簡報內嵌的求解器再對一次（J11）
+python3 tests/test_site_static.py        # 節點7：出處、連結、沒有懸停操作、不存資料、沒有寫死的檢查結果
+node tests/e2e_flow.js [--mobile]        # 節點7：Playwright實際操作全部互動（桌機／手機觸控）
+node tests/a11y_axe.js                   # 節點7：axe-core和鍵盤、觸控範圍、控制項名稱（要先npm install）
+node tests/perf_mobile.js                # 節點7：Lighthouse和動畫的CPU負擔（要先npm install）
+node tests/visual_regression.js <資料夾> && python3 tests/compare_shots.py tests/visual-baseline <資料夾>   # 節點7：視覺回歸
 ```
 
 ## 10. Commit
