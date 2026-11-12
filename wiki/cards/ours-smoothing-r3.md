@@ -3,7 +3,7 @@ id: ours-smoothing-r3
 type: our_simulation
 source: runs/logs/2026-11-12-model-smoothing.log
 locator: 測試M8的R3（model/explore_smoothing.py）
-conditions: model/ovm.py；N=22、L=44、a=1；先讓塞車形成，t=300把第0台換成平滑車；比較區間[1000, 1500]；規則：a_s·(min(U, V(h))−v)，U=V(2)=0.9640，a_s=1
+conditions: model/ovm.py；N=22、L=44、a=1；先讓塞車形成，t=300把第0台換成平滑車；比較區間[1000, 1500]；規則：a_s·(min(U, V(h))−v)，U=V(2)=0.9640，a_s=1；初始偏移ε=0.1（跟ours-model-offset-jam一樣）
 units: 無因次
 status: confirmed
 related: ours-smoothing-r1, ours-smoothing-target-speed, stern2018-results

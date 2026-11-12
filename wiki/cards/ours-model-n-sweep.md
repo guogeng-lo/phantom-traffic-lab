@@ -3,7 +3,7 @@ id: ours-model-n-sweep
 type: our_simulation
 source: runs/2026-11-12-model-v3-r1.md
 locator: 測試M2、M2v2、M2補測（model/run_core.py、model/run_v2.py、model/run_v3_m2.py）
-conditions: model/ovm.py；L=44、a=1；N=3～60；k=1的小擾動；RK4，dt=0.05；量法照model/CRITERIA.md第2、3版
+conditions: model/ovm.py；L=44、a=1；N=3～60；k=1的小擾動；RK4，dt=0.05；量法照model/CRITERIA.md第2、3版；每個N最長跑到t=2100
 units: 無因次
 status: confirmed
 related: ours-finite-n-threshold, bando1995-stable-regions, ours-model-uniform-dense
