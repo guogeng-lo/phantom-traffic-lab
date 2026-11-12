@@ -22,4 +22,4 @@
 | 8 | 我們設計的平滑車規則在我們的模型裡的效果：車速波動、平均車速、安全性分開呈現；R3是主要互動，R1是比較方案（波動消失但平均車速少約21%），R2撞車是失敗案例 | [ours-smoothing-r3](cards/ours-smoothing-r3.md)、[ours-smoothing-r1](cards/ours-smoothing-r1.md)、[ours-smoothing-r2-collision](cards/ours-smoothing-r2-collision.md) | 主線、知識 |
 | 8 | 第三題：平滑車開得比大家快，減弱波的效果一定比較好嗎？（目標速度越快，剩下的波動越大，但沒有重新形成塞車；不能說重現了Stern實驗A） | [ours-smoothing-target-speed](cards/ours-smoothing-target-speed.md)、[stern2018-wave-returns](cards/stern2018-wave-returns.md) | 主線 |
 | 9 | 模型的假設和其他觀點：隨機減速、反應延遲 | [nagel1992-randomization](cards/nagel1992-randomization.md)、[nagel1992-circle-jams](cards/nagel1992-circle-jams.md)、[orosz2010-delays](cards/orosz2010-delays.md)、[orosz2010-ovm-family](cards/orosz2010-ovm-family.md) | 知識、進階 |
-| 10 | 三題測驗對應前面的頁，不新增主張 | 沿用第1～6頁的卡 | 主線 |
+| 10 | 三題測驗對應前面的頁，不新增主張：沒有事故也會塞（真實實驗）、塞車波往後傳（實驗和模型）、什麼條件下小擾動會放大（模型） | [sugiyama2008-jam-emerges](cards/sugiyama2008-jam-emerges.md)、[sugiyama2008-backward-wave](cards/sugiyama2008-backward-wave.md)、[ours-model-wave-direction](cards/ours-model-wave-direction.md)、[bando1995-linear-stability](cards/bando1995-linear-stability.md)、[ours-model-threshold](cards/ours-model-threshold.md) | 主線 |

@@ -152,6 +152,8 @@ python3 scripts/check_wiki.py --strict   # commit之後、push之前用：Git歷
 python3 scripts/build_index.py           # 從文獻檔和證據卡重建wiki/index.md的自動產生區塊；改了文獻檔或卡片就要跑
 python3 scripts/check_quotes.py          # 證據卡的英文引用要在raw/的PDF裡找得到；結果分成逐字、OCR逐字、OCR近似，後兩種要人對照頁面確認，報告不能混在一起寫
 python3 tests/test_check_wiki.py         # 故意弄壞資料，確認檢查程式擋得住
+python3 scripts/check_slide_map.py       # 節點5：每頁的核心主張跟證據卡的對應
+python3 tests/test_check_slide_map.py    # 故意弄壞slide-map，確認節點5的檢查擋得住
 python3 audition/test_ovm.py             # 選題階段的模型測試，輸出應該跟audition/run2.log一樣
 ```
 
