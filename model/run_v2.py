@@ -1,6 +1,6 @@
 """照model/CRITERIA.md的「第2版修改」執行M2v2、M5a v2、M6v2。
 
-這支程式不改核心求解器：只用model/ovm.py的Ring（RK4、時間步長都沒動），新的量法和展示方式寫在這裡。
+這支程式本身不改核心求解器，只用model/ovm.py的Ring。第3版之後，Ring的煞車改用整數步數判定（見CRITERIA.md）。
 用法：python3 model/run_v2.py [M2v2 M5av2 M6v2]   （不給就全部跑）
 結束代碼：有任何一項沒通過或無法判定就是1。
 """
@@ -313,7 +313,7 @@ def m6v2():
 
 def main():
     want = set(sys.argv[1:]) or {"M2v2", "M5av2", "M6v2"}
-    print(f"dt = {DT}；標準見model/CRITERIA.md的「第2版修改」；核心求解器（model/ovm.py的Ring）沒有改", flush=True)
+    print(f"dt = {DT}；標準見model/CRITERIA.md的「第2版修改」；核心求解器是第3版（煞車用整數步數判定，見CRITERIA.md）", flush=True)
     if "M5av2" in want:
         m5a_v2()
     if "M6v2" in want:
