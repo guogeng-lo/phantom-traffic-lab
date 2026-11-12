@@ -43,8 +43,8 @@ def mode_table(N):
     return {k: [cmath.exp(-2j * math.pi * k * n / N) for n in range(N)] for k in ks}
 
 
-def measure_v2(N, L, a):
-    r = mode_ring(N, L, a)
+def measure_v2(N, L, a, eps=1e-6):
+    r = mode_ring(N, L, a, eps)
     b = L / N
     table = mode_table(N)
     pts, reason = [], "t = 2100"
