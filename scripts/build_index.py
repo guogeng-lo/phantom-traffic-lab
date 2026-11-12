@@ -12,7 +12,7 @@ from pathlib import Path
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from check_wiki import index_with_generated, render_index  # noqa: E402
+from check_wiki import index_problems, index_with_generated, render_index  # noqa: E402
 
 
 def main():
@@ -23,6 +23,12 @@ def main():
     root = Path(args.root).resolve()
     idx = root / "wiki" / "index.md"
     text = idx.read_text(encoding="utf-8")
+    probs = index_problems(root)
+    for where, msg in probs:
+        print(f"[錯誤] {where}：{msg}")
+    if probs:
+        print("證據卡有問題，沒有重建也沒有比對索引")
+        return 1
     new = index_with_generated(text, render_index(root))
     if new is None:
         print("[錯誤] wiki/index.md自動產生區塊的標記要各出現一次、獨立成行，開始在結束前面")

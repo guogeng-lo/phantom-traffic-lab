@@ -6,10 +6,12 @@
 因為歷史要改只能改寫歷史，必須先問使用者）。
 """
 import argparse
+import hashlib
 import posixpath
 import re
 import subprocess
 import sys
+import unicodedata
 from pathlib import Path
 
 sys.dont_write_bytecode = True
@@ -27,16 +29,23 @@ ID_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 MIN_PAPERS = 5
 MAX_QUOTE_WORDS = 50
 
-# 個資和金鑰的樣式。這幾行本身會被掃到，所以行尾加了忽略標記。
+# 個資和金鑰的樣式。2026-11-12起拿掉行內忽略標記（任何檔案都不能自己宣告免檢），
+# 這裡的樣式字串用拼接寫，讓這個檔案本身不會被掃到。邊界都用ASCII英數判斷，
+# 中文緊接著寫（例如「座號」後面直接接座號）也抓得到；學號、手機後面接英文句點也算，
+# 只有句點後面還接數字（小數）才不算。見runs/2026-11-12-eng-acceptance-v2.md。
+LOCAL_PATHS = ["/" + "home/", "/" + "Users/", "(?i:[a-z]:" + r"\\" + "users)", "/" + "tmp/claude", "/" + "mnt/user-data"]
 PRIVACY = [
-    (re.compile(r"(?<![\d.])4\d{8}(?![\d.])"), "像學號的9位數字"),  # privacy-scan: ignore
-    (re.compile(r"(?<![\d.])09\d{2}[- ]?\d{3}[- ]?\d{3}(?![\d.])"), "手機號碼"),  # privacy-scan: ignore
-    (re.compile(r"[A-Za-z0-9._%+-]+@(?!users\.noreply\.github\.com)(?!example\.com)[A-Za-z0-9.-]+\.[A-Za-z]{2,}"), "電子郵件"),  # privacy-scan: ignore
-    (re.compile(r"(/home/|/Users/|[A-Za-z]:\\Users|/tmp/claude|/mnt/user-data)"), "本機路徑"),  # privacy-scan: ignore
-    (re.compile(r"\b(sk-[A-Za-z0-9]{16,}|ghp_[A-Za-z0-9]{20,}|gsk_[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_-]{30,})"), "金鑰或Token"),  # privacy-scan: ignore
-    (re.compile(r"\bI[1-4]A\d{2}\b"), "班級座號"),  # privacy-scan: ignore
+    (re.compile(r"(?<![\d.])4\d{8}(?!\d)(?!\.\d)"), "像學號的9位數字"),
+    (re.compile(r"(?<![\d.])09\d{2}[- ]?\d{3}[- ]?\d{3}(?!\d)(?!\.\d)"), "手機號碼"),
+    (re.compile(r"[A-Za-z0-9._%+-]+" + "@" + r"([A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,})"), "電子郵件"),
+    (re.compile("(" + "|".join(LOCAL_PATHS) + ")"), "本機路徑"),
+    (re.compile(r"(?<![A-Za-z0-9_-])(sk-[A-Za-z0-9]{16,}|ghp_[A-Za-z0-9]{20,}|gsk_[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_-]{30,})"),
+     "金鑰或Token"),
+    (re.compile(r"(?<![A-Za-z0-9])I[1-4]A\d{2}(?!\d)"), "班級座號"),
 ]
-IGNORE_MARK = "privacy-scan: ignore"
+# 信箱網域要完全等於這兩個才不算（example.com.invalid這種不算）
+ALLOWED_EMAIL_DOMAINS = {"users.noreply.github.com", "example.com"}
+ALLOWLIST = "scripts/privacy_allowlist.tsv"
 CJK = r"[一-鿿]"
 SPACE_RE = re.compile(rf"{CJK} +[A-Za-z0-9]|[A-Za-z0-9] +{CJK}")
 
@@ -75,27 +84,51 @@ def parse(path):
     return meta, text[end + 5:]
 
 
-def dup_sections(rep, where, body):
-    """同一個「## 」段落出現兩次，sections()只會留一段，索引會漏掉另一段，所以直接報錯。"""
-    seen = set()
+FENCE_RE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
+H2_RE = re.compile(r"^ {0,3}##[ \t]+(.+?)[ \t]*$")
+
+
+def split_sections(body):
+    """把內文切成 [(段落名稱, 內容行)]。程式碼區塊（```或~~~）裡長得像標題的行不算標題；
+    標題名稱把多餘的空白合併，所以「##  主張」跟「## 主張」是同一個段落。"""
+    out, fence = [], None
     for line in body.splitlines():
-        m = re.match(r"^## (.+?)\s*$", line)
-        if m:
-            if m.group(1) in seen:
-                rep.err(where, f"段落「## {m.group(1)}」出現不只一次")
-            seen.add(m.group(1))
+        m = FENCE_RE.match(line)
+        if fence is None and m:
+            fence = m.group(1)
+        elif fence is not None and m and m.group(1)[0] == fence[0] and len(m.group(1)) >= len(fence) \
+                and not line.strip()[len(m.group(1)):].strip():
+            fence = None
+        elif fence is None:
+            h = H2_RE.match(line)
+            if h:
+                out.append((" ".join(h.group(1).split()), []))
+                continue
+        if out:
+            out[-1][1].append(line)
+    return out
+
+
+def duplicate_sections(body):
+    seen, dups = set(), []
+    for name, _ in split_sections(body):
+        if name in seen and name not in dups:
+            dups.append(name)
+        seen.add(name)
+    return dups
+
+
+def dup_sections(rep, where, body):
+    """同一個「## 」段落出現兩次，只會有一段進索引，所以直接報錯。"""
+    for name in duplicate_sections(body):
+        rep.err(where, f"段落「## {name}」出現不只一次")
 
 
 def sections(body):
-    out, cur = {}, None
-    for line in body.splitlines():
-        m = re.match(r"^## (.+?)\s*$", line)
-        if m:
-            cur = m.group(1)
-            out[cur] = []
-        elif cur:
-            out[cur].append(line)
-    return {k: "\n".join(v).strip() for k, v in out.items()}
+    out = {}
+    for name, lines in split_sections(body):
+        out.setdefault(name, "\n".join(lines).strip())
+    return out
 
 
 def check_fields(rep, where, meta, fields):
@@ -126,6 +159,7 @@ def check_sources(root, rep):
         meta, body = parse(p)
         if not check_fields(rep, where, meta, SOURCE_FIELDS):
             continue
+        dup_sections(rep, where, body)
         if meta.get("id") != p.stem:
             rep.err(where, f"id {meta.get('id')} 跟檔名不一樣")
         if not ID_RE.match(p.stem):
@@ -229,7 +263,7 @@ def check_index(root, rep, sources, cards):
     elif expected != text:
         rep.err("wiki/index.md", "跟文獻檔、證據卡不同步（自動產生的部分被手改，或卡片改了沒重建），"
                                  "請跑 python3 scripts/build_index.py")
-    for kind, name in re.findall(r"\b(sources|cards)/([a-z0-9-]+)\.md", text):
+    for kind, name in re.findall(r"\b(sources|cards)/([a-z0-9-]+)\.md", prose_only(text)):
         if not (root / "wiki" / kind / f"{name}.md").is_file():
             rep.err("wiki/index.md", f"列出的 {kind}/{name}.md 不存在")
     for sid in sources:
@@ -248,21 +282,73 @@ INDEX_END = "<!-- 自動產生結束 -->"
 OURS_GROUP = "我們自己的推導和模擬"
 
 
-CODE = re.compile(r"(```.*?```|`[^`\n]*`)", re.S)
+INLINE_CODE = re.compile(r"(?<!`)(`+)(?!`).*?(?<!`)\1(?!`)", re.S)
+LINK_DEST = re.compile(r"\]\(\s*(<[^>\n]*>|[^()\s]+)((?:\s+(?:\"[^\"\n]*\"|'[^'\n]*'|\([^)\n]*\)))?)\s*\)")
+
+
+def split_code(text):
+    """把文字切成 [(是不是程式碼, 原文)]，接回去跟原文一模一樣。
+    程式碼包括```或~~~的區塊（含區塊標記那兩行），以及任意長度反引號包起來的行內程式碼。"""
+    out, prose, fence = [], [], None
+
+    def flush():
+        chunk = "".join(prose)
+        prose.clear()
+        pos = 0
+        for m in INLINE_CODE.finditer(chunk):
+            out.append((False, chunk[pos:m.start()]))
+            out.append((True, m.group(0)))
+            pos = m.end()
+        out.append((False, chunk[pos:]))
+
+    for line in text.splitlines(keepends=True):
+        m = FENCE_RE.match(line)
+        if fence is None and m:
+            flush()
+            fence = m.group(1)
+            out.append((True, line))
+        elif fence is not None:
+            out.append((True, line))
+            body = line.rstrip("\r\n")
+            if m and m.group(1)[0] == fence[0] and len(m.group(1)) >= len(fence) and not body.strip()[len(m.group(1)):].strip():
+                fence = None
+        else:
+            prose.append(line)
+    flush()
+    return [(c, s) for c, s in out if s]
+
+
+def prose_only(text):
+    return "".join(s for code, s in split_code(text) if not code)
 
 
 def fix_links(text, card_name):
     """主張裡的相對連結是從cards/出發寫的，放進index.md要改成從wiki/出發；
-    「#段落」這種卡片內的錨點改成指回那張卡。程式碼（行內和區塊）裡的字不動。"""
+    「#段落」這種卡片內的錨點（可以帶title）改成指回那張卡。程式碼（行內和區塊）裡的字不動。"""
+    def fix_dest(dest):
+        if re.match(r"^(https?:|mailto:|/)", dest):
+            return dest
+        if dest.startswith("#"):
+            return f"cards/{card_name}{dest}"
+        return posixpath.normpath(posixpath.join("cards", dest))
+
     def repl(m):
-        target = m.group(1)
-        if re.match(r"^(https?:|mailto:|/)", target):
-            return m.group(0)
-        if target.startswith("#"):
-            return f"](cards/{card_name}{target})"
-        return f"]({posixpath.normpath(posixpath.join('cards', target))})"
-    parts = CODE.split(text)
-    return "".join(part if i % 2 else re.sub(r"\]\(([^)\s]+)\)", repl, part) for i, part in enumerate(parts))
+        dest, title = m.group(1), m.group(2)
+        dest = f"<{fix_dest(dest[1:-1])}>" if dest.startswith("<") else fix_dest(dest)
+        return f"]({dest}{title})"
+    return "".join(s if code else LINK_DEST.sub(repl, s) for code, s in split_code(text))
+
+
+def index_problems(root):
+    """產生索引之前要先擋下的問題：證據卡有重複的段落時，主張只會收進一段。"""
+    probs = []
+    for p in sorted((root / "wiki" / "cards").glob("*.md")):
+        if p.name == "_template.md":
+            continue
+        _, body = parse(p)
+        for name in duplicate_sections(body):
+            probs.append((p.relative_to(root).as_posix(), f"段落「## {name}」出現不只一次"))
+    return probs
 
 
 def render_index(root):
@@ -310,9 +396,10 @@ def index_with_generated(text, generated):
 
 def tracked_files(root):
     try:
-        out = subprocess.run(["git", "ls-files", "-co", "--exclude-standard"], cwd=root,
-                             capture_output=True, text=True, check=True).stdout
-        return [root / l for l in out.splitlines() if l]
+        # -z加上core.quotePath=false：中文檔名照原文輸出，不會變成帶引號的跳脫字串而漏掃
+        out = subprocess.run(["git", "-c", "core.quotePath=false", "ls-files", "-z", "-co", "--exclude-standard"],
+                             cwd=root, capture_output=True, text=True, encoding="utf-8", check=True).stdout
+        return [root / l for l in out.split("\0") if l]
     except (OSError, subprocess.CalledProcessError):
         return [p for p in root.rglob("*") if p.is_file() and ".git" not in p.parts]
 
@@ -325,12 +412,14 @@ def tracked_files(root):
 #  runs/2026-11-11-check-wiki-hash-exclusion.md。掃Git歷史時用那個commit的完整檔案判斷表頭，
 #  見runs/2026-11-11-check-wiki-history-fullfile.md。）
 # 2026-11-12第4輪工程審查後收緊（runs/2026-11-12-eng-fixes-after-r4.md）：
-# - 同一行的標記：「SHA-256」前後不能接英數、底線或連字號（NotSHA-256、SHA-256-old都不算）。
+# - 同一行的標記：「SHA-256」前面不能接任何文字的英數（含全形，例如ＮｏｔSHA-256），也不能接底線或連字號；
+#   前面是中文、空白或標點才算（「PDF的SHA-256」算）。後面只能接冒號、空白，再接雜湊。
+# - 程式碼區塊（```或~~~）裡的表格不算表格。
 # - 表格：第一列是表頭、緊接著一列分隔列（|---|）、而且表頭剛好有一格是「SHA-256」或「SHA-256（說明）」，
 #   才算有SHA-256欄的表格；資料列的格數要跟表頭一樣；那一格的內容只能是雜湊值，後面最多接一個全形括號說明。
 HASH_TOKEN = "`[0-9a-f]{64}`"
 HASH_RE = re.compile(HASH_TOKEN)
-LABELED_HASH = re.compile(r"((?<![A-Za-z0-9_-])SHA-256(?![A-Za-z0-9_-])[:：]?\s*)" + HASH_TOKEN)
+LABELED_HASH = re.compile(r"(SHA-256[:：]?\s*)" + HASH_TOKEN)
 HASH_CELL = re.compile(r"^(\s*)" + HASH_TOKEN + r"((?:（[^（）]*）)?\s*)$")
 SHA_HEADER_CELL = re.compile(r"^SHA-256(?:（[^（）]*）)?$")
 SEPARATOR = re.compile(r"^\s*\|(?:\s*:?-{3,}:?\s*\|)+\s*$")
@@ -347,14 +436,26 @@ def sha_column(line):
 
 class ShaTable:
     """一行一行讀，判斷現在這一行是不是「有SHA-256欄的真表格」的資料列。
-    表格從一串「|」開頭的行的第一列開始，第二列一定要是分隔列，表格一結束（下一行不是「|」開頭）就失效。"""
+    表格從一串「|」開頭的行的第一列開始，第二列一定要是分隔列，表格一結束（下一行不是「|」開頭）就失效。
+    程式碼區塊裡的行一律不算。"""
     def __init__(self):
         self.row = 0          # 目前是這個表格的第幾列（0代表不在表格裡）
         self.header_col = None
         self.ncells = 0
         self.col = None
+        self.fence = None
 
     def feed(self, line):
+        m = FENCE_RE.match(line)
+        if self.fence is None and m:
+            self.fence = m.group(1)
+        elif self.fence is not None:
+            if m and m.group(1)[0] == self.fence[0] and len(m.group(1)) >= len(self.fence) \
+                    and not line.strip()[len(m.group(1)):].strip():
+                self.fence = None
+        if self.fence is not None or m:
+            self.row, self.header_col, self.col = 0, None, None
+            return None
         if not line.lstrip().startswith("|"):
             self.row, self.header_col, self.col = 0, None, None
             return None
@@ -370,8 +471,20 @@ class ShaTable:
         return self.col if cells == self.ncells else None
 
 
+def label_ok(line, start):
+    """「SHA-256」前一個字：沒有字、空白、標點或中文才算標記；任何文字的英數（含全形）、底線、連字號都不算。"""
+    if start == 0:
+        return True
+    ch = line[start - 1]
+    if ch in "_-":
+        return False
+    if ch.isalnum():
+        return unicodedata.name(ch, "").startswith("CJK UNIFIED IDEOGRAPH")
+    return True
+
+
 def mask_hashes(line, sha_col=None):
-    line = LABELED_HASH.sub(r"\1`<sha256>`", line)
+    line = LABELED_HASH.sub(lambda m: m.group(1) + "`<sha256>`" if label_ok(line, m.start()) else m.group(0), line)
     if sha_col is not None and line.lstrip().startswith("|"):
         cells = line.split("|")
         if sha_col < len(cells):
@@ -381,16 +494,50 @@ def mask_hashes(line, sha_col=None):
 
 
 def scan_line(line, sha_col=None):
-    if IGNORE_MARK in line:
-        return []
     masked = mask_hashes(line, sha_col)
-    return [name for pat, name in PRIVACY if pat.search(masked if name in HASH_MASKED else line)]
+    found = []
+    for pat, name in PRIVACY:
+        text = masked if name in HASH_MASKED else line
+        if name == "電子郵件":
+            if any(m.group(1).lower() not in ALLOWED_EMAIL_DOMAINS for m in pat.finditer(text)):
+                found.append(name)
+        elif pat.search(text):
+            found.append(name)
+    return found
 
 
-def check_history(root, rep, strict):
-    """掃Git歷史裡加進去過的每一行，以及出現過的PDF。"""
+def line_hash(line):
+    return hashlib.sha256(line.encode("utf-8")).hexdigest()
+
+
+def load_allowlist(root, rep):
+    """受控例外清單：每一行是 commit（40位）、路徑、那一行的SHA-256、規則名稱、原因，用tab分開。
+    只排除清單上「那個commit、那個檔案、那一行內容、那條規則」的命中；目前檔案只要路徑、內容、規則對得上。
+    清單只放雜湊，不放原文。格式錯就報錯，不會因此多排除任何東西。"""
+    path = root / ALLOWLIST
+    history, current = set(), set()
+    if not path.is_file():
+        return history, current
+    names = {name for _, name in PRIVACY}
+    for n, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        if not line.strip() or line.startswith("#"):
+            continue
+        f = line.split("\t")
+        ok = (len(f) == 5 and re.fullmatch(r"[0-9a-f]{40}", f[0]) and f[1] and not f[1].startswith("/")
+              and re.fullmatch(r"[0-9a-f]{64}", f[2]) and f[3] in names and f[4].strip())
+        if not ok:
+            rep.err(ALLOWLIST, f"privacy_allowlist.tsv第{n}行格式錯誤（要有commit、路徑、SHA-256、規則名稱、原因五欄）")
+            continue
+        history.add((f[0], f[1], f[2], f[3]))
+        current.add((f[1], f[2], f[3]))
+    return history, current
+
+
+def check_history(root, rep, strict, allow=frozenset()):
+    """掃Git歷史裡加進去過的每一行（包括merge commit對每個parent新增的行），以及出現過的PDF。"""
     def git(*args):
-        return subprocess.run(["git", *args], cwd=root, capture_output=True, text=True,
+        # core.quotePath=false：中文檔名照原文輸出
+        return subprocess.run(["git", "-c", "core.quotePath=false", *args], cwd=root, capture_output=True, text=True,
                               encoding="utf-8", errors="replace", check=True).stdout
 
     def git_failed(args, e):
@@ -408,18 +555,27 @@ def check_history(root, rep, strict):
         if strict:
             rep.err("Git歷史", "這裡不是Git repo，--strict沒辦法檢查歷史")
         return
+    args = ("for-each-ref", "--count=1", "--format=%(refname)")
+    try:
+        has_refs = bool(git(*args).strip())
+    except (OSError, subprocess.CalledProcessError) as e:
+        git_failed(args, e)
+        return
     try:
         git("rev-parse", "--verify", "HEAD")
     except subprocess.CalledProcessError:
-        return  # 還沒有任何commit，沒有歷史可以掃
+        if not has_refs:
+            return  # 剛git init、還沒有任何commit，沒有歷史可以掃
+        # HEAD壞了但還有其他分支或標籤：報錯，而且照樣掃全部歷史
+        rep.err("Git歷史", "HEAD無法解析（指向不存在的分支，或參照壞掉），但repo裡還有其他參照；照樣掃描全部歷史")
     # 一律加--no-textconv：Git for Windows預設對PDF設了文字轉換（astextplain），轉換失敗會讓git log整個失敗
-    args = ("log", "--all", "--no-textconv", "--name-only", "--format=")
+    args = ("log", "--all", "-z", "--no-textconv", "--name-only", "--format=")
     try:
         names = git(*args)
     except (OSError, subprocess.CalledProcessError) as e:
         git_failed(args, e)
         return
-    for name in sorted(set(names.splitlines())):
+    for name in sorted({n.strip() for n in re.split(r"[\0\n]", names) if n.strip()}):
         if name.lower().endswith(".pdf"):
             report("Git歷史", f"出現過PDF：{name}")
 
@@ -438,12 +594,16 @@ def check_history(root, rep, strict):
         cols = sha_cols(commit, path) if any(HASH_RE.search(text) for _, text in added) else {}
         for n, text in added:
             for name in scan_line(text, cols.get(n)):
-                report(f"Git歷史 {commit} {path}", f"疑似{name}")
+                if (commit, path, line_hash(text), name) in allow:
+                    used.add((commit, path, line_hash(text), name))
+                    continue
+                report(f"Git歷史 {commit[:7]} {path}", f"疑似{name}")
 
     # 只掃每個commit新增的行，但表頭用那個commit的完整檔案判斷，不靠diff前後幾行的上下文。
     # 用@@標頭的行數判斷哪些行是內容，內容剛好以「+++」開頭也不會被當成檔名。
-    commit, path, added, n, old_left, new_left = "", "", [], 0, 0, 0
-    args = ("log", "--all", "-p", "--no-color", "--no-textconv", "--format=commit %h")
+    commit, path, added, n, old_left, new_left, used = "", "", [], 0, 0, 0, set()
+    # -m：merge commit也輸出它對每個parent的差異，只在merge時加進來的內容才掃得到
+    args = ("log", "--all", "-p", "-m", "--no-color", "--no-textconv", "--format=commit %H")
     try:
         log = git(*args)
     except (OSError, subprocess.CalledProcessError) as e:
@@ -461,7 +621,7 @@ def check_history(root, rep, strict):
             continue
         if line.startswith("commit "):
             flush(commit, path, added)
-            commit, path, added = line[7:], "", []
+            commit, path, added = line.split()[1], "", []
         elif line.startswith("diff --git "):
             flush(commit, path, added)
             path, added = "", []
@@ -474,9 +634,10 @@ def check_history(root, rep, strict):
                 n = int(m.group(2))
                 new_left = int(m.group(3)) if m.group(3) is not None else 1
     flush(commit, path, added)
+    return used
 
 
-def check_privacy(root, rep, tracked):
+def check_privacy(root, rep, tracked, allow=frozenset()):
     for p in sorted(tracked):
         if not p.is_file():
             continue
@@ -491,6 +652,8 @@ def check_privacy(root, rep, tracked):
         table = ShaTable()
         for n, line in enumerate(text.splitlines(), 1):
             for name in scan_line(line, table.feed(line)):
+                if (rel, line_hash(line), name) in allow:
+                    continue
                 rep.err(f"{rel}:{n}", f"疑似{name}")
 
 
@@ -522,8 +685,11 @@ def main():
     sources = check_sources(root, rep)
     cards = check_cards(root, rep, sources, tracked)
     check_index(root, rep, sources, cards)
-    check_privacy(root, rep, tracked)
-    check_history(root, rep, args.strict)
+    allow_hist, allow_cur = load_allowlist(root, rep)
+    check_privacy(root, rep, tracked, allow_cur)
+    used = check_history(root, rep, args.strict, allow_hist) or set()
+    for entry in sorted(allow_hist - used):
+        rep.warn(ALLOWLIST, f"例外清單有一筆沒用到（commit {entry[0][:7]}、{entry[1]}、{entry[3]}），可能已經不需要")
     check_spacing(root, rep)
     used = {m.get("source") for m, _, _ in cards.values() if m.get("status") == "confirmed"}
     papers = [s for s, m in sources.items() if m.get("kind") == "paper" and m.get("independent") == "是"

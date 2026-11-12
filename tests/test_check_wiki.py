@@ -238,7 +238,7 @@ def allow_history(same_commit=True, same_path=True):
             commit_all(tmp, "again")
             (tmp / "note.md").unlink()
             commit_all(tmp, "remove again")
-        write_allow(tmp, [(first, "note.md" if same_path else "other.md", line_hash(FAKE_KEY), "疑似金鑰或Token", "測試用的假金鑰")])
+        write_allow(tmp, [(first, "note.md" if same_path else "other.md", line_hash(FAKE_KEY), "金鑰或Token", "測試用的假金鑰")])
     return f
 
 
@@ -246,7 +246,7 @@ def allow_current(tmp):
     git(tmp, "init", "-q")
     (tmp / "note.md").write_text(FAKE_KEY + "\n" + FAKE_KEY + "x\n", encoding="utf-8")
     commit_all(tmp, "add")
-    write_allow(tmp, [(head(tmp), "note.md", line_hash(FAKE_KEY), "疑似金鑰或Token", "測試用的假金鑰")])
+    write_allow(tmp, [(head(tmp), "note.md", line_hash(FAKE_KEY), "金鑰或Token", "測試用的假金鑰")])
 
 
 def fenced(fence):
