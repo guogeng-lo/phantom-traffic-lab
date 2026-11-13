@@ -6,7 +6,8 @@
 - **Wiki入口**：[`wiki/index.md`](wiki/index.md)
 - **Graph／Loop的總整理**：[`runs/2026-11-13-graph-loop-summary.md`](runs/2026-11-13-graph-loop-summary.md)
 
-**目前進度：節點8（最終交件）。**節點7帶著一項已知沒通過的自動測試（動畫CPU）進入節點8，由使用者授權，見[`runs/2026-11-13-n7-risk-acceptance.md`](runs/2026-11-13-n7-risk-acceptance.md)。
+**目前進度：節點8完成，等最終驗收。**節點7帶著一項已知沒通過的自動測試（動畫CPU）進入節點8，由使用者授權，見[`runs/2026-11-13-n7-risk-acceptance.md`](runs/2026-11-13-n7-risk-acceptance.md)；真機測試和交件檢查見[`runs/2026-11-13-n8-final-check.md`](runs/2026-11-13-n8-final-check.md)。
+- **反思**：[`runs/2026-11-13-n8-reflection.md`](runs/2026-11-13-n8-reflection.md)
 
 ## 這個專案在做什麼
 
@@ -44,7 +45,7 @@ node tests/e2e_flow.js [--mobile]        # 用Playwright實際操作全部互動
 
 ## 已知限制
 
-- 動畫CPU的自動測試（CPU慢4倍、忙碌比例≤60%）沒有通過，而且在無頭、沒有GPU的測試環境量不穩（同一個版本36次有19次超過60%）。實際手機順不順，以正式網址的真機測試為準。
+- 動畫CPU的自動測試（CPU慢4倍、忙碌比例≤60%）沒有通過，而且在無頭、沒有GPU的測試環境量不穩（同一個版本36次有19次超過60%）。使用者在真實Android手機上用正式網址測過，操作順暢。
 - 模型是無因次的；平滑車的規則是我們自己設計的，不是實驗用的控制器。
 - 檢查程式只能抓到測過的情境；個資掃描只認得常見格式。
 
