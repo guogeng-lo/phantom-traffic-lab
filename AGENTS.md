@@ -164,6 +164,7 @@ node tests/test_js_parity.js             # 節點7：瀏覽器求解器web/ovm.j
 node tests/test_js_parity_browser.js     # 節點7：在Chromium裡用簡報內嵌的求解器再對一次（J11）
 python3 tests/test_site_static.py        # 節點7：出處、連結、沒有懸停操作、不存資料、沒有寫死的檢查結果
 node tests/e2e_flow.js [--mobile]        # 節點7：Playwright實際操作全部互動（桌機／手機觸控）
+node tests/e2e_embedded.js               # 節點7：簡報嵌在沙盒iframe（about:srcdoc）裡也能換頁、計算
 node tests/a11y_axe.js                   # 節點7：axe-core和鍵盤、觸控範圍、控制項名稱（要先npm install）
 node tests/perf_mobile.js                # 節點7：Lighthouse和動畫的CPU負擔（要先npm install）
 node tests/visual_regression.js <資料夾> && python3 tests/compare_shots.py tests/visual-baseline <資料夾>   # 節點7：視覺回歸
