@@ -2,11 +2,13 @@
 
 沒有紅燈、沒有事故、沒有施工，車流還是會自己塞住，而且塞車波會往後跑。這個專案把相關研究整理成一份可以追溯出處的LLM Wiki，再用它做一份讀者可以自己操作的教學HTML簡報。
 
+這個專案由我負責選題、需求確認、各關的決策和最終驗收；Wiki整理、程式實作和自動測試主要交給Claude，科學內容、逐頁稿和簡報則另外交給ChatGPT獨立審查。
+
 - **簡報**：https://guogeng-lo.github.io/phantom-traffic-lab/ （GitHub Pages，從`docs/`發佈）
 - **Wiki入口**：[`wiki/index.md`](wiki/index.md)
 - **Graph／Loop的總整理**：[`runs/2026-11-13-graph-loop-summary.md`](runs/2026-11-13-graph-loop-summary.md)
 
-**目前進度：節點8完成，最終驗收有條件通過（剩第二次真機紀錄待使用者核實）。**節點7帶著一項已知沒通過的自動測試（動畫CPU）進入節點8，由使用者授權，見[`runs/2026-11-13-n7-risk-acceptance.md`](runs/2026-11-13-n7-risk-acceptance.md)；真機測試和交件檢查見[`runs/2026-11-13-n8-final-check.md`](runs/2026-11-13-n8-final-check.md)。
+**目前進度：節點8完成，最終驗收有條件通過（剩第二次真機紀錄待我核實）。**節點7帶著一項已知沒通過的自動測試（動畫CPU）進入節點8，這是我授權的，見[`runs/2026-11-13-n7-risk-acceptance.md`](runs/2026-11-13-n7-risk-acceptance.md)；真機測試和交件檢查見[`runs/2026-11-13-n8-final-check.md`](runs/2026-11-13-n8-final-check.md)。
 - **反思**：[`runs/2026-11-13-n8-reflection.md`](runs/2026-11-13-n8-reflection.md)
 
 ## 這個專案在做什麼
@@ -24,7 +26,7 @@
 | `model/` | Python參考模型和它的測試 |
 | `web/` | 簡報的樣板、樣式、互動程式、瀏覽器求解器 |
 | `docs/` | 建置出來的簡報（不要手改，用`scripts/build_site.py`產生） |
-| `runs/` | 每次執行的檢查和審查紀錄，包括失敗的 |
+| `runs/` | 每次執行的檢查和審查紀錄，包括失敗的。節點1～7的紀錄是當時邊做邊寫的，裡面的「使用者」指的就是我 |
 | `diagnostics/` | 節點7效能診斷用的暫時性腳本（不是驗收測試） |
 | `audition/` | 選題階段的模型驗證（不是正式流程） |
 | `scripts/`、`tests/` | 檢查和建置程式、它們的測試 |
@@ -45,7 +47,7 @@ node tests/e2e_flow.js [--mobile]        # 用Playwright實際操作全部互動
 
 ## 已知限制
 
-- 動畫CPU的自動測試（CPU慢4倍、忙碌比例≤60%）沒有通過，而且在無頭、沒有GPU的測試環境量不穩（同一個版本36次有19次超過60%）。使用者在真實Android手機上用正式網址測過，操作都流暢。
+- 動畫CPU的自動測試（CPU慢4倍、忙碌比例≤60%）沒有通過，而且在無頭、沒有GPU的測試環境量不穩（同一個版本36次有19次超過60%）。我用真實Android手機開正式網址測過，操作都流暢。
 - 模型是無因次的；平滑車的規則是我們自己設計的，不是實驗用的控制器。
 - 檢查程式只能抓到測過的情境；個資掃描只認得常見格式。
 
