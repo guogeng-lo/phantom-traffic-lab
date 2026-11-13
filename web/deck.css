@@ -43,6 +43,9 @@ a { color: #1d5fae; text-underline-offset: 3px }
 .dot[aria-current="page"]::before { background: var(--ink); width: 16px; height: 16px }
 .where { margin: 0; text-align: center; font-weight: 700; display: none }
 @media (max-width: 700px) { .dots { display: none } .where { display: block } .nav-btn { padding: 8px 16px } }
+/* 節點8：320寬時「第10頁／共10頁」要排成一行；縮按鈕內距和間距，不縮字，按鈕還是48px高 */
+.where { white-space: nowrap }
+@media (max-width: 360px) { .pager { gap: 6px; padding-left: 12px; padding-right: 12px } .nav-btn { padding: 8px 10px } }
 
 /* ---------- 一頁 ---------- */
 .page { max-width: 1240px; margin: 0 auto; padding: 18px var(--gut) 48px }
@@ -157,6 +160,8 @@ canvas.chart { width: 100% }
 .guide figcaption { font-size: 16px; font-weight: 700; line-height: 1.35 }
 .guide figcaption span { display: block; font-weight: 400; color: var(--soft); font-size: 15px }
 .guide .q svg { opacity: .5 }
+/* 節點8：讀圖卡的字在窄螢幕不要剩一個字單獨一行（不支援的瀏覽器照一般方式換行） */
+.guide figcaption, .guide figcaption span { text-wrap: balance }
 
 /* ---------- 小圖、結果 ---------- */
 .charts2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px }

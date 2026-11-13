@@ -206,7 +206,8 @@
   function lineChart(cv, o) {
     const f = fit(cv, o.height || (w => Math.round(Math.min(360, Math.max(220, w * 0.62))))); if (!f) return null;
     const { ctx, w, h } = f;
-    const fs = w < 420 ? 14 : 15, pad = { l: o.log ? 60 : 48, r: 14, t: 14, b: 42 };
+    const fs = w < 420 ? 14 : 15; ctx.font = `600 ${fs}px ${HEAD}`;
+    const pad = { l: o.log ? 60 : 48, r: o.fitLastTick ? Math.max(14, Math.ceil(ctx.measureText(String(o.xticks[o.xticks.length - 1])).width / 2) + 8) : 14, t: 14, b: 42 };
     const W = w - pad.l - pad.r, H = h - pad.t - pad.b;
     const ly = v => o.log ? Math.log10(Math.max(v, o.y0 / 10)) : v, Y0 = ly(o.y0), Y1 = ly(o.y1);
     const X = x => pad.l + (x - o.x0) / (o.x1 - o.x0) * W, Y = v => pad.t + (1 - (Math.min(Math.max(ly(v), Y0), Y1) - Y0) / (Y1 - Y0)) * H;
@@ -456,7 +457,10 @@
       const { ctx, w, h } = f;
       const [K0, K1] = windowOf(w), F = D.frames;
       if (prog == null) prog = K0;
-      const pad = { l: w < 560 ? 48 : 60, r: 12, t: 72, b: 14 }, W = w - pad.l - pad.r, H = h - pad.t - pad.b, Y = k => pad.t + (k - K0) / (K1 - K0) * H;
+      // 左邊距＝軸標題（直的，中心在x=14）＋間隔8＋最寬的刻度數字＋6
+      const tfs = w < 560 ? 13 : 15; ctx.font = `600 ${tfs}px ${HEAD}`;
+      const tickW = ctx.measureText(String(Math.floor(D.ck.tc + K1 * 0.5))).width;
+      const pad = { l: Math.max(w < 560 ? 48 : 60, Math.ceil(14 + tfs * 0.75 + 8 + tickW + 6)), r: 12, t: 72, b: 14 }, W = w - pad.l - pad.r, H = h - pad.t - pad.b, Y = k => pad.t + (k - K0) / (K1 - K0) * H;
       const key = mode === "one" ? "" : [mode, cv.width, cv.height, K0, K1, D.key].join();
       if (key && key === cacheKey) ctx.drawImage(cache, 0, 0, w, h);
       else { paint(ctx, w, h, K0, K1, pad, W, H);
@@ -726,7 +730,7 @@
     function draw() {
       if (body.hidden) return;
       drawRing(ex.cv, { x: ring.x, v: ring.v, N: n, L, small: false });
-      lineChart(cv, { x0: 0, x1: 2100, y0: 1e-11, y1: 0.01, log: true, xticks: [0, 700, 1400, 2100], xlabel: "模型時間", refs: [{ v: 1e-3, text: "0.001：長太大就停" }, { v: 1e-10, text: "縮太小就停" }],
+      lineChart(cv, { x0: 0, x1: 2100, y0: 1e-11, y1: 0.01, log: true, xticks: [0, 700, 1400, 2100], fitLastTick: true, xlabel: "模型時間", refs: [{ v: 1e-3, text: "0.001：長太大就停" }, { v: 1e-10, text: "縮太小就停" }],
         series: single ? [{ pts: single.pts, color: C.ink, width: 2.5 }] : [] });
     }
     range.addEventListener("input", () => setN(+range.value));
@@ -742,6 +746,8 @@
     sec.classList.add("p7");
     const ul = $(".main ul", sec); if (!ul) return {};
     ul.classList.add("exp-grid");
+    // 卡片裡粗體的「年份，地點」單獨成一行，原稿接在後面的「：」會變成內文的第一個字，拿掉（只動這個標點）
+    $$("li > strong", ul).forEach(s => { const t = s.nextSibling; if (t && t.nodeType === 3) t.textContent = t.textContent.replace(/^\s*[：:]\s*/, ""); });
     ul.before(el("p", { class: "exp-caption" }, "三個都是封閉的環道。"));
     const MAP = { "2008": "sugiyama2008", "2013": "tadaki2013", "2018": "stern2018" };
     $$("li", ul).forEach(li => { const y = (li.textContent.match(/(2008|2013|2018)年/) || [])[1], s = DATA.sources.find(q => q.id === MAP[y]);
