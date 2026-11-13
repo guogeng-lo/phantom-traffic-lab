@@ -8,7 +8,7 @@
 - **Wiki入口**：[`wiki/index.md`](wiki/index.md)
 - **Graph／Loop的總整理**：[`runs/2026-11-13-graph-loop-summary.md`](runs/2026-11-13-graph-loop-summary.md)
 
-**目前進度：節點8完成，最終驗收有條件通過（剩第二次真機紀錄待我核實）。**節點7帶著一項已知沒通過的自動測試（動畫CPU）進入節點8，這是我授權的，見[`runs/2026-11-13-n7-risk-acceptance.md`](runs/2026-11-13-n7-risk-acceptance.md)；真機測試和交件檢查見[`runs/2026-11-13-n8-final-check.md`](runs/2026-11-13-n8-final-check.md)。
+**目前進度：節點8完成，最終驗收通過。**節點7帶著一項已知沒通過的自動測試（動畫CPU）進入節點8，這是我授權的，見[`runs/2026-11-13-n7-risk-acceptance.md`](runs/2026-11-13-n7-risk-acceptance.md)；真機測試和交件檢查見[`runs/2026-11-13-n8-final-check.md`](runs/2026-11-13-n8-final-check.md)。
 - **反思**：[`runs/2026-11-13-n8-reflection.md`](runs/2026-11-13-n8-reflection.md)
 
 ## 這個專案在做什麼
