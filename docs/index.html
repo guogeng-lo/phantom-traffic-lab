@@ -116,8 +116,25 @@ ol.steps li.done::before { content: "✓"; background: var(--infield); border-co
 .btn:active:not([disabled]) { box-shadow: 0 1px 0 var(--act-d); transform: translateY(4px) }
 .btn.plain { background: var(--card); box-shadow: inset 0 0 0 3px var(--ink) }
 .btn.plain:active:not([disabled]) { transform: translateY(2px) }
-.btn.plain[aria-pressed="true"] { background: #fff4cf; box-shadow: inset 0 0 0 3px var(--act-d) }
-.btn.plain[aria-pressed="true"]::before { content: "✓ " }
+/* 兩個互斥的選項（快轉｜播放動畫） */
+.seg-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px }
+.seg-label { font-weight: 700; font-size: 17px }
+.seg { display: inline-flex; border-radius: 999px; box-shadow: inset 0 0 0 3px var(--ink); padding: 3px; background: var(--card) }
+.seg button { appearance: none; border: 0; background: transparent; border-radius: 999px; min-height: 44px; padding: 6px 18px; font-family: var(--head); font-weight: 800; font-size: 17px; cursor: pointer; color: var(--ink) }
+.seg button[aria-pressed="true"] { background: var(--act); box-shadow: 0 3px 0 var(--act-d) }
+/* 第6頁：Worker不能用時的確認、選到的車數 */
+.confirm { margin: 12px 0; padding: 14px 16px; border-radius: 12px; background: #fff4cf; box-shadow: inset 0 0 0 2px var(--act-d); display: grid; gap: 10px }
+.confirm p { margin: 0; font-size: 17px }
+.strip .sel { outline: 3px solid var(--ink); outline-offset: -1px }
+.strip thead th.sel { color: var(--ink); font-weight: 900 }
+.verdict-line { font-size: 17px; line-height: 1.55; margin: 0 }
+/* 第8頁第三題的待辦 */
+.todo-box { background: #f6f8f5; border-radius: 12px; padding: 12px 14px; display: grid; gap: 6px }
+ol.todo { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; counter-reset: td }
+ol.todo li { counter-increment: td; display: grid; grid-template-columns: 30px 1fr; gap: 10px; align-items: center; font-size: 17px }
+ol.todo li::before { content: counter(td); width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; box-shadow: inset 0 0 0 2px var(--ink) }
+ol.todo li.done::before { content: "✓"; background: var(--act); box-shadow: none }
+ol.todo li.done { color: var(--soft) }
 .btn[disabled] { opacity: .45; cursor: default; box-shadow: none }
 .key { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 12px; font-size: 16px }
 .key span { display: inline-flex; align-items: center; gap: 8px }
@@ -255,6 +272,20 @@ details.card9 > :last-child { padding-bottom: 14px; margin-bottom: 0 }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important } }
 
+/* 第3頁：時空圖畫的範圍寫在圖上方；手機上按鈕、說明、題目排在圖正下方 */
+.ts-range { margin: 0 4px 8px; font-size: 17px; font-weight: 700; line-height: 1.5 }
+@media (max-width: 860px) { .ts-grid .placard > .p3-act { order: -1 } }
+/* 第5頁：靠近分界時的提醒 */
+.near-note { margin: 0; padding: 10px 12px; border-radius: 10px; background: #fff4cf; font-size: 17px; line-height: 1.5 }
+/* 第8頁最上面的跳轉 */
+.jump { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin: 0 0 18px; padding: 12px 14px; background: var(--card); border-radius: 14px; box-shadow: 0 2px 0 #d3dbd0; max-width: 46em }
+.jump p { margin: 0; font-weight: 700; font-size: 17px; flex-basis: 100% }
+.jump button { appearance: none; border: 0; border-radius: 999px; min-height: 44px; padding: 6px 16px; font-family: var(--head); font-weight: 800; font-size: 17px; background: var(--wall); box-shadow: inset 0 0 0 2px var(--ink); cursor: pointer; color: var(--ink) }
+/* 第10頁的思考題 */
+.think { background: var(--card); border-radius: 18px; padding: 18px 20px; margin: 0 0 16px; box-shadow: inset 0 0 0 3px var(--act) }
+.think h3 { margin: 0 0 10px; font-family: var(--head); font-weight: 800; font-size: 22px }
+.think p { margin: 0 0 10px }
+
 </style>
 </head>
 <body>
@@ -280,7 +311,7 @@ details.card9 > :last-child { padding-bottom: 14px; margin-bottom: 0 }
 <details class="adv" data-layer="adv"><summary>進階：模型、推導和量法</summary><div class="text"><p data-i="1"><span class="tag mod">【模型】</span>這個做法不是我們發明的。1995年Bando等人提出這個模型時，也是讓第1台車往前偏0.1：100台車、環長200，所有車從靜止出發，最後形成5團塞車，而且都以相同的速度慢慢往後移。</p>
 <p data-i="2"><span class="tag sim">【我們的模擬】</span>這一頁用22台、環長44（平均車距2），車子一開始就用一樣的速度在跑，不是從靜止出發。偏移0.1時，在模型時間92出現幾乎停住的車（速度低於0.1）。我們也試了別的大小：偏0.01時要到120.5，偏0.2時是87。這一頁用哪個大小，是在跑之前就定好的規則：用Bando的0.1時，出現幾乎停住的車的模型時間如果落在60到300之間，就用0.1。結果是92，所以用0.1。</p>
 <p data-i="3">模型時間沒有單位。我們沒有把模擬換成公尺和秒，所以不能說「真實道路上幾秒就會塞」。</p></div></details>
-<details class="src"><summary>出處和檢查</summary><div class="src-in"><h3>這一頁用到的證據卡</h3><ul class="cards"><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-setup.md" target="_blank" rel="noopener">sugiyama2008-setup</a><span class="loc">第4頁第2～3段、圖2</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-jam-emerges.md" target="_blank" rel="noopener">sugiyama2008-jam-emerges</a><span class="loc">第4頁最後一段、第5頁圖3</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/bando1995-spontaneous-jam.md" target="_blank" rel="noopener">bando1995-spontaneous-jam</a><span class="loc">第1037頁式(17)～(19)、第1038頁式(24)後段、第1039頁圖5、第1040頁圖6</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-offset-jam.md" target="_blank" rel="noopener">ours-model-offset-jam</a><span class="loc">測試M4（model/run_core.py）</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-mechanism.md" target="_blank" rel="noopener">sugiyama2008-mechanism</a><span class="loc">第1～2頁摘要、第3頁第2段、第7頁第1～2段</span></li></ul><h3>檢查狀態</h3><ul class="chk"><li class="ok">通過：證據卡格式檢查（scripts/check_wiki.py）<span class="loc">錯誤 0 個，警告 0 個。</span></li><li class="ok">通過：頁面和證據卡對應（scripts/check_slide_map.py）<span class="loc">頁數 10，對照列 24，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿程式檢查（scripts/check_pages.py）<span class="loc">逐頁稿 10 頁，錯誤 0 個。</span></li><li class="ok">通過：瀏覽器求解器跟Python對答案（tests/test_js_parity.js）<span class="loc">沒通過 0 項。</span></li><li class="ok">通過：逐頁稿獨立審查（節點6第4輪，使用者授權的限定範圍複核）<span class="loc">逐頁稿的SHA-256跟審查紀錄一致</span></li></ul><p class="chk-meta">以上是建置時（2026-11-13，commit 7ba2579）實際執行的結果。網站不會自己更新；Wiki或程式改了要重新建置。</p></div></details>
+<details class="src"><summary>出處和檢查</summary><div class="src-in"><h3>這一頁用到的證據卡</h3><ul class="cards"><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-setup.md" target="_blank" rel="noopener">sugiyama2008-setup</a><span class="loc">第4頁第2～3段、圖2</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-jam-emerges.md" target="_blank" rel="noopener">sugiyama2008-jam-emerges</a><span class="loc">第4頁最後一段、第5頁圖3</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/bando1995-spontaneous-jam.md" target="_blank" rel="noopener">bando1995-spontaneous-jam</a><span class="loc">第1037頁式(17)～(19)、第1038頁式(24)後段、第1039頁圖5、第1040頁圖6</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-offset-jam.md" target="_blank" rel="noopener">ours-model-offset-jam</a><span class="loc">測試M4（model/run_core.py）</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-mechanism.md" target="_blank" rel="noopener">sugiyama2008-mechanism</a><span class="loc">第1～2頁摘要、第3頁第2段、第7頁第1～2段</span></li></ul><h3>檢查狀態</h3><ul class="chk"><li class="ok">通過：證據卡格式檢查（scripts/check_wiki.py）<span class="loc">錯誤 0 個，警告 0 個。</span></li><li class="ok">通過：頁面和證據卡對應（scripts/check_slide_map.py）<span class="loc">頁數 10，對照列 24，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿程式檢查（scripts/check_pages.py）<span class="loc">逐頁稿 10 頁，錯誤 0 個。</span></li><li class="ok">通過：瀏覽器求解器跟Python對答案（tests/test_js_parity.js）<span class="loc">沒通過 0 項。</span></li><li class="ok">通過：逐頁稿獨立審查（節點6第4輪，使用者授權的限定範圍複核）<span class="loc">逐頁稿的SHA-256跟審查紀錄一致</span></li></ul><p class="chk-meta">以上是建置時（2026-11-13，commit 0122835）實際執行的結果。網站不會自己更新；Wiki或程式改了要重新建置。</p></div></details>
 </section>
 <section class="page" id="p2" data-page="2" aria-labelledby="h2" hidden>
 <header class="ph"><h2 id="h2" tabindex="-1">輕踩一下煞車，會怎樣？</h2></header>
@@ -297,7 +328,7 @@ details.card9 > :last-child { padding-bottom: 14px; margin-bottom: 0 }
 <ul data-i="3"><li>v是這台車現在的速度，h是它到前車的距離（車距）。</li><li>V(h)是「這個車距想開的速度」，叫最佳速度函數（optimal velocity function），Bando用的是<code class="f">V(h) = tanh(h − 2) + tanh2</code>。車距是0時想開的速度是0，車距越大越想開快，但有上限。</li><li>a是駕駛把車速調向V(h)有多快。</li><li>Bando先試過更簡單的<code class="f">V = tanh(h)</code>，結果有車往後倒退，等於撞車，所以改成上面這個函數。</li></ul>
 <p data-i="4"><span class="tag sim">【我們的模擬】</span>這一頁的參數：22台、環長44（平均車距2）、a=1；煞車是加速度減少0.25、持續0.5。這是我們事先比較了9種煞車組合，照事先寫好的規則（能形成塞車的組合裡，煞得最輕的）選出來的。從點擊起算，經過約89.3個模型時間，有車幾乎停住；不管在模型時間20還是500才點，結果都一樣。</p>
 <p data-i="5">為什麼點之前要用公式算？我們第1版的測試是從一開始就一步一步用數值方法算，而且完全不去點：大約到模型時間436，電腦計算的捨入誤差就讓均勻車流自己亂掉了。為了讓「你點了才塞」這件事是真的，我們在點之前用公式算，點了才切換成數值積分；切換的那一刻，位置、速度和時間都是連續的。</p></div></details>
-<details class="src"><summary>出處和檢查</summary><div class="src-in"><h3>這一頁用到的證據卡</h3><ul class="cards"><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/bando1995-ovm-equation.md" target="_blank" rel="noopener">bando1995-ovm-equation</a><span class="loc">第1036頁式(1)～(4)</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/bando1995-velocity-function.md" target="_blank" rel="noopener">bando1995-velocity-function</a><span class="loc">第1037頁式(16)、第1038頁式(24)和圖3～4、第1042頁圖11</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/bando1995-spontaneous-jam.md" target="_blank" rel="noopener">bando1995-spontaneous-jam</a><span class="loc">第1037頁式(17)～(19)、第1038頁式(24)後段、第1039頁圖5、第1040頁圖6</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-click-brake.md" target="_blank" rel="noopener">ours-model-click-brake</a><span class="loc">測試M5a v2、M5b（model/run_v2.py、model/run_core.py）</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-jam-emerges.md" target="_blank" rel="noopener">sugiyama2008-jam-emerges</a><span class="loc">第4頁最後一段、第5頁圖3</span></li></ul><h3>檢查狀態</h3><ul class="chk"><li class="ok">通過：證據卡格式檢查（scripts/check_wiki.py）<span class="loc">錯誤 0 個，警告 0 個。</span></li><li class="ok">通過：頁面和證據卡對應（scripts/check_slide_map.py）<span class="loc">頁數 10，對照列 24，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿程式檢查（scripts/check_pages.py）<span class="loc">逐頁稿 10 頁，錯誤 0 個。</span></li><li class="ok">通過：瀏覽器求解器跟Python對答案（tests/test_js_parity.js）<span class="loc">沒通過 0 項。</span></li><li class="ok">通過：逐頁稿獨立審查（節點6第4輪，使用者授權的限定範圍複核）<span class="loc">逐頁稿的SHA-256跟審查紀錄一致</span></li></ul><p class="chk-meta">以上是建置時（2026-11-13，commit 7ba2579）實際執行的結果。網站不會自己更新；Wiki或程式改了要重新建置。</p></div></details>
+<details class="src"><summary>出處和檢查</summary><div class="src-in"><h3>這一頁用到的證據卡</h3><ul class="cards"><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/bando1995-ovm-equation.md" target="_blank" rel="noopener">bando1995-ovm-equation</a><span class="loc">第1036頁式(1)～(4)</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/bando1995-velocity-function.md" target="_blank" rel="noopener">bando1995-velocity-function</a><span class="loc">第1037頁式(16)、第1038頁式(24)和圖3～4、第1042頁圖11</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/bando1995-spontaneous-jam.md" target="_blank" rel="noopener">bando1995-spontaneous-jam</a><span class="loc">第1037頁式(17)～(19)、第1038頁式(24)後段、第1039頁圖5、第1040頁圖6</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-click-brake.md" target="_blank" rel="noopener">ours-model-click-brake</a><span class="loc">測試M5a v2、M5b（model/run_v2.py、model/run_core.py）</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-jam-emerges.md" target="_blank" rel="noopener">sugiyama2008-jam-emerges</a><span class="loc">第4頁最後一段、第5頁圖3</span></li></ul><h3>檢查狀態</h3><ul class="chk"><li class="ok">通過：證據卡格式檢查（scripts/check_wiki.py）<span class="loc">錯誤 0 個，警告 0 個。</span></li><li class="ok">通過：頁面和證據卡對應（scripts/check_slide_map.py）<span class="loc">頁數 10，對照列 24，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿程式檢查（scripts/check_pages.py）<span class="loc">逐頁稿 10 頁，錯誤 0 個。</span></li><li class="ok">通過：瀏覽器求解器跟Python對答案（tests/test_js_parity.js）<span class="loc">沒通過 0 項。</span></li><li class="ok">通過：逐頁稿獨立審查（節點6第4輪，使用者授權的限定範圍複核）<span class="loc">逐頁稿的SHA-256跟審查紀錄一致</span></li></ul><p class="chk-meta">以上是建置時（2026-11-13，commit 0122835）實際執行的結果。網站不會自己更新；Wiki或程式改了要重新建置。</p></div></details>
 </section>
 <section class="page" id="p3" data-page="3" aria-labelledby="h3" hidden>
 <header class="ph"><h2 id="h3" tabindex="-1">車往前開，塞車卻往後跑</h2></header>
@@ -313,7 +344,7 @@ details.card9 > :last-child { padding-bottom: 14px; margin-bottom: 0 }
 <p data-i="2">在我們的參考測試裡，車的平均速度是+0.9632，塞車團的移動速度是−0.1505：車往前、塞車團往後。我們用兩種取樣間隔（0.5和0.05）量，結果一樣，也確認了軌跡跨過0和44那個點時沒有畫錯。</p>
 <p data-i="3">這兩個數字都沒有單位。我們沒有把模擬換成公尺和秒，所以<strong>不能</strong>說模擬裡的塞車團是20 km/h往後；20 km/h是真實實驗的數字。</p>
 <p data-i="4"><span class="tag mod">【模型】</span>Bando 1995的模擬（100台車）裡，塞車團也都以相同的速度慢慢往後移動。</p></div></details>
-<details class="src"><summary>出處和檢查</summary><div class="src-in"><h3>這一頁用到的證據卡</h3><ul class="cards"><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-setup.md" target="_blank" rel="noopener">sugiyama2008-setup</a><span class="loc">第4頁第2～3段、圖2</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-backward-wave.md" target="_blank" rel="noopener">sugiyama2008-backward-wave</a><span class="loc">第5頁第1～2段、第6頁圖4</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/tadaki2013-density-dependence.md" target="_blank" rel="noopener">tadaki2013-density-dependence</a><span class="loc">第6頁第1段、第7頁圖4、附錄B～C</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/bando1995-spontaneous-jam.md" target="_blank" rel="noopener">bando1995-spontaneous-jam</a><span class="loc">第1037頁式(17)～(19)、第1038頁式(24)後段、第1039頁圖5、第1040頁圖6</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-wave-direction.md" target="_blank" rel="noopener">ours-model-wave-direction</a><span class="loc">測試M6v2（model/run_v2.py）</span></li></ul><h3>檢查狀態</h3><ul class="chk"><li class="ok">通過：證據卡格式檢查（scripts/check_wiki.py）<span class="loc">錯誤 0 個，警告 0 個。</span></li><li class="ok">通過：頁面和證據卡對應（scripts/check_slide_map.py）<span class="loc">頁數 10，對照列 24，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿程式檢查（scripts/check_pages.py）<span class="loc">逐頁稿 10 頁，錯誤 0 個。</span></li><li class="ok">通過：瀏覽器求解器跟Python對答案（tests/test_js_parity.js）<span class="loc">沒通過 0 項。</span></li><li class="ok">通過：逐頁稿獨立審查（節點6第4輪，使用者授權的限定範圍複核）<span class="loc">逐頁稿的SHA-256跟審查紀錄一致</span></li></ul><p class="chk-meta">以上是建置時（2026-11-13，commit 7ba2579）實際執行的結果。網站不會自己更新；Wiki或程式改了要重新建置。</p></div></details>
+<details class="src"><summary>出處和檢查</summary><div class="src-in"><h3>這一頁用到的證據卡</h3><ul class="cards"><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-setup.md" target="_blank" rel="noopener">sugiyama2008-setup</a><span class="loc">第4頁第2～3段、圖2</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-backward-wave.md" target="_blank" rel="noopener">sugiyama2008-backward-wave</a><span class="loc">第5頁第1～2段、第6頁圖4</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/tadaki2013-density-dependence.md" target="_blank" rel="noopener">tadaki2013-density-dependence</a><span class="loc">第6頁第1段、第7頁圖4、附錄B～C</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/bando1995-spontaneous-jam.md" target="_blank" rel="noopener">bando1995-spontaneous-jam</a><span class="loc">第1037頁式(17)～(19)、第1038頁式(24)後段、第1039頁圖5、第1040頁圖6</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-wave-direction.md" target="_blank" rel="noopener">ours-model-wave-direction</a><span class="loc">測試M6v2（model/run_v2.py）</span></li></ul><h3>檢查狀態</h3><ul class="chk"><li class="ok">通過：證據卡格式檢查（scripts/check_wiki.py）<span class="loc">錯誤 0 個，警告 0 個。</span></li><li class="ok">通過：頁面和證據卡對應（scripts/check_slide_map.py）<span class="loc">頁數 10，對照列 24，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿程式檢查（scripts/check_pages.py）<span class="loc">逐頁稿 10 頁，錯誤 0 個。</span></li><li class="ok">通過：瀏覽器求解器跟Python對答案（tests/test_js_parity.js）<span class="loc">沒通過 0 項。</span></li><li class="ok">通過：逐頁稿獨立審查（節點6第4輪，使用者授權的限定範圍複核）<span class="loc">逐頁稿的SHA-256跟審查紀錄一致</span></li></ul><p class="chk-meta">以上是建置時（2026-11-13，commit 0122835）實際執行的結果。網站不會自己更新；Wiki或程式改了要重新建置。</p></div></details>
 </section>
 <section class="page" id="p4" data-page="4" aria-labelledby="h4" hidden>
 <header class="ph"><h2 id="h4" tabindex="-1">擾動往後傳，在這組條件下越傳越大</h2></header>
@@ -326,7 +357,7 @@ details.card9 > :last-child { padding-bottom: 14px; margin-bottom: 0 }
 <details class="adv" data-layer="adv"><summary>進階：模型、推導和量法</summary><div class="text"><p data-i="1"><span class="tag sim">【我們的模擬】</span>「越傳越大」說的是整體，不是每一台都比前一台慢得更多。取點擊後100模型時間內的最低車速來比：a=1時，被點那台後面的21台裡，有19台的最低速度比它前面那台低，但第13台就比第12台高。所以圖上的線不一定一條比一條低。a=2.5時剛好相反，後面21台沒有一台的最低速度比前一台低。</p>
 <p data-i="2"><span class="tag mod">【模型】</span>「要一點時間才調好」是我們給一般人的說法，不是論文的原話。在模型裡，它來自加速度的方程式本身：車速是慢慢往V(h)靠過去的，a決定靠得多快。Bando的模型刻意不加入反應延遲（reaction time, delay），作者認為寫成加速度的方程式就已經包含了「速度跟不上變化」的效果。所以這裡講的不是「駕駛反應慢了幾秒」。</p>
 <p data-i="3"><span class="tag mod">【模型】</span>為什麼調得慢會放大？下一頁會看到：小擾動會變大還是變小，要看a跟速度函數的斜率比起來夠不夠大。</p></div></details>
-<details class="src"><summary>出處和檢查</summary><div class="src-in"><h3>這一頁用到的證據卡</h3><ul class="cards"><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/bando1995-linear-stability.md" target="_blank" rel="noopener">bando1995-linear-stability</a><span class="loc">第1036～1037頁式(5)～(12)、圖1</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/bando1995-no-delay.md" target="_blank" rel="noopener">bando1995-no-delay</a><span class="loc">第1035頁右欄、第1042頁右欄</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-propagation.md" target="_blank" rel="noopener">ours-model-propagation</a><span class="loc">測試M7（model/run_core.py）</span></li></ul><h3>檢查狀態</h3><ul class="chk"><li class="ok">通過：證據卡格式檢查（scripts/check_wiki.py）<span class="loc">錯誤 0 個，警告 0 個。</span></li><li class="ok">通過：頁面和證據卡對應（scripts/check_slide_map.py）<span class="loc">頁數 10，對照列 24，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿程式檢查（scripts/check_pages.py）<span class="loc">逐頁稿 10 頁，錯誤 0 個。</span></li><li class="ok">通過：瀏覽器求解器跟Python對答案（tests/test_js_parity.js）<span class="loc">沒通過 0 項。</span></li><li class="ok">通過：逐頁稿獨立審查（節點6第4輪，使用者授權的限定範圍複核）<span class="loc">逐頁稿的SHA-256跟審查紀錄一致</span></li></ul><p class="chk-meta">以上是建置時（2026-11-13，commit 7ba2579）實際執行的結果。網站不會自己更新；Wiki或程式改了要重新建置。</p></div></details>
+<details class="src"><summary>出處和檢查</summary><div class="src-in"><h3>這一頁用到的證據卡</h3><ul class="cards"><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/bando1995-linear-stability.md" target="_blank" rel="noopener">bando1995-linear-stability</a><span class="loc">第1036～1037頁式(5)～(12)、圖1</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/bando1995-no-delay.md" target="_blank" rel="noopener">bando1995-no-delay</a><span class="loc">第1035頁右欄、第1042頁右欄</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-propagation.md" target="_blank" rel="noopener">ours-model-propagation</a><span class="loc">測試M7（model/run_core.py）</span></li></ul><h3>檢查狀態</h3><ul class="chk"><li class="ok">通過：證據卡格式檢查（scripts/check_wiki.py）<span class="loc">錯誤 0 個，警告 0 個。</span></li><li class="ok">通過：頁面和證據卡對應（scripts/check_slide_map.py）<span class="loc">頁數 10，對照列 24，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿程式檢查（scripts/check_pages.py）<span class="loc">逐頁稿 10 頁，錯誤 0 個。</span></li><li class="ok">通過：瀏覽器求解器跟Python對答案（tests/test_js_parity.js）<span class="loc">沒通過 0 項。</span></li><li class="ok">通過：逐頁稿獨立審查（節點6第4輪，使用者授權的限定範圍複核）<span class="loc">逐頁稿的SHA-256跟審查紀錄一致</span></li></ul><p class="chk-meta">以上是建置時（2026-11-13，commit 0122835）實際執行的結果。網站不會自己更新；Wiki或程式改了要重新建置。</p></div></details>
 </section>
 <section class="page" id="p5" data-page="5" aria-labelledby="h5" hidden>
 <header class="ph"><h2 id="h5" tabindex="-1">猜猜看①：每台車更快調整速度，還會塞嗎？</h2></header>
@@ -343,7 +374,7 @@ details.card9 > :last-child { padding-bottom: 14px; margin-bottom: 0 }
 <p data-i="4">22台、車距2時是1.9595，不是2。Orosz等人2010年綜述附錄的一般公式，代入這個模型之後也得到同一個分界（代入那一步是我們做的）。</p>
 <p data-i="5"><span class="tag sim">【我們的模擬】</span>正式模型用二分法量到1.959494，公式是1.959493；選題階段的程式量到1.95966。a=1.98時，照a/2的條件應該不穩定，照有限車數的公式卻是穩定的；模擬裡擾動確實慢慢變小。這就是有限車數的差別，大約2%，對一般讀者不重要，所以放在這裡。</p>
 <p data-i="6">a是「把車速調過去有多快」，沒有單位。這個模型沒有反應延遲，所以a不能翻成「駕駛的反應時間是幾秒」。</p></div></details>
-<details class="src"><summary>出處和檢查</summary><div class="src-in"><h3>這一頁用到的證據卡</h3><ul class="cards"><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/bando1995-linear-stability.md" target="_blank" rel="noopener">bando1995-linear-stability</a><span class="loc">第1036～1037頁式(5)～(12)、圖1</span></li><li><span class="tag der">【我們的推導】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-finite-n-threshold.md" target="_blank" rel="noopener">ours-finite-n-threshold</a><span class="loc">「從Bando 1995推」第1～6步、「跟Orosz 2010對照」</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-finite-n-simulation.md" target="_blank" rel="noopener">ours-finite-n-simulation</a><span class="loc">測試A4、A4b（程式在audition/test_ovm.py）</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/orosz2010-ring-stability.md" target="_blank" rel="noopener">orosz2010-ring-stability</a><span class="loc">第4467頁第3段、第4475～4476頁附錄A式(A1)～(A8)</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-threshold.md" target="_blank" rel="noopener">ours-model-threshold</a><span class="loc">測試M1（model/run_core.py）</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-near-threshold.md" target="_blank" rel="noopener">ours-model-near-threshold</a><span class="loc">測試M5d（model/run_core.py）</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-fast-adjust.md" target="_blank" rel="noopener">ours-model-fast-adjust</a><span class="loc">測試M5c（model/run_core.py）</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-click-brake.md" target="_blank" rel="noopener">ours-model-click-brake</a><span class="loc">測試M5a v2、M5b（model/run_v2.py、model/run_core.py）</span></li></ul><h3>檢查狀態</h3><ul class="chk"><li class="ok">通過：證據卡格式檢查（scripts/check_wiki.py）<span class="loc">錯誤 0 個，警告 0 個。</span></li><li class="ok">通過：頁面和證據卡對應（scripts/check_slide_map.py）<span class="loc">頁數 10，對照列 24，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿程式檢查（scripts/check_pages.py）<span class="loc">逐頁稿 10 頁，錯誤 0 個。</span></li><li class="ok">通過：瀏覽器求解器跟Python對答案（tests/test_js_parity.js）<span class="loc">沒通過 0 項。</span></li><li class="ok">通過：逐頁稿獨立審查（節點6第4輪，使用者授權的限定範圍複核）<span class="loc">逐頁稿的SHA-256跟審查紀錄一致</span></li></ul><p class="chk-meta">以上是建置時（2026-11-13，commit 7ba2579）實際執行的結果。網站不會自己更新；Wiki或程式改了要重新建置。</p></div></details>
+<details class="src"><summary>出處和檢查</summary><div class="src-in"><h3>這一頁用到的證據卡</h3><ul class="cards"><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/bando1995-linear-stability.md" target="_blank" rel="noopener">bando1995-linear-stability</a><span class="loc">第1036～1037頁式(5)～(12)、圖1</span></li><li><span class="tag der">【我們的推導】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-finite-n-threshold.md" target="_blank" rel="noopener">ours-finite-n-threshold</a><span class="loc">「從Bando 1995推」第1～6步、「跟Orosz 2010對照」</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-finite-n-simulation.md" target="_blank" rel="noopener">ours-finite-n-simulation</a><span class="loc">測試A4、A4b（程式在audition/test_ovm.py）</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/orosz2010-ring-stability.md" target="_blank" rel="noopener">orosz2010-ring-stability</a><span class="loc">第4467頁第3段、第4475～4476頁附錄A式(A1)～(A8)</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-threshold.md" target="_blank" rel="noopener">ours-model-threshold</a><span class="loc">測試M1（model/run_core.py）</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-near-threshold.md" target="_blank" rel="noopener">ours-model-near-threshold</a><span class="loc">測試M5d（model/run_core.py）</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-fast-adjust.md" target="_blank" rel="noopener">ours-model-fast-adjust</a><span class="loc">測試M5c（model/run_core.py）</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-click-brake.md" target="_blank" rel="noopener">ours-model-click-brake</a><span class="loc">測試M5a v2、M5b（model/run_v2.py、model/run_core.py）</span></li></ul><h3>檢查狀態</h3><ul class="chk"><li class="ok">通過：證據卡格式檢查（scripts/check_wiki.py）<span class="loc">錯誤 0 個，警告 0 個。</span></li><li class="ok">通過：頁面和證據卡對應（scripts/check_slide_map.py）<span class="loc">頁數 10，對照列 24，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿程式檢查（scripts/check_pages.py）<span class="loc">逐頁稿 10 頁，錯誤 0 個。</span></li><li class="ok">通過：瀏覽器求解器跟Python對答案（tests/test_js_parity.js）<span class="loc">沒通過 0 項。</span></li><li class="ok">通過：逐頁稿獨立審查（節點6第4輪，使用者授權的限定範圍複核）<span class="loc">逐頁稿的SHA-256跟審查紀錄一致</span></li></ul><p class="chk-meta">以上是建置時（2026-11-13，commit 0122835）實際執行的結果。網站不會自己更新；Wiki或程式改了要重新建置。</p></div></details>
 </section>
 <section class="page" id="p6" data-page="6" aria-labelledby="h6" hidden>
 <header class="ph"><h2 id="h6" tabindex="-1">猜猜看②：車越多，越容易塞嗎？</h2></header>
@@ -363,7 +394,7 @@ details.card9 > :last-child { padding-bottom: 14px; margin-bottom: 0 }
 <p data-i="3"><span class="tag sim">【我們的模擬】</span>量法的細節：每個N都只加一個很小的擾動，看它的成長速度跟公式差多少；擾動長太大、縮太小，或別的波長大到干擾量測，就停下來。剩下能用來量的時間要至少200才算數。21台停下來，是因為另一種波長（繞一圈三個起伏）的擾動，從計算的數值誤差長起來，很快就大到最長那個波的十分之一。58個車數裡，57個量測資料足夠，而且都符合各自的比對規則；其中3台只確認了差距在容許範圍內。這個量法是看過前兩次結果之後才改的，經使用者批准，紀錄都保留。</p>
 <p data-i="4"><span class="tag exp">【實驗】</span>很擠的時候真的會穩定嗎？2013年那個實驗有一場40台的，車速波動非常小，車流是均勻的。但只有一場，而且是駕駛特別小心的第一天；作者自己也說，還不清楚這是不是模型預測的那種情況。所以這只能說「單一場次觀察到均勻流」，不能拿來證明模型。</p>
 <p data-i="5">模擬的「車數」不能直接跟實驗的「密度」對數字：模擬沒有單位，環長44不是44公尺。</p></div></details>
-<details class="src"><summary>出處和檢查</summary><div class="src-in"><h3>這一頁用到的證據卡</h3><ul class="cards"><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/bando1995-stable-regions.md" target="_blank" rel="noopener">bando1995-stable-regions</a><span class="loc">第1041頁右欄最後一段、圖10</span></li><li><span class="tag der">【我們的推導】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-finite-n-threshold.md" target="_blank" rel="noopener">ours-finite-n-threshold</a><span class="loc">「從Bando 1995推」第1～6步、「跟Orosz 2010對照」</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-n-sweep.md" target="_blank" rel="noopener">ours-model-n-sweep</a><span class="loc">測試M2、M2v2、M2補測（model/run_core.py、model/run_v2.py、model/run_v3_m2.py）</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-uniform-dense.md" target="_blank" rel="noopener">ours-model-uniform-dense</a><span class="loc">測試M3（model/run_core.py）</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/tadaki2013-density-dependence.md" target="_blank" rel="noopener">tadaki2013-density-dependence</a><span class="loc">第6頁第1段、第7頁圖4、附錄B～C</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/tadaki2013-critical-density.md" target="_blank" rel="noopener">tadaki2013-critical-density</a><span class="loc">第6頁第3段、第8頁圖5～6、第9頁圖7、第10頁圖8、第10～11頁</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/tadaki2013-metastable.md" target="_blank" rel="noopener">tadaki2013-metastable</a><span class="loc">第5頁表1、第6頁定點量測說明、第9頁圖7(c)、第10頁圖8和內文</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/tadaki2013-high-density.md" target="_blank" rel="noopener">tadaki2013-high-density</a><span class="loc">第12頁第2段、第8頁圖5、第18頁圖C.2</span></li></ul><h3>檢查狀態</h3><ul class="chk"><li class="ok">通過：證據卡格式檢查（scripts/check_wiki.py）<span class="loc">錯誤 0 個，警告 0 個。</span></li><li class="ok">通過：頁面和證據卡對應（scripts/check_slide_map.py）<span class="loc">頁數 10，對照列 24，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿程式檢查（scripts/check_pages.py）<span class="loc">逐頁稿 10 頁，錯誤 0 個。</span></li><li class="ok">通過：瀏覽器求解器跟Python對答案（tests/test_js_parity.js）<span class="loc">沒通過 0 項。</span></li><li class="ok">通過：逐頁稿獨立審查（節點6第4輪，使用者授權的限定範圍複核）<span class="loc">逐頁稿的SHA-256跟審查紀錄一致</span></li></ul><p class="chk-meta">以上是建置時（2026-11-13，commit 7ba2579）實際執行的結果。網站不會自己更新；Wiki或程式改了要重新建置。</p></div></details>
+<details class="src"><summary>出處和檢查</summary><div class="src-in"><h3>這一頁用到的證據卡</h3><ul class="cards"><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/bando1995-stable-regions.md" target="_blank" rel="noopener">bando1995-stable-regions</a><span class="loc">第1041頁右欄最後一段、圖10</span></li><li><span class="tag der">【我們的推導】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-finite-n-threshold.md" target="_blank" rel="noopener">ours-finite-n-threshold</a><span class="loc">「從Bando 1995推」第1～6步、「跟Orosz 2010對照」</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-n-sweep.md" target="_blank" rel="noopener">ours-model-n-sweep</a><span class="loc">測試M2、M2v2、M2補測（model/run_core.py、model/run_v2.py、model/run_v3_m2.py）</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-uniform-dense.md" target="_blank" rel="noopener">ours-model-uniform-dense</a><span class="loc">測試M3（model/run_core.py）</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/tadaki2013-density-dependence.md" target="_blank" rel="noopener">tadaki2013-density-dependence</a><span class="loc">第6頁第1段、第7頁圖4、附錄B～C</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/tadaki2013-critical-density.md" target="_blank" rel="noopener">tadaki2013-critical-density</a><span class="loc">第6頁第3段、第8頁圖5～6、第9頁圖7、第10頁圖8、第10～11頁</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/tadaki2013-metastable.md" target="_blank" rel="noopener">tadaki2013-metastable</a><span class="loc">第5頁表1、第6頁定點量測說明、第9頁圖7(c)、第10頁圖8和內文</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/tadaki2013-high-density.md" target="_blank" rel="noopener">tadaki2013-high-density</a><span class="loc">第12頁第2段、第8頁圖5、第18頁圖C.2</span></li></ul><h3>檢查狀態</h3><ul class="chk"><li class="ok">通過：證據卡格式檢查（scripts/check_wiki.py）<span class="loc">錯誤 0 個，警告 0 個。</span></li><li class="ok">通過：頁面和證據卡對應（scripts/check_slide_map.py）<span class="loc">頁數 10，對照列 24，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿程式檢查（scripts/check_pages.py）<span class="loc">逐頁稿 10 頁，錯誤 0 個。</span></li><li class="ok">通過：瀏覽器求解器跟Python對答案（tests/test_js_parity.js）<span class="loc">沒通過 0 項。</span></li><li class="ok">通過：逐頁稿獨立審查（節點6第4輪，使用者授權的限定範圍複核）<span class="loc">逐頁稿的SHA-256跟審查紀錄一致</span></li></ul><p class="chk-meta">以上是建置時（2026-11-13，commit 0122835）實際執行的結果。網站不會自己更新；Wiki或程式改了要重新建置。</p></div></details>
 </section>
 <section class="page" id="p7" data-page="7" aria-labelledby="h7" hidden>
 <header class="ph"><h2 id="h7" tabindex="-1">真的人開車，也會出現幽靈塞車</h2></header>
@@ -377,7 +408,7 @@ details.card9 > :last-child { padding-bottom: 14px; margin-bottom: 0 }
 <details class="adv" data-layer="adv"><summary>進階：模型、推導和量法</summary><div class="text"><p data-i="1"><span class="tag exp">【實驗】</span>三個實驗的條件不一樣，不能合成一個數字：</p>
 <ul data-i="2"><li>環道周長、車數、車種、駕駛都不同。2018年的環道比2008年的大，作者說是因為美國的車比較大。</li><li>2013年的實驗用雷射掃描器，大約每0.2秒量一次車的位置；2008年的速度是從影片裡的軌跡估出來的，沒有給誤差範圍。</li><li>重複次數都不多：2008年的論文沒有寫重複了幾次；2018年每種條件一場；2013年第二天的28、30、32、34台各2～3場，其他車數大多只有1場。2013年的論文寫兩天共19場，但表格列的場次跟這個數字對不上，我們目前無法判斷是怎麼算的。</li><li>駕駛：2013年是輪流開車的大學生，不是隨機抽樣的一般人；2018年除了負責減弱波的那台車，其他駕駛是受過安全駕駛訓練的大學職員；2008年的論文沒有寫駕駛是誰。</li></ul>
 <p data-i="3"><span class="tag exp">【實驗】</span>2013年那篇的作者還用一個粗略的比例比較環道和高速公路：車速快三倍，需要的車距大約也大三倍，所以環道量到的臨界密度（每公尺0.08～0.09台），跟高速公路的約每公里25台是一致的。作者自己說這是粗略的論證。</p></div></details>
-<details class="src"><summary>出處和檢查</summary><div class="src-in"><h3>這一頁用到的證據卡</h3><ul class="cards"><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-setup.md" target="_blank" rel="noopener">sugiyama2008-setup</a><span class="loc">第4頁第2～3段、圖2</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-backward-wave.md" target="_blank" rel="noopener">sugiyama2008-backward-wave</a><span class="loc">第5頁第1～2段、第6頁圖4</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/tadaki2013-setup.md" target="_blank" rel="noopener">tadaki2013-setup</a><span class="loc">第3～5頁、圖2～3、表1</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/tadaki2013-density-dependence.md" target="_blank" rel="noopener">tadaki2013-density-dependence</a><span class="loc">第6頁第1段、第7頁圖4、附錄B～C</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/stern2018-setup.md" target="_blank" rel="noopener">stern2018-setup</a><span class="loc">第3頁第2.1節、第4～5頁</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/stern2018-waves-emerge.md" target="_blank" rel="noopener">stern2018-waves-emerge</a><span class="loc">第4頁第2.2節、第9～10頁第4.2節、表1、表2、表4</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-highway-comparison.md" target="_blank" rel="noopener">sugiyama2008-highway-comparison</a><span class="loc">第5頁第2段、第6頁圖5</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-fundamental-diagram.md" target="_blank" rel="noopener">sugiyama2008-fundamental-diagram</a><span class="loc">第2頁最後一段、第3頁圖1</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/tadaki2013-expressway-consistency.md" target="_blank" rel="noopener">tadaki2013-expressway-consistency</a><span class="loc">第11頁第2段、第3頁圖1、第9～10頁圖7(a)和擬合式</span></li></ul><h3>檢查狀態</h3><ul class="chk"><li class="ok">通過：證據卡格式檢查（scripts/check_wiki.py）<span class="loc">錯誤 0 個，警告 0 個。</span></li><li class="ok">通過：頁面和證據卡對應（scripts/check_slide_map.py）<span class="loc">頁數 10，對照列 24，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿程式檢查（scripts/check_pages.py）<span class="loc">逐頁稿 10 頁，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿獨立審查（節點6第4輪，使用者授權的限定範圍複核）<span class="loc">逐頁稿的SHA-256跟審查紀錄一致</span></li></ul><p class="chk-meta">以上是建置時（2026-11-13，commit 7ba2579）實際執行的結果。網站不會自己更新；Wiki或程式改了要重新建置。</p></div></details>
+<details class="src"><summary>出處和檢查</summary><div class="src-in"><h3>這一頁用到的證據卡</h3><ul class="cards"><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-setup.md" target="_blank" rel="noopener">sugiyama2008-setup</a><span class="loc">第4頁第2～3段、圖2</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-backward-wave.md" target="_blank" rel="noopener">sugiyama2008-backward-wave</a><span class="loc">第5頁第1～2段、第6頁圖4</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/tadaki2013-setup.md" target="_blank" rel="noopener">tadaki2013-setup</a><span class="loc">第3～5頁、圖2～3、表1</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/tadaki2013-density-dependence.md" target="_blank" rel="noopener">tadaki2013-density-dependence</a><span class="loc">第6頁第1段、第7頁圖4、附錄B～C</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/stern2018-setup.md" target="_blank" rel="noopener">stern2018-setup</a><span class="loc">第3頁第2.1節、第4～5頁</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/stern2018-waves-emerge.md" target="_blank" rel="noopener">stern2018-waves-emerge</a><span class="loc">第4頁第2.2節、第9～10頁第4.2節、表1、表2、表4</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-highway-comparison.md" target="_blank" rel="noopener">sugiyama2008-highway-comparison</a><span class="loc">第5頁第2段、第6頁圖5</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-fundamental-diagram.md" target="_blank" rel="noopener">sugiyama2008-fundamental-diagram</a><span class="loc">第2頁最後一段、第3頁圖1</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/tadaki2013-expressway-consistency.md" target="_blank" rel="noopener">tadaki2013-expressway-consistency</a><span class="loc">第11頁第2段、第3頁圖1、第9～10頁圖7(a)和擬合式</span></li></ul><h3>檢查狀態</h3><ul class="chk"><li class="ok">通過：證據卡格式檢查（scripts/check_wiki.py）<span class="loc">錯誤 0 個，警告 0 個。</span></li><li class="ok">通過：頁面和證據卡對應（scripts/check_slide_map.py）<span class="loc">頁數 10，對照列 24，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿程式檢查（scripts/check_pages.py）<span class="loc">逐頁稿 10 頁，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿獨立審查（節點6第4輪，使用者授權的限定範圍複核）<span class="loc">逐頁稿的SHA-256跟審查紀錄一致</span></li></ul><p class="chk-meta">以上是建置時（2026-11-13，commit 0122835）實際執行的結果。網站不會自己更新；Wiki或程式改了要重新建置。</p></div></details>
 </section>
 <section class="page" id="p8" data-page="8" aria-labelledby="h8" hidden>
 <header class="ph"><h2 id="h8" tabindex="-1">一台車能把波撫平嗎？</h2></header>
@@ -400,7 +431,7 @@ details.card9 > :last-child { padding-bottom: 14px; margin-bottom: 0 }
 <p data-i="4">長條圖比的是「表現最好的控制時段」：A、B有好幾段控制時段，取各自最好的一段；C只有一段。每種控制方式只做了一場，沒有統計檢定。</p>
 <p data-i="5"><span class="tag sim">【我們的模擬】</span>我們的規則（22台、環長44、a=1；模型時間300換車，比較1000到1500這一段）：</p>
 <ul data-i="6"><li>固定目標速度：平滑車的加速度是<code class="f">a_s·(min(U, V(h)) − v)</code>，U是均勻車流的速度V(2)=0.9640，a_s=1。</li><li>照自己過去的平均速度：把U換成它自己過去50模型時間的平均速度。這跟實驗C都用「自己過去的平均速度」，但細節不同：C用約38秒，還有距離太近、太遠的處理；我們的規則只有「車距不夠時，把目標速度調低」。</li><li>失敗的例子：照原本的模型開，但加速度限制在±0.05。最小車距變成−14.5，等於撞車。</li></ul></div></details>
-<details class="src"><summary>出處和檢查</summary><div class="src-in"><h3>這一頁用到的證據卡</h3><ul class="cards"><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/stern2018-setup.md" target="_blank" rel="noopener">stern2018-setup</a><span class="loc">第3頁第2.1節、第4～5頁</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/stern2018-controllers.md" target="_blank" rel="noopener">stern2018-controllers</a><span class="loc">第3頁第1.2節、第5～7頁第3節和式(1)～(5)、第8頁第3.4節</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/stern2018-results.md" target="_blank" rel="noopener">stern2018-results</a><span class="loc">第8～9頁第4.1節（指標定義）、第9頁表1、第11頁表2、第12頁表3、第13頁表4、第13頁第4.2節末段</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/stern2018-wave-returns.md" target="_blank" rel="noopener">stern2018-wave-returns</a><span class="loc">第7頁第3.2節（控制器參數）、第9～10頁第4.2節（三場的設定和實驗A結果）、第11頁表2、第12頁實驗B、第13頁實驗C、第14頁圖5</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-smoothing-r3.md" target="_blank" rel="noopener">ours-smoothing-r3</a><span class="loc">測試M8的R3（model/explore_smoothing.py）</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-smoothing-r1.md" target="_blank" rel="noopener">ours-smoothing-r1</a><span class="loc">測試M8的R1（model/explore_smoothing.py）</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-smoothing-r2-collision.md" target="_blank" rel="noopener">ours-smoothing-r2-collision</a><span class="loc">測試M8的R2（model/explore_smoothing.py）</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-smoothing-target-speed.md" target="_blank" rel="noopener">ours-smoothing-target-speed</a><span class="loc">測試M9（model/explore_smoothing.py）</span></li></ul><h3>檢查狀態</h3><ul class="chk"><li class="ok">通過：證據卡格式檢查（scripts/check_wiki.py）<span class="loc">錯誤 0 個，警告 0 個。</span></li><li class="ok">通過：頁面和證據卡對應（scripts/check_slide_map.py）<span class="loc">頁數 10，對照列 24，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿程式檢查（scripts/check_pages.py）<span class="loc">逐頁稿 10 頁，錯誤 0 個。</span></li><li class="ok">通過：瀏覽器求解器跟Python對答案（tests/test_js_parity.js）<span class="loc">沒通過 0 項。</span></li><li class="ok">通過：逐頁稿獨立審查（節點6第4輪，使用者授權的限定範圍複核）<span class="loc">逐頁稿的SHA-256跟審查紀錄一致</span></li></ul><p class="chk-meta">以上是建置時（2026-11-13，commit 7ba2579）實際執行的結果。網站不會自己更新；Wiki或程式改了要重新建置。</p></div></details>
+<details class="src"><summary>出處和檢查</summary><div class="src-in"><h3>這一頁用到的證據卡</h3><ul class="cards"><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/stern2018-setup.md" target="_blank" rel="noopener">stern2018-setup</a><span class="loc">第3頁第2.1節、第4～5頁</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/stern2018-controllers.md" target="_blank" rel="noopener">stern2018-controllers</a><span class="loc">第3頁第1.2節、第5～7頁第3節和式(1)～(5)、第8頁第3.4節</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/stern2018-results.md" target="_blank" rel="noopener">stern2018-results</a><span class="loc">第8～9頁第4.1節（指標定義）、第9頁表1、第11頁表2、第12頁表3、第13頁表4、第13頁第4.2節末段</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/stern2018-wave-returns.md" target="_blank" rel="noopener">stern2018-wave-returns</a><span class="loc">第7頁第3.2節（控制器參數）、第9～10頁第4.2節（三場的設定和實驗A結果）、第11頁表2、第12頁實驗B、第13頁實驗C、第14頁圖5</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-smoothing-r3.md" target="_blank" rel="noopener">ours-smoothing-r3</a><span class="loc">測試M8的R3（model/explore_smoothing.py）</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-smoothing-r1.md" target="_blank" rel="noopener">ours-smoothing-r1</a><span class="loc">測試M8的R1（model/explore_smoothing.py）</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-smoothing-r2-collision.md" target="_blank" rel="noopener">ours-smoothing-r2-collision</a><span class="loc">測試M8的R2（model/explore_smoothing.py）</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-smoothing-target-speed.md" target="_blank" rel="noopener">ours-smoothing-target-speed</a><span class="loc">測試M9（model/explore_smoothing.py）</span></li></ul><h3>檢查狀態</h3><ul class="chk"><li class="ok">通過：證據卡格式檢查（scripts/check_wiki.py）<span class="loc">錯誤 0 個，警告 0 個。</span></li><li class="ok">通過：頁面和證據卡對應（scripts/check_slide_map.py）<span class="loc">頁數 10，對照列 24，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿程式檢查（scripts/check_pages.py）<span class="loc">逐頁稿 10 頁，錯誤 0 個。</span></li><li class="ok">通過：瀏覽器求解器跟Python對答案（tests/test_js_parity.js）<span class="loc">沒通過 0 項。</span></li><li class="ok">通過：逐頁稿獨立審查（節點6第4輪，使用者授權的限定範圍複核）<span class="loc">逐頁稿的SHA-256跟審查紀錄一致</span></li></ul><p class="chk-meta">以上是建置時（2026-11-13，commit 0122835）實際執行的結果。網站不會自己更新；Wiki或程式改了要重新建置。</p></div></details>
 </section>
 <section class="page" id="p9" data-page="9" aria-labelledby="h9" hidden>
 <header class="ph"><h2 id="h9" tabindex="-1">模型沒有告訴你的事</h2></header>
@@ -415,7 +446,7 @@ details.card9 > :last-child { padding-bottom: 14px; margin-bottom: 0 }
 <details class="card9"><summary>實驗的場次很少</summary><p><span class="tag exp">【實驗】</span>2008年的實驗只描述了一次的過程；2018年每種控制方式只做了一場，沒有統計檢定；2013年那場40台的實驗只有一場，作者自己也說還不確定。</p></details>
 <details class="card9"><summary>沒有瓶頸也會塞，不代表塞車都跟瓶頸無關</summary><p><span class="tag exp">【實驗】</span>2008年的實驗支持的是：在研究者挑的車數下，沒有瓶頸也出現了塞車。<span class="tag mod">【模型】</span>作者用自己的模型解釋，瓶頸只是讓車流擠過臨界的觸發，不是塞車的根本原因；但這是作者的解釋，不是實驗直接量到的。真實道路上瓶頸怎麼影響塞車，這份簡報不下結論。</p></details></div>
 <details class="adv" data-layer="adv"><summary>進階：模型、推導和量法</summary><div class="text"><p data-i="1"><span class="tag mod">【模型】</span>Orosz等人的綜述把很多跟車模型（car-following model）整理在一起：加速度可以看車距、車距的變化和自己的速度，也可以有反應延遲。Bando的模型是其中把延遲設成0、也不看相對速度的那一種。</p></div></details>
-<details class="src"><summary>出處和檢查</summary><div class="src-in"><h3>這一頁用到的證據卡</h3><ul class="cards"><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/nagel1992-rules.md" target="_blank" rel="noopener">nagel1992-rules</a><span class="loc">第2222頁第2節</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/nagel1992-randomization.md" target="_blank" rel="noopener">nagel1992-randomization</a><span class="loc">第2222頁第2節最後兩段</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/nagel1992-circle-jams.md" target="_blank" rel="noopener">nagel1992-circle-jams</a><span class="loc">第2223頁圖1、第2224頁圖2和第1段</span></li><li><span class="tag mod">【綜述】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/orosz2010-delays.md" target="_blank" rel="noopener">orosz2010-delays</a><span class="loc">第4467頁第3～4段</span></li><li><span class="tag mod">【綜述】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/orosz2010-ovm-family.md" target="_blank" rel="noopener">orosz2010-ovm-family</a><span class="loc">第4461頁式(3.7)前的h_n定義和式(3.7)、第4462頁式(3.10)和三種延遲設定、第4462～4463頁式(3.12)</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/bando1995-ovm-equation.md" target="_blank" rel="noopener">bando1995-ovm-equation</a><span class="loc">第1036頁式(1)～(4)</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-wave-direction.md" target="_blank" rel="noopener">ours-model-wave-direction</a><span class="loc">測試M6v2（model/run_v2.py）</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-backward-wave.md" target="_blank" rel="noopener">sugiyama2008-backward-wave</a><span class="loc">第5頁第1～2段、第6頁圖4</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-jam-emerges.md" target="_blank" rel="noopener">sugiyama2008-jam-emerges</a><span class="loc">第4頁最後一段、第5頁圖3</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/stern2018-results.md" target="_blank" rel="noopener">stern2018-results</a><span class="loc">第8～9頁第4.1節（指標定義）、第9頁表1、第11頁表2、第12頁表3、第13頁表4、第13頁第4.2節末段</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/tadaki2013-high-density.md" target="_blank" rel="noopener">tadaki2013-high-density</a><span class="loc">第12頁第2段、第8頁圖5、第18頁圖C.2</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-setup.md" target="_blank" rel="noopener">sugiyama2008-setup</a><span class="loc">第4頁第2～3段、圖2</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-mechanism.md" target="_blank" rel="noopener">sugiyama2008-mechanism</a><span class="loc">第1～2頁摘要、第3頁第2段、第7頁第1～2段</span></li></ul><h3>檢查狀態</h3><ul class="chk"><li class="ok">通過：證據卡格式檢查（scripts/check_wiki.py）<span class="loc">錯誤 0 個，警告 0 個。</span></li><li class="ok">通過：頁面和證據卡對應（scripts/check_slide_map.py）<span class="loc">頁數 10，對照列 24，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿程式檢查（scripts/check_pages.py）<span class="loc">逐頁稿 10 頁，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿獨立審查（節點6第4輪，使用者授權的限定範圍複核）<span class="loc">逐頁稿的SHA-256跟審查紀錄一致</span></li></ul><p class="chk-meta">以上是建置時（2026-11-13，commit 7ba2579）實際執行的結果。網站不會自己更新；Wiki或程式改了要重新建置。</p></div></details>
+<details class="src"><summary>出處和檢查</summary><div class="src-in"><h3>這一頁用到的證據卡</h3><ul class="cards"><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/nagel1992-rules.md" target="_blank" rel="noopener">nagel1992-rules</a><span class="loc">第2222頁第2節</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/nagel1992-randomization.md" target="_blank" rel="noopener">nagel1992-randomization</a><span class="loc">第2222頁第2節最後兩段</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/nagel1992-circle-jams.md" target="_blank" rel="noopener">nagel1992-circle-jams</a><span class="loc">第2223頁圖1、第2224頁圖2和第1段</span></li><li><span class="tag mod">【綜述】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/orosz2010-delays.md" target="_blank" rel="noopener">orosz2010-delays</a><span class="loc">第4467頁第3～4段</span></li><li><span class="tag mod">【綜述】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/orosz2010-ovm-family.md" target="_blank" rel="noopener">orosz2010-ovm-family</a><span class="loc">第4461頁式(3.7)前的h_n定義和式(3.7)、第4462頁式(3.10)和三種延遲設定、第4462～4463頁式(3.12)</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/bando1995-ovm-equation.md" target="_blank" rel="noopener">bando1995-ovm-equation</a><span class="loc">第1036頁式(1)～(4)</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-wave-direction.md" target="_blank" rel="noopener">ours-model-wave-direction</a><span class="loc">測試M6v2（model/run_v2.py）</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-backward-wave.md" target="_blank" rel="noopener">sugiyama2008-backward-wave</a><span class="loc">第5頁第1～2段、第6頁圖4</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-jam-emerges.md" target="_blank" rel="noopener">sugiyama2008-jam-emerges</a><span class="loc">第4頁最後一段、第5頁圖3</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/stern2018-results.md" target="_blank" rel="noopener">stern2018-results</a><span class="loc">第8～9頁第4.1節（指標定義）、第9頁表1、第11頁表2、第12頁表3、第13頁表4、第13頁第4.2節末段</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/tadaki2013-high-density.md" target="_blank" rel="noopener">tadaki2013-high-density</a><span class="loc">第12頁第2段、第8頁圖5、第18頁圖C.2</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-setup.md" target="_blank" rel="noopener">sugiyama2008-setup</a><span class="loc">第4頁第2～3段、圖2</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-mechanism.md" target="_blank" rel="noopener">sugiyama2008-mechanism</a><span class="loc">第1～2頁摘要、第3頁第2段、第7頁第1～2段</span></li></ul><h3>檢查狀態</h3><ul class="chk"><li class="ok">通過：證據卡格式檢查（scripts/check_wiki.py）<span class="loc">錯誤 0 個，警告 0 個。</span></li><li class="ok">通過：頁面和證據卡對應（scripts/check_slide_map.py）<span class="loc">頁數 10，對照列 24，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿程式檢查（scripts/check_pages.py）<span class="loc">逐頁稿 10 頁，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿獨立審查（節點6第4輪，使用者授權的限定範圍複核）<span class="loc">逐頁稿的SHA-256跟審查紀錄一致</span></li></ul><p class="chk-meta">以上是建置時（2026-11-13，commit 0122835）實際執行的結果。網站不會自己更新；Wiki或程式改了要重新建置。</p></div></details>
 </section>
 <section class="page" id="p10" data-page="10" aria-labelledby="h10" hidden>
 <header class="ph"><h2 id="h10" tabindex="-1">用你自己的話說說看</h2></header>
@@ -424,7 +455,7 @@ details.card9 > :last-child { padding-bottom: 14px; margin-bottom: 0 }
 <div class="quiz" data-quiz="1"><h3>第1題：沒有車禍、沒有障礙物，為什麼也會塞車？</h3><div class="opts"><button class="opt" type="button" data-q="1" data-right="0">一定有人亂開或故意急煞</button><button class="opt" type="button" data-q="1" data-right="1">在某些條件下，車流本身不穩定：一點小小的速度變化會往後傳，整體的速度起伏可能越來越大</button><button class="opt" type="button" data-q="1" data-right="0">因為環道太小，車子轉不過來</button></div><p class="verdict" hidden></p><div class="why" hidden><p><span class="tag exp">【實驗】</span>真的環道實驗裡，一開始很順的車流，車距的小波動自己變大，最後有車停住。<span class="tag mod">【模型】</span>模型裡，每台車的車速都是慢慢調過去的。<span class="tag sim">【我們的模擬】</span>在第4頁左圖那組條件下，一點減速傳給後面的車時，整體的擾動會放大。不需要有人犯錯；在這組條件下，一點小變化就可能一路放大到形成塞車（第1、2、4頁）。</p></div></div>
 <div class="quiz" data-quiz="2"><h3>第2題：車子都往前開，為什麼塞車波往後跑？</h3><div class="opts"><button class="opt" type="button" data-q="2" data-right="0">因為塞住的車在倒車</button><button class="opt" type="button" data-q="2" data-right="1">塞住那一段的車一直在換：前面的車開出去，後面的車開進來，塞住的位置就一直往後退</button><button class="opt" type="button" data-q="2" data-right="0">其實塞車波也是往前跑，只是比較慢</button></div><p class="verdict" hidden></p><div class="why" hidden><p><span class="tag exp">【實驗】</span>真的環道實驗裡，塞車團往後移，團裡的車停住，前端的車開出去、後面又有車加入。<span class="tag sim">【我們的模擬】</span>在時空圖上，車子前進時軌跡往右下，幾乎停住時接近直直往下；把各台車慢下來的那一段連起來，整條帶子卻往左下（往後）（第3頁）。</p></div></div>
 <div class="quiz" data-quiz="3"><h3>第3題：在這個模型裡，什麼時候一個小擾動可能越變越大？</h3><div class="opts"><button class="opt" type="button" data-q="3" data-right="0">車越多越容易，車越多越塞</button><button class="opt" type="button" data-q="3" data-right="1">駕駛把車速調過去的速度不夠快的時候；要多快才夠，要看車距和車數</button><button class="opt" type="button" data-q="3" data-right="0">只要有人煞車就一定會</button></div><p class="verdict" hidden></p><div class="why" hidden><p><span class="tag der">【我們的推導】</span>小擾動會不會放大，要看駕駛調整得夠不夠快；要多快才夠，會隨車距和車數改變。第5頁和第6頁是從兩邊看同一件事。跨過這條分界時，最先開始放大的是繞一圈剛好一個起伏的波。<span class="tag sim">【我們的模擬】</span>第5頁固定22台車、平均車距2時，調整的快慢有一條分界，大約在1.96。<span class="tag der">【我們的推導】</span>第6頁固定環長44、a=1時，公式預測16到39台會讓「繞一圈剛好一個起伏」的小擾動放大。這些是模型裡的結果，不是真實駕駛的數字。</p></div></div></div>
-<details class="src"><summary>出處和檢查</summary><div class="src-in"><h3>這一頁用到的證據卡</h3><ul class="cards"><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-jam-emerges.md" target="_blank" rel="noopener">sugiyama2008-jam-emerges</a><span class="loc">第4頁最後一段、第5頁圖3</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-backward-wave.md" target="_blank" rel="noopener">sugiyama2008-backward-wave</a><span class="loc">第5頁第1～2段、第6頁圖4</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-wave-direction.md" target="_blank" rel="noopener">ours-model-wave-direction</a><span class="loc">測試M6v2（model/run_v2.py）</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/bando1995-ovm-equation.md" target="_blank" rel="noopener">bando1995-ovm-equation</a><span class="loc">第1036頁式(1)～(4)</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/bando1995-linear-stability.md" target="_blank" rel="noopener">bando1995-linear-stability</a><span class="loc">第1036～1037頁式(5)～(12)、圖1</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-propagation.md" target="_blank" rel="noopener">ours-model-propagation</a><span class="loc">測試M7（model/run_core.py）</span></li><li><span class="tag der">【我們的推導】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-finite-n-threshold.md" target="_blank" rel="noopener">ours-finite-n-threshold</a><span class="loc">「從Bando 1995推」第1～6步、「跟Orosz 2010對照」</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-threshold.md" target="_blank" rel="noopener">ours-model-threshold</a><span class="loc">測試M1（model/run_core.py）</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-n-sweep.md" target="_blank" rel="noopener">ours-model-n-sweep</a><span class="loc">測試M2、M2v2、M2補測（model/run_core.py、model/run_v2.py、model/run_v3_m2.py）</span></li></ul><h3>檢查狀態</h3><ul class="chk"><li class="ok">通過：證據卡格式檢查（scripts/check_wiki.py）<span class="loc">錯誤 0 個，警告 0 個。</span></li><li class="ok">通過：頁面和證據卡對應（scripts/check_slide_map.py）<span class="loc">頁數 10，對照列 24，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿程式檢查（scripts/check_pages.py）<span class="loc">逐頁稿 10 頁，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿獨立審查（節點6第4輪，使用者授權的限定範圍複核）<span class="loc">逐頁稿的SHA-256跟審查紀錄一致</span></li></ul><p class="chk-meta">以上是建置時（2026-11-13，commit 7ba2579）實際執行的結果。網站不會自己更新；Wiki或程式改了要重新建置。</p></div></details>
+<details class="src"><summary>出處和檢查</summary><div class="src-in"><h3>這一頁用到的證據卡</h3><ul class="cards"><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-jam-emerges.md" target="_blank" rel="noopener">sugiyama2008-jam-emerges</a><span class="loc">第4頁最後一段、第5頁圖3</span></li><li><span class="tag exp">【實驗】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/sugiyama2008-backward-wave.md" target="_blank" rel="noopener">sugiyama2008-backward-wave</a><span class="loc">第5頁第1～2段、第6頁圖4</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-wave-direction.md" target="_blank" rel="noopener">ours-model-wave-direction</a><span class="loc">測試M6v2（model/run_v2.py）</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/bando1995-ovm-equation.md" target="_blank" rel="noopener">bando1995-ovm-equation</a><span class="loc">第1036頁式(1)～(4)</span></li><li><span class="tag mod">【模型】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/bando1995-linear-stability.md" target="_blank" rel="noopener">bando1995-linear-stability</a><span class="loc">第1036～1037頁式(5)～(12)、圖1</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-propagation.md" target="_blank" rel="noopener">ours-model-propagation</a><span class="loc">測試M7（model/run_core.py）</span></li><li><span class="tag der">【我們的推導】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-finite-n-threshold.md" target="_blank" rel="noopener">ours-finite-n-threshold</a><span class="loc">「從Bando 1995推」第1～6步、「跟Orosz 2010對照」</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-threshold.md" target="_blank" rel="noopener">ours-model-threshold</a><span class="loc">測試M1（model/run_core.py）</span></li><li><span class="tag sim">【我們的模擬】</span> <a href="https://github.com/guogeng-lo/phantom-traffic-lab/blob/main/wiki/cards/ours-model-n-sweep.md" target="_blank" rel="noopener">ours-model-n-sweep</a><span class="loc">測試M2、M2v2、M2補測（model/run_core.py、model/run_v2.py、model/run_v3_m2.py）</span></li></ul><h3>檢查狀態</h3><ul class="chk"><li class="ok">通過：證據卡格式檢查（scripts/check_wiki.py）<span class="loc">錯誤 0 個，警告 0 個。</span></li><li class="ok">通過：頁面和證據卡對應（scripts/check_slide_map.py）<span class="loc">頁數 10，對照列 24，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿程式檢查（scripts/check_pages.py）<span class="loc">逐頁稿 10 頁，錯誤 0 個。</span></li><li class="ok">通過：逐頁稿獨立審查（節點6第4輪，使用者授權的限定範圍複核）<span class="loc">逐頁稿的SHA-256跟審查紀錄一致</span></li></ul><p class="chk-meta">以上是建置時（2026-11-13，commit 0122835）實際執行的結果。網站不會自己更新；Wiki或程式改了要重新建置。</p></div></details>
 </section>
 </main>
 <nav class="pager" aria-label="換頁">
@@ -836,7 +867,7 @@ window.DECK_DATA = {"titles": ["沒有車禍，車流也會自己卡住", "輕�
     ctx.clearRect(0, 0, w, w);
     ctx.fillStyle = C.infield; ctx.beginPath(); ctx.arc(g.cx, g.cy, g.R + g.rw, 0, 2 * Math.PI); ctx.fill();
     drawRoad(ctx, g); drawCars(ctx, g, s);
-    const fs = Math.max(13, Math.min(17, w / 30)), jam = jamSpan(s), outer = g.R + g.rw / 2 + 5;
+    const fs = Math.max(14, Math.min(17, w / 30)), jam = jamSpan(s), outer = g.R + g.rw / 2 + 5;
     if (jam) {   // 塞車團：環外側的紅色帶子
       const a0 = angOf(jam.from, s.L) - g.cl / g.ppu / s.L * 2 * Math.PI * 0.8, a1 = a0 + (jam.to - jam.from + g.cl / g.ppu * 1.6) / s.L * 2 * Math.PI;
       ctx.strokeStyle = C.stop; ctx.lineWidth = Math.max(7, w / 60); ctx.lineCap = "round";
@@ -849,6 +880,10 @@ window.DECK_DATA = {"titles": ["沒有車禍，車流也會自己卡住", "輕�
     if (s.focus != null && s.focus !== s.sel) { const [x, y] = at(g, g.R, angOf(s.x[s.focus], s.L)); ctx.setLineDash([4, 3]); ctx.lineWidth = 3; ctx.strokeStyle = C.ink; ctx.beginPath(); ctx.arc(x, y, g.cl * 0.75 + 9, 0, 2 * Math.PI); ctx.stroke(); ctx.setLineDash([]); }
     if (s.small) return g;
     chip(ctx, "車子順時針前進", g.cx, g.cy - g.R * 0.7, { fs, fill: C.soft, weight: 700 });
+    if (s.hint && !jam && s.sel == null) {   // 還沒點車：直接在環道中間說要做什麼
+      chip(ctx, s.hint[0], g.cx, g.cy - fs * 0.9, { fs: fs + 3, fill: C.ink, bg: C.act });
+      if (s.hint[1]) chip(ctx, s.hint[1], g.cx, g.cy + fs * 1.3, { fs, fill: C.ink, bg: "rgba(255,255,255,.9)", weight: 700 });
+    }
     const target = jam ? { pos: jam.mid, kind: "jam", text: "這裡幾乎停住了" } : s.sel != null && s.lens ? { pos: s.x[s.sel], kind: "sel", text: s.selLabel || "你點的車" } : null;
     if (s.lens && target) {
       const Rl = g.R * 0.56, lx = g.cx, ly = g.cy + g.R * 0.1, a = angOf(target.pos, s.L), [px, py] = at(g, g.R, a);
@@ -910,7 +945,7 @@ window.DECK_DATA = {"titles": ["沒有車禍，車流也會自己卡住", "輕�
   function lineChart(cv, o) {
     const f = fit(cv, o.height || (w => Math.round(Math.min(360, Math.max(220, w * 0.62))))); if (!f) return null;
     const { ctx, w, h } = f;
-    const fs = w < 420 ? 13 : 14, pad = { l: o.log ? 58 : 48, r: 14, t: 14, b: 40 };
+    const fs = w < 420 ? 14 : 15, pad = { l: o.log ? 60 : 48, r: 14, t: 14, b: 42 };
     const W = w - pad.l - pad.r, H = h - pad.t - pad.b;
     const ly = v => o.log ? Math.log10(Math.max(v, o.y0 / 10)) : v, Y0 = ly(o.y0), Y1 = ly(o.y1);
     const X = x => pad.l + (x - o.x0) / (o.x1 - o.x0) * W, Y = v => pad.t + (1 - (Math.min(Math.max(ly(v), Y0), Y1) - Y0) / (Y1 - Y0)) * H;
@@ -930,6 +965,8 @@ window.DECK_DATA = {"titles": ["沒有車禍，車流也會自己卡住", "輕�
       ctx.strokeStyle = sr.color; ctx.lineWidth = sr.width || 2.5; ctx.setLineDash(sr.dash || []); ctx.lineJoin = "round";
       ctx.beginPath(); ctx.moveTo(X(pts[0][0]), Y(pts[0][1])); for (let i = 1; i < pts.length; i++) ctx.lineTo(X(pts[i][0]), Y(pts[i][1])); ctx.stroke(); ctx.setLineDash([]);
     }
+    if (o.empty) { const lh = (fs + 1) * 1.6;   // 還沒有資料：在圖中間分行寫要做什麼
+      o.empty.forEach((t, i) => chip(ctx, t, pad.l + W / 2, pad.t + H / 2 + (i - (o.empty.length - 1) / 2) * lh, { fs: fs + 1, fill: C.ink, bg: "rgba(255,244,207,.95)", bounds: [pad.l + 2, pad.l + W - 2] })); }
     for (const n of o.notes || []) chip(ctx, n.text, X(n.x), Y(n.y), { fs, fill: n.fill || C.ink, bg: n.bg || C.act, align: n.align || "right", bounds: [pad.l + 2, pad.l + W - 2] });
     return { X, Y, pad, W, H };
   }
@@ -978,34 +1015,60 @@ window.DECK_DATA = {"titles": ["沒有車禍，車流也會自己卡住", "輕�
 
   // ---------- 背景計算（Web Worker；用同一份ovm.js） ----------
   function workerMain(O, m, post) {
-    if (m.cmd === "measure") {
-      const pts = []; const r = O.measureV2(m.N, 44.0, 1.0, 1e-6, (t, a1) => { pts.push([t, a1]); });
-      post({ id: m.id, pts, r });
-    } else if (m.cmd === "verdict") {
-      post({ id: m.id, r: O.verdictN(m.N, 44.0, 1.0) });
-    } else if (m.cmd === "smooth") {
-      const rule = m.kind === "R0" ? null : m.kind === "R1" ? new O.AvgRule() : new O.TargetRule(O.V(2.0) * m.mult);
-      const frames = [];
-      const res = O.smoothingRun(rule, 0.1, { onStep: m.frames ? r => { if (r._steps % 10 === 0 && r.t >= 300 - 1e-9) frames.push([r.t, Array.from(r.x), Array.from(r.v)]); } : null });
-      post({ id: m.id, std: res.std, vmin: res.vmin, jamFrac: res.jamFrac, mean: res.mean, sane: res.sane, minH: res.minH, x: Array.from(res.ring.x), v: Array.from(res.ring.v), frames });
-    }
-  }
-  const engine = (() => {
-    let w = null, id = 0; const cbs = new Map(), sent = new Map();
-    const local = m => setTimeout(() => workerMain(O, m, d => { const f = cbs.get(d.id); cbs.delete(d.id); sent.delete(d.id); if (f) f(d); }), 0);
     try {
-      const src = $("#ovm-src").textContent + "\n;(function(){var workerMain=" + workerMain.toString() + ";self.onmessage=function(e){workerMain(self.OVM,e.data,function(d){self.postMessage(d);});};})();";
-      w = new Worker(URL.createObjectURL(new Blob([src], { type: "text/javascript" })));
-      w.onmessage = e => { const f = cbs.get(e.data.id); cbs.delete(e.data.id); sent.delete(e.data.id); if (f) f(e.data); };
-      // Worker開不起來（例如被沙盒擋掉）：改在主執行緒算，已經送出去、還沒回來的也重算，不會卡住
-      w.onerror = ev => { if (ev && ev.preventDefault) ev.preventDefault(); if (w) { w.terminate(); w = null; } for (const m of sent.values()) local(m); };
-    } catch (err) { w = null; }
+      if (m.cmd === "measure") {
+        const pts = []; const r = O.measureV2(m.N, 44.0, 1.0, 1e-6, (t, a1) => { pts.push([t, a1]); });
+        post({ id: m.id, pts, r });
+      } else if (m.cmd === "verdict") {
+        post({ id: m.id, r: O.verdictN(m.N, 44.0, 1.0) });
+      } else if (m.cmd === "smooth") {
+        const rule = m.kind === "R0" ? null : m.kind === "R1" ? new O.AvgRule() : new O.TargetRule(O.V(2.0) * m.mult);
+        const frames = [];
+        const res = O.smoothingRun(rule, 0.1, { onStep: m.frames ? r => { if (r._steps % 10 === 0 && r.t >= 300 - 1e-9) frames.push([r.t, Array.from(r.x), Array.from(r.v)]); } : null });
+        post({ id: m.id, std: res.std, vmin: res.vmin, jamFrac: res.jamFrac, mean: res.mean, sane: res.sane, minH: res.minH, x: Array.from(res.ring.x), v: Array.from(res.ring.v), frames });
+      } else post({ id: m.id, error: "不認得的計算：" + m.cmd });
+    } catch (err) { post({ id: m.id, error: String((err && err.message) || err) }); }
+  }
+  /** 計算引擎。run(訊息, 群組)回傳Promise，結果是{...}、{cancelled: true}或{error}。
+   *  cancel(群組)：還沒開始的不算了；Worker正在算的，把Worker關掉重開（其他群組的工作重新送）。
+   *  Worker不能用時改在主執行緒算，會先通知onFallback的人（第6頁要先問讀者）。 */
+  const engine = (() => {
+    let w = null, id = 0; const cbs = new Map(), sent = new Map(), timers = new Map(), fallbacks = [];
+    const finish = d => { const f = cbs.get(d.id); cbs.delete(d.id); sent.delete(d.id); timers.delete(d.id); if (f) f(d); };
+    const local = m => { timers.set(m.id, setTimeout(() => { timers.delete(m.id); if (cbs.has(m.id)) workerMain(O, m, finish); }, 0)); };
+    const SRC = () => $("#ovm-src").textContent + "\n;(function(){var workerMain=" + workerMain.toString() + ";self.onmessage=function(e){workerMain(self.OVM,e.data,function(d){self.postMessage(d);});};})();";
+    function fallback() {
+      if (w) { try { w.terminate(); } catch (e) { /* 已經壞了 */ } w = null; }
+      fallbacks.forEach(f => f());
+      for (const m of sent.values()) if (!timers.has(m.id)) local(m);
+    }
+    function spawn() {
+      try {
+        w = new Worker(URL.createObjectURL(new Blob([SRC()], { type: "text/javascript" })));
+        w.onmessage = e => finish(e.data);
+        w.onerror = ev => { if (ev && ev.preventDefault) ev.preventDefault(); fallback(); };   // 載入失敗（例如被沙盒擋掉）
+      } catch (err) { w = null; }
+    }
+    spawn();
     return {
       get mode() { return w ? "worker" : "main"; },
-      run(msg) { return new Promise(res => { const m = Object.assign({ id: ++id }, msg); cbs.set(m.id, res); sent.set(m.id, m);
-        if (w) w.postMessage(m); else local(m); }); }
+      onFallback(f) { fallbacks.push(f); },
+      run(msg, group) { return new Promise(res => { const m = Object.assign({ id: ++id, group: group || "" }, msg); cbs.set(m.id, res); sent.set(m.id, m);
+        if (w) w.postMessage(m); else local(m); }); },
+      cancel(group) {
+        const mine = [...sent.values()].filter(m => m.group === group); if (!mine.length) return;
+        for (const m of mine) { const t = timers.get(m.id); if (t != null) clearTimeout(t); finish({ id: m.id, cancelled: true }); }
+        if (w) { w.terminate(); spawn(); for (const m of sent.values()) { if (w) w.postMessage(m); else local(m); } }
+      }
     };
   })();
+  /** 兩個互斥的選項（例如「快轉｜播放動畫」）。 */
+  function segmented(label, options, onChange) {
+    let cur = 0;
+    const bs = options.map((t, i) => el("button", { type: "button", "aria-pressed": String(i === 0), onclick: () => { cur = i; bs.forEach((b, j) => b.setAttribute("aria-pressed", String(j === i))); onChange(i); } }, t));
+    const box = el("div", { class: "seg-wrap" }, el("span", { class: "seg-label" }, label), el("div", { class: "seg", role: "group", "aria-label": label }, ...bs));
+    return { el: box, get value() { return cur; } };
+  }
 
   // =====================================================================
   const PAGES = {};
@@ -1050,7 +1113,7 @@ window.DECK_DATA = {"titles": ["沒有車禍，車流也會自己卡住", "輕�
       playing = true; sp.set(1); msg.textContent = "你剛剛讓這台車慢了一下。"; msg.className = "say"; sync(); announce(`你讓第${n}台車輕踩了一下煞車。`);
     };
     const cr = clickableRing(ex.cv, state, click, "22台車的環狀道路，點一台車讓它輕踩一下煞車。", () => draw());
-    const draw = () => { const s = state(); drawRing(ex.cv, Object.assign(s, { sel: demo.ring ? demo.ring.brake[0] : null, focus: cr.focus(), flash: demo.ring && performance.now() < flashUntil ? demo.ring.brake[0] : null, lens: true, selLabel: "你點的車" })); clock.set(now()); };
+    const draw = () => { const s = state(); drawRing(ex.cv, Object.assign(s, { hint: ["點環道上任一台車", "它會輕輕踩一下煞車"], sel: demo.ring ? demo.ring.brake[0] : null, focus: cr.focus(), flash: demo.ring && performance.now() < flashUntil ? demo.ring.brake[0] : null, lens: true, selLabel: "你點的車" })); clock.set(now()); };
     bPlay.onclick = () => { playing = !playing; sync(); };
     bReset.onclick = () => { reset(); };
     bFF.onclick = () => { for (let i = 0; i < 40000 && !jam; i++) stepOne(); sync(); draw(); };
@@ -1078,9 +1141,10 @@ window.DECK_DATA = {"titles": ["沒有車禍，車流也會自己卡住", "輕�
     const sp = steps(["看一台車的軌跡", "疊上其他車", "猜帶子往哪邊移"]);
     const msg = say(), note = el("p", { class: "fine" }), bAll = btn("疊上其他車", ""), bRe = btn("重畫這台車", "plain");
     const askBox = el("div", {});
-    const placard = el("div", { class: "placard" }, el("div", { class: "mini" }, mini), sp.ol, msg, note, el("div", { class: "btns" }, bAll, bRe), askBox);
-    const span = el("p", { class: "fine", style: "margin:8px 4px 0" });
-    stage.append(guide, el("div", { class: "ts-grid" }, el("div", { class: "model flat" }, cv, span), placard));
+    msg.classList.add("p3-act"); askBox.classList.add("p3-act");
+    const placard = el("div", { class: "placard" }, el("div", { class: "mini" }, mini), sp.ol, msg, note, el("div", { class: "btns p3-act" }, bAll, bRe), askBox);
+    const span = el("p", { class: "ts-range" }), legendLine = el("p", { class: "fine", style: "margin:8px 4px 0" }, "灰線是其他車，紅色是車速低於0.1的地方，黃線是我們挑出來跟著看的那台車。");
+    stage.append(guide, el("div", { class: "ts-grid" }, el("div", { class: "model flat" }, span, cv, legendLine), placard));
     let D = null, mode = "one", prog = 0, cursor = 0, chosen = null; bAll.disabled = true;
     const ask = predict(askBox, "塞住的地方連成一條帶子。這條帶子往哪邊移？", ["往右，跟車子同方向", "往左，跟車子反方向", "不動"], t => { chosen = t; reveal(); });
     ask.hidden = true;
@@ -1118,6 +1182,8 @@ window.DECK_DATA = {"titles": ["沒有車禍，車流也會自己卡住", "輕�
       t3.querySelector("figcaption span").textContent = back ? "塞住的位置往後退" : "塞住的位置往前移";
       msg.textContent = `你選了「${chosen}」。圖上的黑色箭頭，是程式從軌跡量出來的塞車團移動方向。`;
       g.open();
+      // 手機上圖和答案是上下排的：揭曉時把圖捲回畫面裡，讓箭頭和說明在一起
+      if (window.innerWidth < 860) cv.scrollIntoView({ block: "start", behavior: reduce() ? "auto" : "smooth" });
     }
     bAll.onclick = () => { mode = "all"; sp.set(2); ask.hidden = false; msg.textContent = "22台車的軌跡都畫上去了。"; bAll.disabled = true; };
     bRe.onclick = () => restart();
@@ -1145,7 +1211,7 @@ window.DECK_DATA = {"titles": ["沒有車禍，車流也會自己卡住", "輕�
       ctx.strokeStyle = C.grid; ctx.lineWidth = 1; ctx.font = `600 ${fs}px ${HEAD}`; ctx.textBaseline = "middle";
       for (let x = 0; x <= 44; x += 11) { const px = pad.l + x / L * W; ctx.beginPath(); ctx.moveTo(px, pad.t); ctx.lineTo(px, pad.t + H); ctx.stroke(); ctx.fillStyle = C.soft; ctx.textAlign = "center"; ctx.fillText(String(x), px, pad.t - 12); }
       const tA = tc + K0 * 0.5, tB = tc + K1 * 0.5;
-      span.textContent = `為了讓線不要太密，這裡只畫點擊之後的一段：模型時間${tA.toFixed(1)}到${tB.toFixed(1)}（點擊在${tc.toFixed(1)}）。灰線是其他車，紅色是車速低於0.1的地方。`;
+      span.textContent = `這張圖只畫點擊之後的一段：模型時間${tA.toFixed(1)}到${tB.toFixed(1)}（點擊在${tc.toFixed(1)}）。`;
       for (let t = Math.ceil(tA / 20) * 20; t <= tB; t += 20) { const py = Y((t - tc) / 0.5); ctx.strokeStyle = C.grid; ctx.beginPath(); ctx.moveTo(pad.l, py); ctx.lineTo(pad.l + W, py); ctx.stroke(); ctx.fillStyle = C.soft; ctx.textAlign = "right"; ctx.fillText(String(t), pad.l - 6, py); }
       chip(ctx, "位置（0和44是同一點）", pad.l, 14, { fs, fill: C.soft, align: "left", weight: 700 });
       const ay = 42, x1 = pad.l + W - 2, x0 = x1 - Math.min(90, W * 0.22);
@@ -1207,15 +1273,15 @@ window.DECK_DATA = {"titles": ["沒有車禍，車流也會自己卡住", "輕�
     const boxes = [1.0, 2.5].map(a => { const cv = el("canvas", { class: "chart", role: "img", "aria-label": `車速對時間的圖，a=${a}，被點那台車後面第1、5、10、15台車` });
       return { a, cv, box: el("div", { class: "chart-box" }, el("h3", {}, a === 1 ? "第2頁的條件（a=1）" : "每台車調整得更快（a=2.5）"), cv) }; });
     const msg = say(), bGo = btn("開始", "");
-    stage.append(el("p", { class: "exp-caption" }, "22台車、平均車距2、同樣的煞車"), el("div", { class: "charts2" }, ...boxes.map(b => b.box)),
+    stage.append(el("p", { class: "exp-caption" }, "22台車、平均車距2、同樣的煞車"), el("div", { class: "btns", style: "margin:0 0 14px;align-items:center" }, bGo, msg),
+      el("div", { class: "charts2" }, ...boxes.map(b => b.box)),
       legend(FOL.map((j, i) => ({ color: STY[i].color, dash: STY[i].dash, label: `後面第${j}台` }))),
-      el("p", { class: "fine" }, "這四台是事先決定的，不是挑出來好看的。橫軸是點擊之後的模型時間，兩張圖的縱軸範圍相同。"),
-      el("div", { class: "btns", style: "margin-top:12px" }, bGo), msg);
-    let ymin = 0, ymax = 1.2;
+      el("p", { class: "fine" }, "這四台是事先決定的，不是挑出來好看的。橫軸是點擊之後的模型時間，兩張圖的縱軸範圍相同。"));
+    let ymin = 0, ymax = 2.0;
     function draw() {
-      if (!R) return;
-      boxes.forEach((b, bi) => lineChart(b.cv, { x0: 0, x1: 100, y0: ymin, y1: ymax, xticks: [0, 20, 40, 60, 80, 100], yticks: [0, 0.4, 0.8, 1.2, 1.6].filter(v => v <= ymax + 1e-9 && v >= ymin - 1e-9), xlabel: "點擊之後的模型時間",
-        series: R[bi].map((pts, i) => ({ pts: pts.filter(p => p[0] <= prog + 1e-9), color: STY[i].color, dash: STY[i].dash, width: 2.5 })) }));
+      boxes.forEach((b, bi) => lineChart(b.cv, { x0: 0, x1: 100, y0: ymin, y1: ymax, xticks: [0, 20, 40, 60, 80, 100], yticks: [0, 0.4, 0.8, 1.2, 1.6, 2.0].filter(v => v <= ymax + 1e-9 && v >= ymin - 1e-9), xlabel: "點擊之後的模型時間",
+        empty: R ? null : ["按上面的「開始」", "比較同一個煞車", "在兩種條件下怎麼傳下去"],
+        series: R ? R[bi].map((pts, i) => ({ pts: pts.filter(p => p[0] <= prog + 1e-9), color: STY[i].color, dash: STY[i].dash, width: 2.5 })) : [] }));
     }
     bGo.onclick = () => { if (!R) { R = [run(1.0), run(2.5)]; const all = R.flat(2).map(pt => pt[1]); /* 兩張圖、四條線的所有車速 */ ymin = Math.min(0, Math.floor(Math.min(...all) * 5) / 5); ymax = Math.ceil(Math.max(...all) * 5) / 5; }
       prog = reduce() ? 100 : 0; playing = true; bGo.textContent = "重播"; msg.textContent = "邊算邊畫中……"; draw(); };
@@ -1235,17 +1301,20 @@ window.DECK_DATA = {"titles": ["沒有車禍，車流也會自己卡住", "輕�
     const ex = exhibit(body, { key: ringKey("你點的車") });
     const range = el("input", { type: "range", min: "0", max: "5", step: "1", value: "0", id: "p5a", "aria-valuetext": "a = 1.0" });
     const out = el("output", { for: "p5a" }, "a = 1.0");
-    const slider = el("div", { class: "slider" }, el("label", { for: "p5a" }, "a：把車速調過去有多快"), out, range, el("div", { class: "ticks", "aria-hidden": "true" }, ...AS.map(a => el("span", {}, fa(a)))));
+    const slider = el("div", { class: "slider" }, el("label", { for: "p5a" }, "a：把車速調過去有多快"), el("span", { class: "fine" }, "a越大，車速調得越快。"), out, range, el("div", { class: "ticks", "aria-hidden": "true" }, ...AS.map(a => el("span", {}, fa(a)))));
     const clock = clockEl(), msg = say(), bFF = btn("快轉", ""), bPlay = btn("暫停", "plain"), bReset = btn("重來", "plain");
-    const bAnim = el("button", { type: "button", class: "btn plain", "aria-pressed": "false" }, "點了之後播放動畫（預設快轉）");
+    let animPref = false;
+    const seg5 = segmented("a=1.90、1.98點了之後：", ["直接快轉", "播放動畫"], i => { animPref = i === 1; }), bAnim = seg5.el;
     const hist = el("ul", { class: "fine", style: "margin:0;padding-left:1.2em" }), bReveal = btn("揭曉", ""); bReveal.hidden = true;
-    ex.placard.append(slider, msg, clock.box, el("div", { class: "btns" }, bFF, bPlay, bReset), bAnim, hist, bReveal);
+    // 沿用逐頁稿第5頁：「越靠近分界，變化越慢……靠近分界時，光看車子很難分出來」；揭曉前不提「分界」
+    const nearNote = el("p", { class: "near-note" }, "這個a值，擾動的變化很慢，光看車子很難分出來，要看下面那張小圖。"); nearNote.hidden = true;
+    ex.placard.append(slider, nearNote, msg, clock.box, el("div", { class: "btns" }, bFF, bPlay, bReset), bAnim, hist, bReveal);
     const cv = el("canvas", { class: "chart", role: "img", "aria-label": "擾動大小對時間的圖，縱軸是對數刻度" }), chartNote = el("p", { class: "fine" });
     body.append(el("div", { class: "chart-box", style: "margin-top:18px" }, el("h3", {}, "擾動大小（所有車裡，車速跟均勻車流差最多的值）"), cv, chartNote));
-    let a = 1.0, demo, t, pts, done, playing, run = 0, animPref = false; const ran = new Set(), st = stepper(RATE);
+    let a = 1.0, demo, t, pts, done, playing, run = 0; const ran = new Set(), st = stepper(RATE);
     const END = a => a === 1.0 ? 1500 : a < 2 ? 1500 : 300, XMAX = a => a === 1.0 ? 100 : a < 2 ? 1500 : 300;
     const reset = () => { run++; demo = new O.ClickDemo(N, L, a); t = 0; pts = []; done = null; playing = !reduce(); st.reset(); msg.textContent = "點一台車，讓它輕踩一下煞車。"; msg.className = "say"; chartNote.textContent = ""; sync(); draw(); };
-    const sync = () => { bFF.disabled = !demo.ring || !!done; bPlay.disabled = !!done; bPlay.textContent = playing ? "暫停" : "播放"; bAnim.hidden = !(a > 1.5 && a < 2); };
+    const sync = () => { bFF.disabled = !demo.ring || !!done; bPlay.disabled = !!done; bPlay.textContent = playing ? "暫停" : "播放"; bAnim.hidden = !(a > 1.5 && a < 2); nearNote.hidden = !(a > 1.5 && a < 2); };
     const finish = text => { done = text; playing = false; ran.add(a); msg.textContent = `a = ${fa(a)}：${text}`; msg.className = "say" + (text === "塞住了" ? " jam" : "");
       hist.append(el("li", {}, `a = ${fa(a)}：${text}`)); if (ran.size >= 2 && !g.isOpen) bReveal.hidden = false; sync(); draw(); };
     const judge = () => {
@@ -1266,7 +1335,7 @@ window.DECK_DATA = {"titles": ["沒有車禍，車流也會自己卡住", "輕�
     const cr = clickableRing(ex.cv, () => { const [x, v] = demo.state(t); return { x, v, N, L }; }, click, "22台車的環狀道路，點一台車讓它輕踩一下煞車。", () => draw());
     function draw() {
       const [x, v] = demo.state(t);
-      drawRing(ex.cv, { x, v, N, L, sel: demo.ring ? demo.ring.brake[0] : null, focus: cr.focus(), lens: true });
+      drawRing(ex.cv, { x, v, N, L, hint: ["點環道上任一台車", "它會輕輕踩一下煞車"], sel: demo.ring ? demo.ring.brake[0] : null, focus: cr.focus(), lens: true });
       clock.set(demo.ring ? demo.time() : t);
       const xm = XMAX(a), last = pts[pts.length - 1];
       lineChart(cv, { x0: 0, x1: xm, y0: 1e-5, y1: 1, log: true, xticks: xm === 100 ? [0, 25, 50, 75, 100] : xm === 300 ? [0, 100, 200, 300] : [0, 500, 1000, 1500], xlabel: "點擊之後的模型時間",
@@ -1277,7 +1346,6 @@ window.DECK_DATA = {"titles": ["沒有車禍，車流也會自己卡住", "輕�
     bFF.onclick = () => fastForward();
     bPlay.onclick = () => { playing = !playing; sync(); };
     bReset.onclick = () => reset();
-    bAnim.onclick = () => { animPref = !animPref; bAnim.setAttribute("aria-pressed", String(animPref)); };
     bReveal.onclick = () => { g.open(); bReveal.hidden = true; };
     const tick = dt => { if (!vis.on || body.hidden || !playing || done) return; const n = st.take(dt); if (!demo.ring) t += n * DT; else for (let i = 0; i < n; i++) if (!stepOne()) break; if (loop.paint || done) draw(); };
     const vis = watch(stage);
@@ -1290,44 +1358,105 @@ window.DECK_DATA = {"titles": ["沒有車禍，車流也會自己卡住", "輕�
     const g = gate(sec, 2, true, "按「把3到60台全部跑一次」、算完之後，這裡會出現接下來的說明。");
     const stage = $(".stage", sec), askBox = el("div", {}); stage.append(askBox);
     const body = el("div", {}), lk = lockable(body, "先選一個答案，下面的模擬才會打開。"); stage.append(lk.wrap);
-    predict(askBox, "環長和調整快慢都不變，車數多少時，繞一圈剛好一個起伏的小擾動會越變越大？", ["越多", "越少", "中間那段"], () => { lk.unlock(); draw(); });
+    predict(askBox, "環長和調整快慢都不變，車數多少時，繞一圈剛好一個起伏的小擾動會越變越大？", ["越多", "越少", "中間那段"], () => { lk.unlock(); draw(); renderStrip(); });
     const ex = exhibit(body, { ringLabel: "環道上的車，加了很小的擾動，眼睛看不出來" });
     const range = el("input", { type: "range", min: "3", max: "60", step: "1", value: "22", id: "p6n" }), out = el("output", { for: "p6n" }, "22台");
     const info = el("p", { class: "fine", style: "font-size:17px;color:var(--ink)" });
-    const msg = say(), bOne = btn("跑這個車數", ""), bAll = btn("把3到60台全部跑一次", "plain");
-    ex.placard.append(el("div", { class: "slider" }, el("label", { for: "p6n" }, "車數N（環長44、a=1）"), out, range, el("div", { class: "ticks", "aria-hidden": "true" }, el("span", {}, "3"), el("span", {}, "60"))), info, el("div", { class: "btns" }, bOne, bAll), msg);
+    const msg = say(), verdictBox = el("p", { class: "verdict-line", "aria-live": "polite" }), bOne = btn("跑這個車數", "");
+    ex.placard.append(el("div", { class: "slider" }, el("label", { for: "p6n" }, "車數N（環長44、a=1）"), out, range, el("div", { class: "ticks", "aria-hidden": "true" }, el("span", {}, "3"), el("span", {}, "60"))), info, el("div", { class: "btns" }, bOne), msg, verdictBox);
     const cv = el("canvas", { class: "chart", role: "img", "aria-label": "這個車數的擾動大小對時間的圖，縱軸是對數刻度" }), cvNote = el("p", { class: "fine" });
     body.append(el("div", { class: "chart-box", style: "margin-top:18px" }, el("h3", {}, "擾動大小（繞一圈一個起伏的那種波）"), cv, cvNote));
-    const strip = el("div", { class: "strip", style: "margin-top:18px" }), prog = el("p", { class: "progress", "aria-live": "polite" });
+    // 全部跑一次：按鈕、停止、Worker不能用時的確認
+    const strip = el("div", { class: "strip", style: "margin-top:12px" }), prog = el("p", { class: "progress", "aria-live": "polite" });
+    const bAll = btn("把3到60台全部跑一次", ""), bStop = btn("停止", "plain"); bStop.hidden = true;
+    const bYes = btn("照樣全部跑", ""), bNo = btn("先不要", "plain");
+    const confirmBox = el("div", { class: "confirm", role: "group", "aria-label": "要不要在畫面這邊計算" },
+      el("p", {}, "這個瀏覽器不能在背景計算，只能在畫面這邊算。全部跑一次的時候，畫面可能會卡頓，按鈕和捲動可能反應變慢，要等多久要看你的裝置。要跑嗎？"),
+      el("div", { class: "btns" }, bYes, bNo)); confirmBox.hidden = true;
     const KEY = { up: ["+", "放大"], down: ["−", "不放大"], na: ["?", "無法判定"], gap: ["≈", "公式算出的變化接近0，只比差距"], bad: ["!", "跟公式不符"], wait: ["…", "還沒算"] };
-    const keyList = el("ul", { class: "strip-key" }, ...["up", "down", "na", "gap"].map(k => el("li", {}, el("b", { class: "c-" + k, "aria-hidden": "true" }, KEY[k][0]), KEY[k][1])));
-    body.append(el("div", { class: "chart-box", style: "margin-top:18px" }, el("h3", {}, "3到60台的結果條"), el("p", { class: "fine" }, "每一格是一個車數。「公式預測」照有限車數的公式；「我們的模擬」照model/CRITERIA.md第2、3版事先定好的量法，在你的瀏覽器裡算。"), keyList, prog, strip));
-    let n = 22, ring, single = null, sweep = null, busy = false; const st = stepper(RATE);
+    const keyList = el("ul", { class: "strip-key" }, ...["up", "down", "na", "gap", "wait"].map(k => el("li", {}, el("b", { class: "c-" + k, "aria-hidden": "true" }, KEY[k][0]), KEY[k][1])));
+    body.append(el("div", { class: "chart-box", style: "margin-top:18px" }, el("h3", {}, "3到60台的結果條"),
+      el("p", { class: "fine" }, "每一格是一個車數，框起來的是你在上面選的車數。「公式預測」照有限車數的公式；「我們的模擬」照model/CRITERIA.md第2、3版事先定好的量法，在你的瀏覽器裡算。"),
+      keyList, el("div", { class: "btns", style: "margin-top:12px" }, bAll, bStop), confirmBox, prog, strip));
+    let n = 22, ring, single = null, oneRun = 0, consent = false, running = false, sweepRun = 0, spent = 0; const sweep = {}, st = stepper(RATE);
     const theory = {}; for (let k = 3; k <= 60; k++) theory[k] = O.theorySigma(1.0, 44 / k, k);
-    const setN = k => { n = k; out.textContent = `${k}台`; range.setAttribute("aria-valuetext", `${k}台`); ring = O.modeRing(k, L, 1.0, 1e-6); st.reset(); single = null;
-      info.textContent = `平均車距 44÷${k} = ${trim(44 / k, 3)}，均勻車流的速度 ${O.V(44 / k).toFixed(4)}`; cvNote.textContent = ""; draw(); };
+    const doneCount = () => Object.keys(sweep).length;
     const REASON = r => r.reason.startsWith("k=1 > ") ? "擾動長到0.001以上，停止" : r.reason.startsWith("k=1 < ") ? "擾動縮到0.0000000001以下，停止" : r.reason === "t = 2100" ? "跑到上限2100，停止" : "別的波變得太大，停止";
-    bOne.onclick = async () => { if (busy) return; busy = true; bOne.disabled = true; const k = n; msg.textContent = `正在算${k}台……`;
-      const res = await engine.run({ cmd: "measure", N: k }); busy = false; bOne.disabled = false; if (k !== n) return;
-      single = res; msg.textContent = `${k}台：${REASON(res.r)}（模型時間${res.r.stop.toFixed(0)}）。`; draw(); };
     function cellOf(k, verdict) { const s = theory[k];
       if (!verdict) return "wait"; if (verdict === "相符") return s > 0 ? "up" : "down"; if (verdict === "相符（只比差距）") return "gap"; if (verdict === "數值無法判定") return "na"; return "bad"; }
-    function simCell(k, td) { const c = cellOf(k, sweep && sweep[k]); td.className = "c-" + c; td.textContent = "";
-      td.append(el("span", { "aria-hidden": "true" }, KEY[c][0]), el("span", { class: "sr" }, KEY[c][1])); return td; }
+    // 選到的車數，用人話說結論。說法沿用逐頁稿第6頁審過的句子；數字是這次模擬實際量到的
+    function sayVerdict(k, res) {
+      const c = cellOf(k, res.verdict), f = theory[k] > 0 ? "放大" : "不放大";
+      const used = res.runs[0].length;   // 主要那次（ε=1e−6）的有效長度，跟證據卡ours-model-n-sweep的「190左右」同一個量
+      const tail = c === "na" ? `能用來量的時間只有約${used}，少於我們事先定的200。照規則標成「無法判定」，不能說已經驗證過。`
+        : c === "gap" ? "公式算出的變化幾乎是0，照事先的規則只比數值的差距、不比變大還是變小。"
+        : c === "bad" ? "跟公式不符。" : `跟公式一樣，小擾動會${c === "up" ? "放大" : "變小"}。`;
+      verdictBox.innerHTML = ""; verdictBox.append(el("b", {}, `${k}台：`), `公式預測${f}；我們的模擬：${KEY[c][1]}。${tail}`);
+    }
+    const setN = k => { n = k; oneRun++; out.textContent = `${k}台`; range.setAttribute("aria-valuetext", `${k}台`); ring = O.modeRing(k, L, 1.0, 1e-6); st.reset(); single = null;
+      info.textContent = `平均車距 44÷${k} = ${trim(44 / k, 3)}，均勻車流的速度 ${O.V(44 / k).toFixed(4)}`; cvNote.textContent = ""; msg.textContent = ""; verdictBox.textContent = ""; bOne.disabled = false; mark(); draw(); };
+    bOne.onclick = async () => {
+      const k = n, my = ++oneRun; bOne.disabled = true; engine.cancel("p6one");
+      msg.textContent = `正在算${k}台……${engine.mode === "main" ? "（這個瀏覽器只能在畫面這邊算，可能會卡頓一下）" : ""}`;
+      const [res, ver] = await Promise.all([engine.run({ cmd: "measure", N: k }, "p6one"), sweep[k] ? Promise.resolve({ r: { verdict: sweep[k].verdict, runs: sweep[k].runs } }) : engine.run({ cmd: "verdict", N: k }, "p6one")]);
+      if (my !== oneRun) return;
+      bOne.disabled = false;
+      if (res.cancelled || ver.cancelled) { msg.textContent = ""; return; }
+      if (res.error || ver.error) { msg.textContent = `${k}台算到一半出錯了：${res.error || ver.error}。可以再按一次「跑這個車數」。`; return; }
+      single = res; msg.textContent = `${k}台：${REASON(res.r)}（模型時間${res.r.stop.toFixed(0)}）。`;
+      if (!sweep[k]) { sweep[k] = { verdict: ver.r.verdict, runs: ver.r.runs }; updateCell(k); }
+      sayVerdict(k, ver.r); draw();
+    };
+    function simCell(k, td) { const c = cellOf(k, sweep[k] && sweep[k].verdict); td.className = "c-" + c + (k === n ? " sel" : ""); td.textContent = "";
+      td.append(el("span", { "aria-hidden": "true" }, KEY[c][0]), el("span", { class: "sr" }, KEY[c][1] + (k === n ? "（你選的車數）" : ""))); return td; }
+    const updateCell = k => { const td = strip.querySelector(`td[data-n="${k}"]`); if (td) simCell(k, td); };
+    function mark() { $$("[data-col]", strip).forEach(e => e.classList.toggle("sel", +e.dataset.col === n)); $$("td[data-n]", strip).forEach(td => simCell(+td.dataset.n, td)); }
+    // 一列放幾個車數：每格至少約19px寬，兩位數的車數才不會擠在一起（列標題約佔90px）
+    const perRow = () => Math.max(6, Math.min(29, Math.floor(((strip.clientWidth || 300) - 90) / 19)));
     function renderStrip() {
-      strip.textContent = ""; const cw = strip.clientWidth, per = cw < 420 ? 12 : cw < 600 ? 15 : 29;
+      strip.textContent = ""; const per = perRow();
       for (let a0 = 3; a0 <= 60; a0 += per) {
         const ks = []; for (let k = a0; k < a0 + per && k <= 60; k++) ks.push(k);
         const tb = el("table", {}, el("caption", { class: "sr" }, `車數${ks[0]}到${ks[ks.length - 1]}台`),
-          el("thead", {}, el("tr", {}, el("th", { scope: "col" }, "車數"), ...ks.map(k => el("th", { scope: "col" }, String(k))))),
-          el("tbody", {}, el("tr", {}, el("th", { scope: "row" }, "公式預測"), ...ks.map(k => { const c = theory[k] > 0 ? "up" : "down"; return el("td", { class: "c-" + c }, el("span", { "aria-hidden": "true" }, KEY[c][0]), el("span", { class: "sr" }, KEY[c][1])); })),
+          el("thead", {}, el("tr", {}, el("th", { scope: "col" }, "車數"), ...ks.map(k => el("th", { scope: "col", "data-col": k, class: k === n ? "sel" : "" }, String(k))))),
+          el("tbody", {}, el("tr", {}, el("th", { scope: "row" }, "公式預測"), ...ks.map(k => { const c = theory[k] > 0 ? "up" : "down"; return el("td", { class: "c-" + c + (k === n ? " sel" : ""), "data-col": k }, el("span", { "aria-hidden": "true" }, KEY[c][0]), el("span", { class: "sr" }, KEY[c][1])); })),
             el("tr", {}, el("th", { scope: "row" }, "我們的模擬"), ...ks.map(k => simCell(k, el("td", { "data-n": k }))))));
         strip.append(tb);
       }
     }
-    bAll.onclick = async () => { if (sweep) return; sweep = {}; bAll.disabled = true; renderStrip(); const t0 = performance.now(); let k = 0;
-      for (let q = 3; q <= 60; q++) { const res = await engine.run({ cmd: "verdict", N: q }); sweep[q] = res.r.verdict; k++; prog.textContent = `模擬已算完 ${k}／58 個車數`; const td = strip.querySelector(`td[data-n="${q}"]`); if (td) simCell(q, td); }
-      const sec2 = (performance.now() - t0) / 1000; prog.textContent = `模擬算完了（58個車數，在你的瀏覽器裡花了${sec2.toFixed(0)}秒）。`; g.open(); };
+    function syncSweep() {
+      const left = 58 - doneCount();
+      bStop.hidden = !running; bAll.hidden = left === 0; bAll.disabled = running;
+      bAll.textContent = left === 58 ? "把3到60台全部跑一次" : `繼續跑剩下的（還有${left}個）`;
+    }
+    function stopSweep(why) {
+      if (!running) return; running = false; sweepRun++; engine.cancel("p6all");
+      prog.textContent = `${why}目前算完${doneCount()}／58個車數，已經算完的會保留。`; syncSweep();
+    }
+    async function runSweep() {
+      confirmBox.hidden = true; running = true; const my = ++sweepRun, t0 = performance.now(); syncSweep();
+      prog.textContent = `模擬已算完 ${doneCount()}／58 個車數`;
+      for (let q = 3; q <= 60; q++) {
+        if (sweep[q]) continue;
+        const res = await engine.run({ cmd: "verdict", N: q }, "p6all");
+        if (my !== sweepRun || res.cancelled) return;
+        if (res.error) { running = false; prog.textContent = `算${q}台的時候出錯了：${res.error}。已經算完的會保留，可以按「繼續跑剩下的」再試一次。`; syncSweep(); return; }
+        sweep[q] = { verdict: res.r.verdict, runs: res.r.runs }; updateCell(q);
+        prog.textContent = `模擬已算完 ${doneCount()}／58 個車數`;
+      }
+      spent += (performance.now() - t0) / 1000; running = false; syncSweep();
+      prog.textContent = `模擬算完了（58個車數，在你的瀏覽器裡一共花了約${spent.toFixed(0)}秒）。`; g.open();
+    }
+    bAll.onclick = () => {
+      if (running) return;
+      if (engine.mode === "main" && !consent) { confirmBox.hidden = false; bYes.focus(); return; }
+      runSweep().catch(err => { running = false; prog.textContent = `計算出錯了：${err}`; syncSweep(); });
+    };
+    bYes.onclick = () => { consent = true; confirmBox.hidden = true; bAll.onclick(); };
+    bNo.onclick = () => { confirmBox.hidden = true; prog.textContent = "沒有跑。想跑的時候再按一次。"; bAll.focus(); };
+    bStop.onclick = () => { stopSweep("已停止。"); bAll.focus(); };
+    // 跑到一半Worker壞掉：先停下來問，不直接改在畫面這邊算
+    engine.onFallback(() => { if (running && !consent) { stopSweep("背景計算停止運作了。"); confirmBox.hidden = false; } });
     function draw() {
       if (body.hidden) return;
       drawRing(ex.cv, { x: ring.x, v: ring.v, N: n, L, small: false });
@@ -1337,9 +1466,9 @@ window.DECK_DATA = {"titles": ["沒有車禍，車流也會自己卡住", "輕�
     range.addEventListener("input", () => setN(+range.value));
     const tick = dt => { if (!vis.on || body.hidden) return; if (!reduce()) { const k = st.take(dt); for (let i = 0; i < k; i++) ring.step(); if (loop.paint) drawRing(ex.cv, { x: ring.x, v: ring.v, N: n, L }); } };
     const vis = watch(stage);
-    setN(22); renderStrip();
-    let rs = 0; new ResizeObserver(() => { const w = strip.clientWidth < 600; if (w !== rs) { rs = w; renderStrip(); } }).observe(strip);
-    return { enter() { loop.add(tick); }, leave() { loop.del(tick); }, draw };
+    setN(22); renderStrip(); syncSweep();
+    let rs = 0; new ResizeObserver(() => { const w = perRow(); if (w !== rs) { rs = w; renderStrip(); } }).observe(strip);
+    return { enter() { loop.add(tick); }, leave() { loop.del(tick); stopSweep("離開這一頁時停止了。"); engine.cancel("p6one"); oneRun++; bOne.disabled = false; if (msg.textContent.startsWith("正在算")) msg.textContent = ""; }, draw };
   };
 
   // ---------- 第7頁：三個實驗 ----------
@@ -1379,54 +1508,81 @@ window.DECK_DATA = {"titles": ["沒有車禍，車流也會自己卡住", "輕�
     const cv = el("canvas", { class: "ring", role: "img", "aria-label": "模型時間300時的環道，已經形成塞車，標出來的是要換成平滑車的那台" });
     const clock = clockEl(), msg = say(), res1 = el("dl", { class: "results" });
     const bR3 = btn("固定目標速度", ""), bR1 = btn("照自己過去的平均速度", "plain");
-    const bMode = el("button", { type: "button", class: "btn plain", "aria-pressed": "false" }, "改成播放動畫（預設快轉）");
-    const box2 = el("div", { class: "sim-box" }, el("p", { style: "margin:0", html: `${tagHtml("sim")}環道上已經形成塞車。選一種規則，把標出來的這台車換成平滑車。` }),
+    let playAnim = false;
+    const seg = segmented("跑的時候：", ["快轉", "播放動畫"], i => { playAnim = i === 1; });
+    const box2 = el("div", { class: "sim-box", id: "p8-sim" }, el("p", { style: "margin:0", html: `${tagHtml("sim")}環道上已經形成塞車。選一種規則，把標出來的這台車換成平滑車。` }),
       el("p", { class: "fine", style: "margin:0" }, "平滑車的規則是我們自己設計的，不是實驗用的控制方式。"),
-      el("div", { class: "split" }, el("div", { class: "model" }, cv), el("div", { style: "display:grid;gap:12px" }, el("div", { class: "btns" }, bR3, bR1), bMode, clock.box, msg, res1)),
+      el("div", { class: "split" }, el("div", { class: "model" }, cv), el("div", { style: "display:grid;gap:12px" }, el("div", { class: "btns" }, bR3, bR1), seg.el, clock.box, msg, res1)),
       el("p", { class: "fine", style: "margin:0" }, "從模型時間300換成平滑車，跑到1500；在1000到1500這一段算下面三件事，分三列，不合成一個分數。同時在背景跑一個「不換」的對照。"),
       el("p", { style: "margin:0;font-size:17px" }, "失敗的例子：只限制加速度、沒有安全機制的平滑車會撞車。"));
     after(6).after(box2);
 
     // 三、第三題
-    const MULT = [0.9, 1.0, 1.05, 1.1, 1.2];
-    const q3 = el("div", { class: "sim-box" }), q3body = el("div", { style: "display:grid;gap:12px" }), lk = lockable(q3body, "先選一個答案，滑桿才會打開。");
+    const MULT = [0.9, 1.0, 1.05, 1.1, 1.2], fm = m => (Math.round(m * 100) % 10 ? m.toFixed(2) : m.toFixed(1));
+    const q3 = el("div", { class: "sim-box", id: "p8-q3" }), q3body = el("div", { style: "display:grid;gap:12px" }), lk = lockable(q3body, "先選一個答案，滑桿才會打開。");
     const range = el("input", { type: "range", min: "0", max: "4", step: "1", value: "1", id: "p8u" }), out = el("output", { for: "p8u" });
     const res3 = el("dl", { class: "results" }), msg3 = say(), hist = el("ul", { class: "fine", style: "margin:0;padding-left:1.2em" }), bRev = btn("揭曉", ""); bRev.hidden = true;
-    q3body.append(el("div", { class: "slider" }, el("label", { for: "p8u" }, "平滑車的目標速度（固定目標速度的規則）"), out, range, el("div", { class: "ticks", "aria-hidden": "true" }, ...MULT.map(m => el("span", {}, `${m}倍`)))), msg3, res3, hist, bRev);
+    // 揭曉要做的兩件事，一開始就列出來（條件跟原本一樣：1.0倍和任一個大於1.0倍都跑過）
+    const todo1 = el("li", {}, "先跑1.0倍（原本均勻車流的速度）"), todo2 = el("li", {}, "再跑任一個大於1.0倍");
+    const todo = el("div", { class: "todo-box" }, el("p", { style: "margin:0;font-weight:700" }, "要看第三題的答案，先做這兩件事："), el("ol", { class: "todo" }, todo1, todo2));
+    const bRun = btn("跑這個值", "");
+    q3body.append(todo, el("div", { class: "slider" }, el("label", { for: "p8u" }, "平滑車的目標速度（固定目標速度的規則）"), out, range, el("div", { class: "ticks", "aria-hidden": "true" }, ...MULT.map(m => el("span", {}, `${fm(m)}倍`)))), el("div", { class: "btns" }, bRun), msg3, res3, hist, bRev);
     predict(q3, "把目標速度設得比原本均勻車流的速度快，車速起伏一定會更小嗎？", ["一定會更小", "不一定，可能更大", "沒有差別"], () => lk.unlock());
     q3.append(lk.wrap); after(8).after(q3);
+    // 頁首的跳轉：這頁很長，先讓讀者知道有哪幾段可以操作（內容一個字都不刪）
+    const jumpTo = (node, focusSel) => () => { node.scrollIntoView({ block: "start", behavior: reduce() ? "auto" : "smooth" }); const f = $(focusSel, node); if (f) f.focus({ preventScroll: true }); };
+    bars.tabIndex = -1;
+    $(".main", sec).prepend(el("nav", { class: "jump", "aria-label": "這一頁的三段" }, el("p", {}, "這一頁有一份實驗結果，和兩個可以自己操作的地方："),
+      el("button", { type: "button", onclick: jumpTo(bars, "h3") }, "看實驗結果"),
+      el("button", { type: "button", onclick: jumpTo(box2, "button") }, "換一台平滑車"),
+      el("button", { type: "button", onclick: jumpTo(q3, "button") }, "第三題")));
 
-    let base = null, x300 = null, ring = null, frames = null, fi = 0, playing = false, playAnim = false, busy = false; const tried = new Set();
-    const showU = () => { const m = MULT[+range.value]; out.textContent = `均勻車流速度的${m}倍（${(O.V(2) * m).toFixed(3)}）`; range.setAttribute("aria-valuetext", out.textContent); };
+    // 同一個計算只送一次：算過的存起來，正在算的共用同一個Promise
+    const cache = {}, pend = {};
+    const compute = (key, msgObj) => {
+      if (cache[key]) return Promise.resolve(cache[key]);
+      if (!pend[key]) pend[key] = engine.run(msgObj, "p8").then(r => { delete pend[key]; if (!r.error && !r.cancelled) cache[key] = r; return r; });
+      return pend[key];
+    };
+    const getBase = () => compute("R0", { cmd: "smooth", kind: "R0" });
+    let x300 = null, ring = null, frames = null, fi = 0, playing = false, busy = false, q3Seq = 0; const tried = new Set();
+    const showU = () => { const m = MULT[+range.value]; out.textContent = `均勻車流速度的${fm(m)}倍（${(O.V(2) * m).toFixed(3)}）`; range.setAttribute("aria-valuetext", out.textContent); };
     showU();
-    const rows = (dl, r) => { dl.textContent = "";
+    const rows = (dl, r, base) => { dl.textContent = "";
       const row = (k, v, cls) => dl.append(el("div", {}, el("dt", {}, k), el("dd", { class: cls || "" }, v)));
       row("車速起伏", `是不換的時候的${Math.round(r.std / base.std * 100)}%`);
       row("平均車速", `不換的時候是${base.mean.toFixed(3)}，換了之後是${r.mean.toFixed(3)}`);
       row("安全", `最小車距${r.minH.toFixed(3)}，${r.minH > 0 ? "沒有撞車" : "撞車了（車距變成負的）"}`, r.minH > 0 ? "" : "bad-text"); };
-    const getBase = async () => { if (!base) base = await engine.run({ cmd: "smooth", kind: "R0" }); return base; };
+    const failed = r => r.error || r.cancelled;
     function initRing() { if (x300) return; const x = Array.from({ length: N }, (_, n) => n * 2.0); x[0] += 0.1; const r = new O.Ring(N, L, 1.0, x); while (r.t < 300 - 1e-9) r.step(); x300 = { x: r.x, v: r.v, t: r.t }; ring = x300; }
     async function go(kind, label) {
-      if (busy) return; busy = true; [bR3, bR1].forEach(b => { b.disabled = true; }); msg.textContent = `「${label}」計算中……`; res1.textContent = "";
-      const [b0, r] = await Promise.all([getBase(), engine.run({ cmd: "smooth", kind, mult: 1.0, frames: playAnim })]);
+      if (busy) return; busy = true; [bR3, bR1].forEach(b => { b.disabled = true; }); const anim = playAnim;
+      msg.textContent = `「${label}」計算中……`; res1.textContent = "";
+      const key = kind === "R3" ? "R3:1" : kind, [b0, r] = await Promise.all([getBase(), compute(key + (anim ? ":frames" : ""), { cmd: "smooth", kind, mult: 1.0, frames: anim })]);
       busy = false; [bR3, bR1].forEach(b => { b.disabled = false; });
-      if (playAnim && r.frames.length) { frames = r.frames; fi = 0; playing = true; msg.textContent = `「${label}」播放中……`; frames.done = () => { msg.textContent = `「${label}」跑完了。`; rows(res1, r); }; }
-      else { ring = { x: r.x, v: r.v, t: 1500 }; msg.textContent = `「${label}」跑完了（快轉）。`; rows(res1, r); draw(); }
+      if (failed(b0) || failed(r)) { msg.textContent = `「${label}」算到一半出錯了：${b0.error || r.error || "被中斷"}。可以再按一次。`; return; }
+      if (anim && r.frames.length) { frames = r.frames; fi = 0; playing = true; msg.textContent = `「${label}」播放中……`; frames.done = () => { msg.textContent = `「${label}」跑完了。`; rows(res1, r, b0); }; }
+      else { ring = { x: r.x, v: r.v, t: 1500 }; msg.textContent = `「${label}」跑完了（快轉）。`; rows(res1, r, b0); draw(); }
     }
     bR3.onclick = () => go("R3", "固定目標速度");
     bR1.onclick = () => go("R1", "照自己過去的平均速度");
-    bMode.onclick = () => { playAnim = !playAnim; bMode.setAttribute("aria-pressed", String(playAnim)); };
-    async function runQ3() {
-      const m = MULT[+range.value]; msg3.textContent = `${m}倍：計算中……`; res3.textContent = "";
-      const [b0, r] = await Promise.all([getBase(), engine.run({ cmd: "smooth", kind: "R3", mult: m })]);
-      if (MULT[+range.value] !== m) return;
-      msg3.textContent = `${m}倍：跑完了。`; rows(res3, r);
-      if (!tried.has(m)) { tried.add(m); hist.append(el("li", {}, `${m}倍：車速起伏是不換的時候的${Math.round(r.std / base.std * 100)}%`)); }
+    function syncTodo() {
+      todo1.classList.toggle("done", tried.has(1.0)); todo2.classList.toggle("done", [...tried].some(q => q > 1.0));
       if (tried.has(1.0) && [...tried].some(q => q > 1.0) && !g.isOpen) bRev.hidden = false;
     }
-    range.addEventListener("input", showU);
+    // 只顯示「現在選的那個值」的結果：比較舊的請求回來時，如果讀者已經換了值，就不寫到畫面上
+    async function runQ3() {
+      const m = MULT[+range.value], my = ++q3Seq;
+      msg3.textContent = `${fm(m)}倍：計算中……`; res3.textContent = "";
+      const [b0, r] = await Promise.all([getBase(), compute("R3:" + m, { cmd: "smooth", kind: "R3", mult: m })]);
+      if (!failed(b0) && !failed(r) && !tried.has(m)) { tried.add(m); hist.append(el("li", {}, `${fm(m)}倍：車速起伏是不換的時候的${Math.round(r.std / b0.std * 100)}%`)); syncTodo(); }
+      if (my !== q3Seq || MULT[+range.value] !== m) return;
+      if (failed(b0) || failed(r)) { msg3.textContent = `${fm(m)}倍算到一半出錯了：${b0.error || r.error || "被中斷"}。可以再按「跑這個值」。`; return; }
+      msg3.textContent = `${fm(m)}倍：跑完了。`; rows(res3, r, b0);
+    }
+    range.addEventListener("input", () => { showU(); q3Seq++; msg3.textContent = ""; res3.textContent = ""; });
     range.addEventListener("change", runQ3);
-    q3body.prepend(el("div", { class: "btns" }, btn("跑這個值", "", runQ3)));
+    bRun.onclick = runQ3;
     bRev.onclick = () => { g.open(); bRev.hidden = true; };
     function draw() { if (!ring) return; drawRing(cv, { x: ring.x, v: ring.v, N, L, sel: 0, selLabel: "換成平滑車的車", lens: true }); clock.set(ring.t); }
     const tick = dt => { if (!vis.on) return;
@@ -1439,7 +1595,12 @@ window.DECK_DATA = {"titles": ["沒有車禍，車流也會自己卡住", "輕�
   // ---------- 第10頁：三個問題 ----------
   PAGES[10] = sec => {
     const qs = $$(".quiz", sec); qs.forEach((q, i) => { q.hidden = i > 0; });
-    const further = el("div", { class: "further", hidden: true }, el("h3", {}, "延伸閱讀"),
+    // 三題做完之後的思考題：不計分、不收集答案（文字是使用者核准的，見runs/2026-11-13-n7-build-r3.md）
+    const think = el("div", { class: "think" }, el("h3", {}, "想一想（不計分）"),
+      el("p", {}, "不看前面，你能用一句話說明，為什麼沒有車禍或障礙物，也可能出現塞車嗎？"),
+      el("p", { class: "fine" }, "不用寫下來，這裡也不會記錄你的答案。想不出來的話，可以回去看："),
+      el("p", { class: "back-links" }, ...[1, 2, 3, 4].map(k => el("a", { href: `#p${k}` }, `第${k}頁：${DATA.titles[k - 1]}`))));
+    const further = el("div", { class: "further", hidden: true }, think, el("h3", {}, "延伸閱讀"),
       el("ul", {}, el("li", {}, el("a", { href: `${DATA.repo}/blob/main/wiki/index.md`, target: "_blank", rel: "noopener" }, "這份簡報的知識庫（LLM Wiki）入口")),
         ...DATA.sources.map(s => el("li", {}, el("a", { href: s.url, target: "_blank", rel: "noopener" }, `${s.title}（${s.year}）`)))),
       el("h3", {}, "這份簡報怎麼做出來的"),
