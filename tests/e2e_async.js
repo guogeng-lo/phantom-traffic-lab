@@ -13,7 +13,8 @@
  *   7. 「不換」的對照（R0）整頁只算一次，不管先按哪個、連按幾次。
  *   8. 同一個目標速度只算一次（連按「跑這個值」、來回切換都不重算）。
  *   9. 快速切換0.9→1.2→0.9→1.0時，最後畫面顯示的是1.0倍的結果（舊的結果不會蓋掉）。
- *  10. 第三題一開始就看得到兩個待辦（先跑1.0倍、再跑一個大於1.0倍）；只跑1.2倍時揭曉鈕不出現、第二項打勾；兩項都做了才出現。
+ *  10. 第三題答題之前看不到待辦；答題解鎖之後馬上看得到兩個待辦（先跑1.0倍、再跑一個大於1.0倍）；只跑1.2倍時揭曉鈕不出現、第二項打勾；兩項都做了才出現。
+ *      （第3輪之後的限定修補改寫：原本用textContent讀，連看不到的元素也算，又去找畫面上沒有的①②，所以印出「找不到」。見runs/2026-11-13-n7-perf-patch-authorization.md）
  *  11. 快轉／播放動畫是兩個互斥的按鈕，aria-pressed跟畫面一致。 */
 const fs = require("fs");
 const path = require("path");
@@ -109,12 +110,16 @@ async function p8Case(browser) {
   say(p0 === "true/false" && p1 === "false/true" && p2 === "true/false", "快轉／播放動畫是兩個互斥按鈕，狀態跟aria-pressed一致", `${p0} → ${p1} → ${p2}`);
   // 7、8. 先按規則，馬上答第三題、連按跑這個值
   await s8.getByRole("button", { name: "固定目標速度", exact: true }).click();
+  // 10. 待辦：答題前看不到，解鎖後看得到（用畫面上真的看得到的文字判斷）
+  const todoList = q3.locator("ol.todo");
+  const before = await todoList.isVisible().catch(() => false);
   await s8.getByRole("button", { name: "不一定，可能更大" }).click();
+  const after = await todoList.isVisible().catch(() => false);
+  const items = after ? await q3.locator("ol.todo li").evaluateAll(ls => ls.map(li => li.innerText.trim())) : [];
+  say(!before && after && items.length === 2 && items[0] === "先跑1.0倍（原本均勻車流的速度）" && items[1] === "再跑任一個大於1.0倍",
+    "第三題：答題前看不到待辦，解鎖後看得到兩項", `答題前${before ? "看得到" : "看不到"}；解鎖後${after ? "看得到：" + items.map((t, i) => `${i + 1}.${t}`).join(" ") : "看不到"}`);
   const run = s8.getByRole("button", { name: "跑這個值" });
   await tryClick(run); await tryClick(run); await tryClick(run);
-  // 10. 待辦
-  const todo = await q3.textContent();
-  say(/先跑1\.0倍/.test(todo) && /大於1\.0倍/.test(todo), "第三題一開始就看得到兩個待辦", todo.match(/[①②][^①②]{0,30}/g)?.join(" ") || "找不到");
   await page.waitForTimeout(6000);
   // 只跑1.2倍的情況另開一個頁面測，這裡先測快速切換
   const slider = s8.locator("#p8u");

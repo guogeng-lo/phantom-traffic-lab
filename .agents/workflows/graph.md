@@ -12,7 +12,7 @@
 | 4 | 教學大綱 | 證據卡、`pipeline/requirements.md` | `pipeline/outline.md`、`wiki/slide-map.md` | 教學順序、互動設計、深度、故事 | **使用者** | 4 |
 | 5 | 頁面和證據卡對應 | `wiki/slide-map.md`、證據卡 | 不改檔案 | 每頁核心主張都有證據卡；寫「真實道路」的主張要連到experiment卡；核心主張不能只靠pending或expression卡 | 程式：`scripts/check_slide_map.py`（另外檢查只有我們的卡時要寫明是模擬、主張的數字要在卡片裡找得到） | 缺證據回1，對應錯回4 |
 | 6 | 逐頁稿審查 | `pipeline/pages/`、證據卡 | `pipeline/pages/`裡出錯的那頁 | 先跑程式：`scripts/check_pages.py`錯誤0（段落、證據卡跟slide-map一致、數字對得到卡、術語、標示）；再送審：有沒有超出證據、生活化說法有沒有扭曲原意、會不會誤導 | 程式＋ChatGPT獨立對話（分開記錄） | 6，只改出錯的頁 |
-| 7 | 模擬和HTML測試 | 逐頁稿、`model/`、`docs/` | `docs/`的建置來源、瀏覽器模擬 | 瀏覽器版和Python版對答案（標準先寫好）；取樣、波的方向；文字溢出；每頁都有出處；連結有效；手機375寬；沒有只能懸停的操作 | 程式＋截圖：`tests/test_js_parity.js`、`tests/test_js_parity_browser.js`、`tests/test_site_static.py`、`tests/e2e_flow.js`、`tests/e2e_embedded.js`、`tests/e2e_async.js`、`tests/layout_widths.js`、`tests/a11y_axe.js`、`tests/perf_mobile.js`、`tests/visual_regression.js`＋`tests/compare_shots.py` | 數值錯只修瀏覽器模擬，版面錯只修版面 |
+| 7 | 模擬和HTML測試 | 逐頁稿、`model/`、`docs/` | `docs/`的建置來源、瀏覽器模擬 | 瀏覽器版和Python版對答案（標準先寫好）；取樣、波的方向；文字溢出；每頁都有出處；連結有效；手機375寬；沒有只能懸停的操作 | 程式＋截圖：`tests/test_js_parity.js`、`tests/test_js_parity_browser.js`、`tests/test_site_static.py`、`tests/e2e_flow.js`、`tests/e2e_embedded.js`、`tests/e2e_async.js`、`tests/e2e_p5_chart.js`、`tests/layout_widths.js`、`tests/a11y_axe.js`、`tests/perf_mobile.js`、`tests/visual_regression.js`＋`tests/compare_shots.py` | 數值錯只修瀏覽器模擬，版面錯只修版面 |
 | 8 | 最終交件 | 全部報告 | — | 所有報告都是最新版本而且通過；GitHub Pages正式網址實際打開測過 | 程式＋**使用者** | 回到過期或失敗的那一關 |
 
 另外，前兩篇ingest完，使用者要先確認格式和品質。
