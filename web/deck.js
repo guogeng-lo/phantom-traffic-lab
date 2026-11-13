@@ -128,7 +128,7 @@
     ctx.clearRect(0, 0, w, w);
     ctx.fillStyle = C.infield; ctx.beginPath(); ctx.arc(g.cx, g.cy, g.R + g.rw, 0, 2 * Math.PI); ctx.fill();
     drawRoad(ctx, g); drawCars(ctx, g, s);
-    const fs = Math.max(13, Math.min(17, w / 30)), jam = jamSpan(s), outer = g.R + g.rw / 2 + 5;
+    const fs = Math.max(14, Math.min(17, w / 30)), jam = jamSpan(s), outer = g.R + g.rw / 2 + 5;
     if (jam) {   // 塞車團：環外側的紅色帶子
       const a0 = angOf(jam.from, s.L) - g.cl / g.ppu / s.L * 2 * Math.PI * 0.8, a1 = a0 + (jam.to - jam.from + g.cl / g.ppu * 1.6) / s.L * 2 * Math.PI;
       ctx.strokeStyle = C.stop; ctx.lineWidth = Math.max(7, w / 60); ctx.lineCap = "round";
@@ -141,6 +141,10 @@
     if (s.focus != null && s.focus !== s.sel) { const [x, y] = at(g, g.R, angOf(s.x[s.focus], s.L)); ctx.setLineDash([4, 3]); ctx.lineWidth = 3; ctx.strokeStyle = C.ink; ctx.beginPath(); ctx.arc(x, y, g.cl * 0.75 + 9, 0, 2 * Math.PI); ctx.stroke(); ctx.setLineDash([]); }
     if (s.small) return g;
     chip(ctx, "車子順時針前進", g.cx, g.cy - g.R * 0.7, { fs, fill: C.soft, weight: 700 });
+    if (s.hint && !jam && s.sel == null) {   // 還沒點車：直接在環道中間說要做什麼
+      chip(ctx, s.hint[0], g.cx, g.cy - fs * 0.9, { fs: fs + 3, fill: C.ink, bg: C.act });
+      if (s.hint[1]) chip(ctx, s.hint[1], g.cx, g.cy + fs * 1.3, { fs, fill: C.ink, bg: "rgba(255,255,255,.9)", weight: 700 });
+    }
     const target = jam ? { pos: jam.mid, kind: "jam", text: "這裡幾乎停住了" } : s.sel != null && s.lens ? { pos: s.x[s.sel], kind: "sel", text: s.selLabel || "你點的車" } : null;
     if (s.lens && target) {
       const Rl = g.R * 0.56, lx = g.cx, ly = g.cy + g.R * 0.1, a = angOf(target.pos, s.L), [px, py] = at(g, g.R, a);
@@ -202,7 +206,7 @@
   function lineChart(cv, o) {
     const f = fit(cv, o.height || (w => Math.round(Math.min(360, Math.max(220, w * 0.62))))); if (!f) return null;
     const { ctx, w, h } = f;
-    const fs = w < 420 ? 13 : 14, pad = { l: o.log ? 58 : 48, r: 14, t: 14, b: 40 };
+    const fs = w < 420 ? 14 : 15, pad = { l: o.log ? 60 : 48, r: 14, t: 14, b: 42 };
     const W = w - pad.l - pad.r, H = h - pad.t - pad.b;
     const ly = v => o.log ? Math.log10(Math.max(v, o.y0 / 10)) : v, Y0 = ly(o.y0), Y1 = ly(o.y1);
     const X = x => pad.l + (x - o.x0) / (o.x1 - o.x0) * W, Y = v => pad.t + (1 - (Math.min(Math.max(ly(v), Y0), Y1) - Y0) / (Y1 - Y0)) * H;
@@ -222,6 +226,8 @@
       ctx.strokeStyle = sr.color; ctx.lineWidth = sr.width || 2.5; ctx.setLineDash(sr.dash || []); ctx.lineJoin = "round";
       ctx.beginPath(); ctx.moveTo(X(pts[0][0]), Y(pts[0][1])); for (let i = 1; i < pts.length; i++) ctx.lineTo(X(pts[i][0]), Y(pts[i][1])); ctx.stroke(); ctx.setLineDash([]);
     }
+    if (o.empty) { const lh = (fs + 1) * 1.6;   // 還沒有資料：在圖中間分行寫要做什麼
+      o.empty.forEach((t, i) => chip(ctx, t, pad.l + W / 2, pad.t + H / 2 + (i - (o.empty.length - 1) / 2) * lh, { fs: fs + 1, fill: C.ink, bg: "rgba(255,244,207,.95)", bounds: [pad.l + 2, pad.l + W - 2] })); }
     for (const n of o.notes || []) chip(ctx, n.text, X(n.x), Y(n.y), { fs, fill: n.fill || C.ink, bg: n.bg || C.act, align: n.align || "right", bounds: [pad.l + 2, pad.l + W - 2] });
     return { X, Y, pad, W, H };
   }
@@ -270,34 +276,60 @@
 
   // ---------- 背景計算（Web Worker；用同一份ovm.js） ----------
   function workerMain(O, m, post) {
-    if (m.cmd === "measure") {
-      const pts = []; const r = O.measureV2(m.N, 44.0, 1.0, 1e-6, (t, a1) => { pts.push([t, a1]); });
-      post({ id: m.id, pts, r });
-    } else if (m.cmd === "verdict") {
-      post({ id: m.id, r: O.verdictN(m.N, 44.0, 1.0) });
-    } else if (m.cmd === "smooth") {
-      const rule = m.kind === "R0" ? null : m.kind === "R1" ? new O.AvgRule() : new O.TargetRule(O.V(2.0) * m.mult);
-      const frames = [];
-      const res = O.smoothingRun(rule, 0.1, { onStep: m.frames ? r => { if (r._steps % 10 === 0 && r.t >= 300 - 1e-9) frames.push([r.t, Array.from(r.x), Array.from(r.v)]); } : null });
-      post({ id: m.id, std: res.std, vmin: res.vmin, jamFrac: res.jamFrac, mean: res.mean, sane: res.sane, minH: res.minH, x: Array.from(res.ring.x), v: Array.from(res.ring.v), frames });
-    }
-  }
-  const engine = (() => {
-    let w = null, id = 0; const cbs = new Map(), sent = new Map();
-    const local = m => setTimeout(() => workerMain(O, m, d => { const f = cbs.get(d.id); cbs.delete(d.id); sent.delete(d.id); if (f) f(d); }), 0);
     try {
-      const src = $("#ovm-src").textContent + "\n;(function(){var workerMain=" + workerMain.toString() + ";self.onmessage=function(e){workerMain(self.OVM,e.data,function(d){self.postMessage(d);});};})();";
-      w = new Worker(URL.createObjectURL(new Blob([src], { type: "text/javascript" })));
-      w.onmessage = e => { const f = cbs.get(e.data.id); cbs.delete(e.data.id); sent.delete(e.data.id); if (f) f(e.data); };
-      // Worker開不起來（例如被沙盒擋掉）：改在主執行緒算，已經送出去、還沒回來的也重算，不會卡住
-      w.onerror = ev => { if (ev && ev.preventDefault) ev.preventDefault(); if (w) { w.terminate(); w = null; } for (const m of sent.values()) local(m); };
-    } catch (err) { w = null; }
+      if (m.cmd === "measure") {
+        const pts = []; const r = O.measureV2(m.N, 44.0, 1.0, 1e-6, (t, a1) => { pts.push([t, a1]); });
+        post({ id: m.id, pts, r });
+      } else if (m.cmd === "verdict") {
+        post({ id: m.id, r: O.verdictN(m.N, 44.0, 1.0) });
+      } else if (m.cmd === "smooth") {
+        const rule = m.kind === "R0" ? null : m.kind === "R1" ? new O.AvgRule() : new O.TargetRule(O.V(2.0) * m.mult);
+        const frames = [];
+        const res = O.smoothingRun(rule, 0.1, { onStep: m.frames ? r => { if (r._steps % 10 === 0 && r.t >= 300 - 1e-9) frames.push([r.t, Array.from(r.x), Array.from(r.v)]); } : null });
+        post({ id: m.id, std: res.std, vmin: res.vmin, jamFrac: res.jamFrac, mean: res.mean, sane: res.sane, minH: res.minH, x: Array.from(res.ring.x), v: Array.from(res.ring.v), frames });
+      } else post({ id: m.id, error: "不認得的計算：" + m.cmd });
+    } catch (err) { post({ id: m.id, error: String((err && err.message) || err) }); }
+  }
+  /** 計算引擎。run(訊息, 群組)回傳Promise，結果是{...}、{cancelled: true}或{error}。
+   *  cancel(群組)：還沒開始的不算了；Worker正在算的，把Worker關掉重開（其他群組的工作重新送）。
+   *  Worker不能用時改在主執行緒算，會先通知onFallback的人（第6頁要先問讀者）。 */
+  const engine = (() => {
+    let w = null, id = 0; const cbs = new Map(), sent = new Map(), timers = new Map(), fallbacks = [];
+    const finish = d => { const f = cbs.get(d.id); cbs.delete(d.id); sent.delete(d.id); timers.delete(d.id); if (f) f(d); };
+    const local = m => { timers.set(m.id, setTimeout(() => { timers.delete(m.id); if (cbs.has(m.id)) workerMain(O, m, finish); }, 0)); };
+    const SRC = () => $("#ovm-src").textContent + "\n;(function(){var workerMain=" + workerMain.toString() + ";self.onmessage=function(e){workerMain(self.OVM,e.data,function(d){self.postMessage(d);});};})();";
+    function fallback() {
+      if (w) { try { w.terminate(); } catch (e) { /* 已經壞了 */ } w = null; }
+      fallbacks.forEach(f => f());
+      for (const m of sent.values()) if (!timers.has(m.id)) local(m);
+    }
+    function spawn() {
+      try {
+        w = new Worker(URL.createObjectURL(new Blob([SRC()], { type: "text/javascript" })));
+        w.onmessage = e => finish(e.data);
+        w.onerror = ev => { if (ev && ev.preventDefault) ev.preventDefault(); fallback(); };   // 載入失敗（例如被沙盒擋掉）
+      } catch (err) { w = null; }
+    }
+    spawn();
     return {
       get mode() { return w ? "worker" : "main"; },
-      run(msg) { return new Promise(res => { const m = Object.assign({ id: ++id }, msg); cbs.set(m.id, res); sent.set(m.id, m);
-        if (w) w.postMessage(m); else local(m); }); }
+      onFallback(f) { fallbacks.push(f); },
+      run(msg, group) { return new Promise(res => { const m = Object.assign({ id: ++id, group: group || "" }, msg); cbs.set(m.id, res); sent.set(m.id, m);
+        if (w) w.postMessage(m); else local(m); }); },
+      cancel(group) {
+        const mine = [...sent.values()].filter(m => m.group === group); if (!mine.length) return;
+        for (const m of mine) { const t = timers.get(m.id); if (t != null) clearTimeout(t); finish({ id: m.id, cancelled: true }); }
+        if (w) { w.terminate(); spawn(); for (const m of sent.values()) { if (w) w.postMessage(m); else local(m); } }
+      }
     };
   })();
+  /** 兩個互斥的選項（例如「快轉｜播放動畫」）。 */
+  function segmented(label, options, onChange) {
+    let cur = 0;
+    const bs = options.map((t, i) => el("button", { type: "button", "aria-pressed": String(i === 0), onclick: () => { cur = i; bs.forEach((b, j) => b.setAttribute("aria-pressed", String(j === i))); onChange(i); } }, t));
+    const box = el("div", { class: "seg-wrap" }, el("span", { class: "seg-label" }, label), el("div", { class: "seg", role: "group", "aria-label": label }, ...bs));
+    return { el: box, get value() { return cur; } };
+  }
 
   // =====================================================================
   const PAGES = {};
@@ -342,7 +374,7 @@
       playing = true; sp.set(1); msg.textContent = "你剛剛讓這台車慢了一下。"; msg.className = "say"; sync(); announce(`你讓第${n}台車輕踩了一下煞車。`);
     };
     const cr = clickableRing(ex.cv, state, click, "22台車的環狀道路，點一台車讓它輕踩一下煞車。", () => draw());
-    const draw = () => { const s = state(); drawRing(ex.cv, Object.assign(s, { sel: demo.ring ? demo.ring.brake[0] : null, focus: cr.focus(), flash: demo.ring && performance.now() < flashUntil ? demo.ring.brake[0] : null, lens: true, selLabel: "你點的車" })); clock.set(now()); };
+    const draw = () => { const s = state(); drawRing(ex.cv, Object.assign(s, { hint: ["點環道上任一台車", "它會輕輕踩一下煞車"], sel: demo.ring ? demo.ring.brake[0] : null, focus: cr.focus(), flash: demo.ring && performance.now() < flashUntil ? demo.ring.brake[0] : null, lens: true, selLabel: "你點的車" })); clock.set(now()); };
     bPlay.onclick = () => { playing = !playing; sync(); };
     bReset.onclick = () => { reset(); };
     bFF.onclick = () => { for (let i = 0; i < 40000 && !jam; i++) stepOne(); sync(); draw(); };
@@ -370,9 +402,10 @@
     const sp = steps(["看一台車的軌跡", "疊上其他車", "猜帶子往哪邊移"]);
     const msg = say(), note = el("p", { class: "fine" }), bAll = btn("疊上其他車", ""), bRe = btn("重畫這台車", "plain");
     const askBox = el("div", {});
-    const placard = el("div", { class: "placard" }, el("div", { class: "mini" }, mini), sp.ol, msg, note, el("div", { class: "btns" }, bAll, bRe), askBox);
-    const span = el("p", { class: "fine", style: "margin:8px 4px 0" });
-    stage.append(guide, el("div", { class: "ts-grid" }, el("div", { class: "model flat" }, cv, span), placard));
+    msg.classList.add("p3-act"); askBox.classList.add("p3-act");
+    const placard = el("div", { class: "placard" }, el("div", { class: "mini" }, mini), sp.ol, msg, note, el("div", { class: "btns p3-act" }, bAll, bRe), askBox);
+    const span = el("p", { class: "ts-range" }), legendLine = el("p", { class: "fine", style: "margin:8px 4px 0" }, "灰線是其他車，紅色是車速低於0.1的地方，黃線是我們挑出來跟著看的那台車。");
+    stage.append(guide, el("div", { class: "ts-grid" }, el("div", { class: "model flat" }, span, cv, legendLine), placard));
     let D = null, mode = "one", prog = 0, cursor = 0, chosen = null; bAll.disabled = true;
     const ask = predict(askBox, "塞住的地方連成一條帶子。這條帶子往哪邊移？", ["往右，跟車子同方向", "往左，跟車子反方向", "不動"], t => { chosen = t; reveal(); });
     ask.hidden = true;
@@ -410,6 +443,8 @@
       t3.querySelector("figcaption span").textContent = back ? "塞住的位置往後退" : "塞住的位置往前移";
       msg.textContent = `你選了「${chosen}」。圖上的黑色箭頭，是程式從軌跡量出來的塞車團移動方向。`;
       g.open();
+      // 手機上圖和答案是上下排的：揭曉時把圖捲回畫面裡，讓箭頭和說明在一起
+      if (window.innerWidth < 860) cv.scrollIntoView({ block: "start", behavior: reduce() ? "auto" : "smooth" });
     }
     bAll.onclick = () => { mode = "all"; sp.set(2); ask.hidden = false; msg.textContent = "22台車的軌跡都畫上去了。"; bAll.disabled = true; };
     bRe.onclick = () => restart();
@@ -437,7 +472,7 @@
       ctx.strokeStyle = C.grid; ctx.lineWidth = 1; ctx.font = `600 ${fs}px ${HEAD}`; ctx.textBaseline = "middle";
       for (let x = 0; x <= 44; x += 11) { const px = pad.l + x / L * W; ctx.beginPath(); ctx.moveTo(px, pad.t); ctx.lineTo(px, pad.t + H); ctx.stroke(); ctx.fillStyle = C.soft; ctx.textAlign = "center"; ctx.fillText(String(x), px, pad.t - 12); }
       const tA = tc + K0 * 0.5, tB = tc + K1 * 0.5;
-      span.textContent = `為了讓線不要太密，這裡只畫點擊之後的一段：模型時間${tA.toFixed(1)}到${tB.toFixed(1)}（點擊在${tc.toFixed(1)}）。灰線是其他車，紅色是車速低於0.1的地方。`;
+      span.textContent = `這張圖只畫點擊之後的一段：模型時間${tA.toFixed(1)}到${tB.toFixed(1)}（點擊在${tc.toFixed(1)}）。`;
       for (let t = Math.ceil(tA / 20) * 20; t <= tB; t += 20) { const py = Y((t - tc) / 0.5); ctx.strokeStyle = C.grid; ctx.beginPath(); ctx.moveTo(pad.l, py); ctx.lineTo(pad.l + W, py); ctx.stroke(); ctx.fillStyle = C.soft; ctx.textAlign = "right"; ctx.fillText(String(t), pad.l - 6, py); }
       chip(ctx, "位置（0和44是同一點）", pad.l, 14, { fs, fill: C.soft, align: "left", weight: 700 });
       const ay = 42, x1 = pad.l + W - 2, x0 = x1 - Math.min(90, W * 0.22);
@@ -499,15 +534,15 @@
     const boxes = [1.0, 2.5].map(a => { const cv = el("canvas", { class: "chart", role: "img", "aria-label": `車速對時間的圖，a=${a}，被點那台車後面第1、5、10、15台車` });
       return { a, cv, box: el("div", { class: "chart-box" }, el("h3", {}, a === 1 ? "第2頁的條件（a=1）" : "每台車調整得更快（a=2.5）"), cv) }; });
     const msg = say(), bGo = btn("開始", "");
-    stage.append(el("p", { class: "exp-caption" }, "22台車、平均車距2、同樣的煞車"), el("div", { class: "charts2" }, ...boxes.map(b => b.box)),
+    stage.append(el("p", { class: "exp-caption" }, "22台車、平均車距2、同樣的煞車"), el("div", { class: "btns", style: "margin:0 0 14px;align-items:center" }, bGo, msg),
+      el("div", { class: "charts2" }, ...boxes.map(b => b.box)),
       legend(FOL.map((j, i) => ({ color: STY[i].color, dash: STY[i].dash, label: `後面第${j}台` }))),
-      el("p", { class: "fine" }, "這四台是事先決定的，不是挑出來好看的。橫軸是點擊之後的模型時間，兩張圖的縱軸範圍相同。"),
-      el("div", { class: "btns", style: "margin-top:12px" }, bGo), msg);
-    let ymin = 0, ymax = 1.2;
+      el("p", { class: "fine" }, "這四台是事先決定的，不是挑出來好看的。橫軸是點擊之後的模型時間，兩張圖的縱軸範圍相同。"));
+    let ymin = 0, ymax = 2.0;
     function draw() {
-      if (!R) return;
-      boxes.forEach((b, bi) => lineChart(b.cv, { x0: 0, x1: 100, y0: ymin, y1: ymax, xticks: [0, 20, 40, 60, 80, 100], yticks: [0, 0.4, 0.8, 1.2, 1.6].filter(v => v <= ymax + 1e-9 && v >= ymin - 1e-9), xlabel: "點擊之後的模型時間",
-        series: R[bi].map((pts, i) => ({ pts: pts.filter(p => p[0] <= prog + 1e-9), color: STY[i].color, dash: STY[i].dash, width: 2.5 })) }));
+      boxes.forEach((b, bi) => lineChart(b.cv, { x0: 0, x1: 100, y0: ymin, y1: ymax, xticks: [0, 20, 40, 60, 80, 100], yticks: [0, 0.4, 0.8, 1.2, 1.6, 2.0].filter(v => v <= ymax + 1e-9 && v >= ymin - 1e-9), xlabel: "點擊之後的模型時間",
+        empty: R ? null : ["按上面的「開始」", "比較同一個煞車", "在兩種條件下怎麼傳下去"],
+        series: R ? R[bi].map((pts, i) => ({ pts: pts.filter(p => p[0] <= prog + 1e-9), color: STY[i].color, dash: STY[i].dash, width: 2.5 })) : [] }));
     }
     bGo.onclick = () => { if (!R) { R = [run(1.0), run(2.5)]; const all = R.flat(2).map(pt => pt[1]); /* 兩張圖、四條線的所有車速 */ ymin = Math.min(0, Math.floor(Math.min(...all) * 5) / 5); ymax = Math.ceil(Math.max(...all) * 5) / 5; }
       prog = reduce() ? 100 : 0; playing = true; bGo.textContent = "重播"; msg.textContent = "邊算邊畫中……"; draw(); };
@@ -527,17 +562,20 @@
     const ex = exhibit(body, { key: ringKey("你點的車") });
     const range = el("input", { type: "range", min: "0", max: "5", step: "1", value: "0", id: "p5a", "aria-valuetext": "a = 1.0" });
     const out = el("output", { for: "p5a" }, "a = 1.0");
-    const slider = el("div", { class: "slider" }, el("label", { for: "p5a" }, "a：把車速調過去有多快"), out, range, el("div", { class: "ticks", "aria-hidden": "true" }, ...AS.map(a => el("span", {}, fa(a)))));
+    const slider = el("div", { class: "slider" }, el("label", { for: "p5a" }, "a：把車速調過去有多快"), el("span", { class: "fine" }, "a越大，車速調得越快。"), out, range, el("div", { class: "ticks", "aria-hidden": "true" }, ...AS.map(a => el("span", {}, fa(a)))));
     const clock = clockEl(), msg = say(), bFF = btn("快轉", ""), bPlay = btn("暫停", "plain"), bReset = btn("重來", "plain");
-    const bAnim = el("button", { type: "button", class: "btn plain", "aria-pressed": "false" }, "點了之後播放動畫（預設快轉）");
+    let animPref = false;
+    const seg5 = segmented("a=1.90、1.98點了之後：", ["直接快轉", "播放動畫"], i => { animPref = i === 1; }), bAnim = seg5.el;
     const hist = el("ul", { class: "fine", style: "margin:0;padding-left:1.2em" }), bReveal = btn("揭曉", ""); bReveal.hidden = true;
-    ex.placard.append(slider, msg, clock.box, el("div", { class: "btns" }, bFF, bPlay, bReset), bAnim, hist, bReveal);
+    // 沿用逐頁稿第5頁：「越靠近分界，變化越慢……靠近分界時，光看車子很難分出來」；揭曉前不提「分界」
+    const nearNote = el("p", { class: "near-note" }, "這個a值，擾動的變化很慢，光看車子很難分出來，要看下面那張小圖。"); nearNote.hidden = true;
+    ex.placard.append(slider, nearNote, msg, clock.box, el("div", { class: "btns" }, bFF, bPlay, bReset), bAnim, hist, bReveal);
     const cv = el("canvas", { class: "chart", role: "img", "aria-label": "擾動大小對時間的圖，縱軸是對數刻度" }), chartNote = el("p", { class: "fine" });
     body.append(el("div", { class: "chart-box", style: "margin-top:18px" }, el("h3", {}, "擾動大小（所有車裡，車速跟均勻車流差最多的值）"), cv, chartNote));
-    let a = 1.0, demo, t, pts, done, playing, run = 0, animPref = false; const ran = new Set(), st = stepper(RATE);
+    let a = 1.0, demo, t, pts, done, playing, run = 0; const ran = new Set(), st = stepper(RATE);
     const END = a => a === 1.0 ? 1500 : a < 2 ? 1500 : 300, XMAX = a => a === 1.0 ? 100 : a < 2 ? 1500 : 300;
     const reset = () => { run++; demo = new O.ClickDemo(N, L, a); t = 0; pts = []; done = null; playing = !reduce(); st.reset(); msg.textContent = "點一台車，讓它輕踩一下煞車。"; msg.className = "say"; chartNote.textContent = ""; sync(); draw(); };
-    const sync = () => { bFF.disabled = !demo.ring || !!done; bPlay.disabled = !!done; bPlay.textContent = playing ? "暫停" : "播放"; bAnim.hidden = !(a > 1.5 && a < 2); };
+    const sync = () => { bFF.disabled = !demo.ring || !!done; bPlay.disabled = !!done; bPlay.textContent = playing ? "暫停" : "播放"; bAnim.hidden = !(a > 1.5 && a < 2); nearNote.hidden = !(a > 1.5 && a < 2); };
     const finish = text => { done = text; playing = false; ran.add(a); msg.textContent = `a = ${fa(a)}：${text}`; msg.className = "say" + (text === "塞住了" ? " jam" : "");
       hist.append(el("li", {}, `a = ${fa(a)}：${text}`)); if (ran.size >= 2 && !g.isOpen) bReveal.hidden = false; sync(); draw(); };
     const judge = () => {
@@ -558,7 +596,7 @@
     const cr = clickableRing(ex.cv, () => { const [x, v] = demo.state(t); return { x, v, N, L }; }, click, "22台車的環狀道路，點一台車讓它輕踩一下煞車。", () => draw());
     function draw() {
       const [x, v] = demo.state(t);
-      drawRing(ex.cv, { x, v, N, L, sel: demo.ring ? demo.ring.brake[0] : null, focus: cr.focus(), lens: true });
+      drawRing(ex.cv, { x, v, N, L, hint: ["點環道上任一台車", "它會輕輕踩一下煞車"], sel: demo.ring ? demo.ring.brake[0] : null, focus: cr.focus(), lens: true });
       clock.set(demo.ring ? demo.time() : t);
       const xm = XMAX(a), last = pts[pts.length - 1];
       lineChart(cv, { x0: 0, x1: xm, y0: 1e-5, y1: 1, log: true, xticks: xm === 100 ? [0, 25, 50, 75, 100] : xm === 300 ? [0, 100, 200, 300] : [0, 500, 1000, 1500], xlabel: "點擊之後的模型時間",
@@ -569,7 +607,6 @@
     bFF.onclick = () => fastForward();
     bPlay.onclick = () => { playing = !playing; sync(); };
     bReset.onclick = () => reset();
-    bAnim.onclick = () => { animPref = !animPref; bAnim.setAttribute("aria-pressed", String(animPref)); };
     bReveal.onclick = () => { g.open(); bReveal.hidden = true; };
     const tick = dt => { if (!vis.on || body.hidden || !playing || done) return; const n = st.take(dt); if (!demo.ring) t += n * DT; else for (let i = 0; i < n; i++) if (!stepOne()) break; if (loop.paint || done) draw(); };
     const vis = watch(stage);
@@ -582,44 +619,105 @@
     const g = gate(sec, 2, true, "按「把3到60台全部跑一次」、算完之後，這裡會出現接下來的說明。");
     const stage = $(".stage", sec), askBox = el("div", {}); stage.append(askBox);
     const body = el("div", {}), lk = lockable(body, "先選一個答案，下面的模擬才會打開。"); stage.append(lk.wrap);
-    predict(askBox, "環長和調整快慢都不變，車數多少時，繞一圈剛好一個起伏的小擾動會越變越大？", ["越多", "越少", "中間那段"], () => { lk.unlock(); draw(); });
+    predict(askBox, "環長和調整快慢都不變，車數多少時，繞一圈剛好一個起伏的小擾動會越變越大？", ["越多", "越少", "中間那段"], () => { lk.unlock(); draw(); renderStrip(); });
     const ex = exhibit(body, { ringLabel: "環道上的車，加了很小的擾動，眼睛看不出來" });
     const range = el("input", { type: "range", min: "3", max: "60", step: "1", value: "22", id: "p6n" }), out = el("output", { for: "p6n" }, "22台");
     const info = el("p", { class: "fine", style: "font-size:17px;color:var(--ink)" });
-    const msg = say(), bOne = btn("跑這個車數", ""), bAll = btn("把3到60台全部跑一次", "plain");
-    ex.placard.append(el("div", { class: "slider" }, el("label", { for: "p6n" }, "車數N（環長44、a=1）"), out, range, el("div", { class: "ticks", "aria-hidden": "true" }, el("span", {}, "3"), el("span", {}, "60"))), info, el("div", { class: "btns" }, bOne, bAll), msg);
+    const msg = say(), verdictBox = el("p", { class: "verdict-line", "aria-live": "polite" }), bOne = btn("跑這個車數", "");
+    ex.placard.append(el("div", { class: "slider" }, el("label", { for: "p6n" }, "車數N（環長44、a=1）"), out, range, el("div", { class: "ticks", "aria-hidden": "true" }, el("span", {}, "3"), el("span", {}, "60"))), info, el("div", { class: "btns" }, bOne), msg, verdictBox);
     const cv = el("canvas", { class: "chart", role: "img", "aria-label": "這個車數的擾動大小對時間的圖，縱軸是對數刻度" }), cvNote = el("p", { class: "fine" });
     body.append(el("div", { class: "chart-box", style: "margin-top:18px" }, el("h3", {}, "擾動大小（繞一圈一個起伏的那種波）"), cv, cvNote));
-    const strip = el("div", { class: "strip", style: "margin-top:18px" }), prog = el("p", { class: "progress", "aria-live": "polite" });
+    // 全部跑一次：按鈕、停止、Worker不能用時的確認
+    const strip = el("div", { class: "strip", style: "margin-top:12px" }), prog = el("p", { class: "progress", "aria-live": "polite" });
+    const bAll = btn("把3到60台全部跑一次", ""), bStop = btn("停止", "plain"); bStop.hidden = true;
+    const bYes = btn("照樣全部跑", ""), bNo = btn("先不要", "plain");
+    const confirmBox = el("div", { class: "confirm", role: "group", "aria-label": "要不要在畫面這邊計算" },
+      el("p", {}, "這個瀏覽器不能在背景計算，只能在畫面這邊算。全部跑一次的時候，畫面可能會卡頓，按鈕和捲動可能反應變慢，要等多久要看你的裝置。要跑嗎？"),
+      el("div", { class: "btns" }, bYes, bNo)); confirmBox.hidden = true;
     const KEY = { up: ["+", "放大"], down: ["−", "不放大"], na: ["?", "無法判定"], gap: ["≈", "公式算出的變化接近0，只比差距"], bad: ["!", "跟公式不符"], wait: ["…", "還沒算"] };
-    const keyList = el("ul", { class: "strip-key" }, ...["up", "down", "na", "gap"].map(k => el("li", {}, el("b", { class: "c-" + k, "aria-hidden": "true" }, KEY[k][0]), KEY[k][1])));
-    body.append(el("div", { class: "chart-box", style: "margin-top:18px" }, el("h3", {}, "3到60台的結果條"), el("p", { class: "fine" }, "每一格是一個車數。「公式預測」照有限車數的公式；「我們的模擬」照model/CRITERIA.md第2、3版事先定好的量法，在你的瀏覽器裡算。"), keyList, prog, strip));
-    let n = 22, ring, single = null, sweep = null, busy = false; const st = stepper(RATE);
+    const keyList = el("ul", { class: "strip-key" }, ...["up", "down", "na", "gap", "wait"].map(k => el("li", {}, el("b", { class: "c-" + k, "aria-hidden": "true" }, KEY[k][0]), KEY[k][1])));
+    body.append(el("div", { class: "chart-box", style: "margin-top:18px" }, el("h3", {}, "3到60台的結果條"),
+      el("p", { class: "fine" }, "每一格是一個車數，框起來的是你在上面選的車數。「公式預測」照有限車數的公式；「我們的模擬」照model/CRITERIA.md第2、3版事先定好的量法，在你的瀏覽器裡算。"),
+      keyList, el("div", { class: "btns", style: "margin-top:12px" }, bAll, bStop), confirmBox, prog, strip));
+    let n = 22, ring, single = null, oneRun = 0, consent = false, running = false, sweepRun = 0, spent = 0; const sweep = {}, st = stepper(RATE);
     const theory = {}; for (let k = 3; k <= 60; k++) theory[k] = O.theorySigma(1.0, 44 / k, k);
-    const setN = k => { n = k; out.textContent = `${k}台`; range.setAttribute("aria-valuetext", `${k}台`); ring = O.modeRing(k, L, 1.0, 1e-6); st.reset(); single = null;
-      info.textContent = `平均車距 44÷${k} = ${trim(44 / k, 3)}，均勻車流的速度 ${O.V(44 / k).toFixed(4)}`; cvNote.textContent = ""; draw(); };
+    const doneCount = () => Object.keys(sweep).length;
     const REASON = r => r.reason.startsWith("k=1 > ") ? "擾動長到0.001以上，停止" : r.reason.startsWith("k=1 < ") ? "擾動縮到0.0000000001以下，停止" : r.reason === "t = 2100" ? "跑到上限2100，停止" : "別的波變得太大，停止";
-    bOne.onclick = async () => { if (busy) return; busy = true; bOne.disabled = true; const k = n; msg.textContent = `正在算${k}台……`;
-      const res = await engine.run({ cmd: "measure", N: k }); busy = false; bOne.disabled = false; if (k !== n) return;
-      single = res; msg.textContent = `${k}台：${REASON(res.r)}（模型時間${res.r.stop.toFixed(0)}）。`; draw(); };
     function cellOf(k, verdict) { const s = theory[k];
       if (!verdict) return "wait"; if (verdict === "相符") return s > 0 ? "up" : "down"; if (verdict === "相符（只比差距）") return "gap"; if (verdict === "數值無法判定") return "na"; return "bad"; }
-    function simCell(k, td) { const c = cellOf(k, sweep && sweep[k]); td.className = "c-" + c; td.textContent = "";
-      td.append(el("span", { "aria-hidden": "true" }, KEY[c][0]), el("span", { class: "sr" }, KEY[c][1])); return td; }
+    // 選到的車數，用人話說結論。說法沿用逐頁稿第6頁審過的句子；數字是這次模擬實際量到的
+    function sayVerdict(k, res) {
+      const c = cellOf(k, res.verdict), f = theory[k] > 0 ? "放大" : "不放大";
+      const used = res.runs[0].length;   // 主要那次（ε=1e−6）的有效長度，跟證據卡ours-model-n-sweep的「190左右」同一個量
+      const tail = c === "na" ? `能用來量的時間只有約${used}，少於我們事先定的200。照規則標成「無法判定」，不能說已經驗證過。`
+        : c === "gap" ? "公式算出的變化幾乎是0，照事先的規則只比數值的差距、不比變大還是變小。"
+        : c === "bad" ? "跟公式不符。" : `跟公式一樣，小擾動會${c === "up" ? "放大" : "變小"}。`;
+      verdictBox.innerHTML = ""; verdictBox.append(el("b", {}, `${k}台：`), `公式預測${f}；我們的模擬：${KEY[c][1]}。${tail}`);
+    }
+    const setN = k => { n = k; oneRun++; out.textContent = `${k}台`; range.setAttribute("aria-valuetext", `${k}台`); ring = O.modeRing(k, L, 1.0, 1e-6); st.reset(); single = null;
+      info.textContent = `平均車距 44÷${k} = ${trim(44 / k, 3)}，均勻車流的速度 ${O.V(44 / k).toFixed(4)}`; cvNote.textContent = ""; msg.textContent = ""; verdictBox.textContent = ""; bOne.disabled = false; mark(); draw(); };
+    bOne.onclick = async () => {
+      const k = n, my = ++oneRun; bOne.disabled = true; engine.cancel("p6one");
+      msg.textContent = `正在算${k}台……${engine.mode === "main" ? "（這個瀏覽器只能在畫面這邊算，可能會卡頓一下）" : ""}`;
+      const [res, ver] = await Promise.all([engine.run({ cmd: "measure", N: k }, "p6one"), sweep[k] ? Promise.resolve({ r: { verdict: sweep[k].verdict, runs: sweep[k].runs } }) : engine.run({ cmd: "verdict", N: k }, "p6one")]);
+      if (my !== oneRun) return;
+      bOne.disabled = false;
+      if (res.cancelled || ver.cancelled) { msg.textContent = ""; return; }
+      if (res.error || ver.error) { msg.textContent = `${k}台算到一半出錯了：${res.error || ver.error}。可以再按一次「跑這個車數」。`; return; }
+      single = res; msg.textContent = `${k}台：${REASON(res.r)}（模型時間${res.r.stop.toFixed(0)}）。`;
+      if (!sweep[k]) { sweep[k] = { verdict: ver.r.verdict, runs: ver.r.runs }; updateCell(k); }
+      sayVerdict(k, ver.r); draw();
+    };
+    function simCell(k, td) { const c = cellOf(k, sweep[k] && sweep[k].verdict); td.className = "c-" + c + (k === n ? " sel" : ""); td.textContent = "";
+      td.append(el("span", { "aria-hidden": "true" }, KEY[c][0]), el("span", { class: "sr" }, KEY[c][1] + (k === n ? "（你選的車數）" : ""))); return td; }
+    const updateCell = k => { const td = strip.querySelector(`td[data-n="${k}"]`); if (td) simCell(k, td); };
+    function mark() { $$("[data-col]", strip).forEach(e => e.classList.toggle("sel", +e.dataset.col === n)); $$("td[data-n]", strip).forEach(td => simCell(+td.dataset.n, td)); }
+    // 一列放幾個車數：每格至少約19px寬，兩位數的車數才不會擠在一起（列標題約佔90px）
+    const perRow = () => Math.max(6, Math.min(29, Math.floor(((strip.clientWidth || 300) - 90) / 19)));
     function renderStrip() {
-      strip.textContent = ""; const cw = strip.clientWidth, per = cw < 420 ? 12 : cw < 600 ? 15 : 29;
+      strip.textContent = ""; const per = perRow();
       for (let a0 = 3; a0 <= 60; a0 += per) {
         const ks = []; for (let k = a0; k < a0 + per && k <= 60; k++) ks.push(k);
         const tb = el("table", {}, el("caption", { class: "sr" }, `車數${ks[0]}到${ks[ks.length - 1]}台`),
-          el("thead", {}, el("tr", {}, el("th", { scope: "col" }, "車數"), ...ks.map(k => el("th", { scope: "col" }, String(k))))),
-          el("tbody", {}, el("tr", {}, el("th", { scope: "row" }, "公式預測"), ...ks.map(k => { const c = theory[k] > 0 ? "up" : "down"; return el("td", { class: "c-" + c }, el("span", { "aria-hidden": "true" }, KEY[c][0]), el("span", { class: "sr" }, KEY[c][1])); })),
+          el("thead", {}, el("tr", {}, el("th", { scope: "col" }, "車數"), ...ks.map(k => el("th", { scope: "col", "data-col": k, class: k === n ? "sel" : "" }, String(k))))),
+          el("tbody", {}, el("tr", {}, el("th", { scope: "row" }, "公式預測"), ...ks.map(k => { const c = theory[k] > 0 ? "up" : "down"; return el("td", { class: "c-" + c + (k === n ? " sel" : ""), "data-col": k }, el("span", { "aria-hidden": "true" }, KEY[c][0]), el("span", { class: "sr" }, KEY[c][1])); })),
             el("tr", {}, el("th", { scope: "row" }, "我們的模擬"), ...ks.map(k => simCell(k, el("td", { "data-n": k }))))));
         strip.append(tb);
       }
     }
-    bAll.onclick = async () => { if (sweep) return; sweep = {}; bAll.disabled = true; renderStrip(); const t0 = performance.now(); let k = 0;
-      for (let q = 3; q <= 60; q++) { const res = await engine.run({ cmd: "verdict", N: q }); sweep[q] = res.r.verdict; k++; prog.textContent = `模擬已算完 ${k}／58 個車數`; const td = strip.querySelector(`td[data-n="${q}"]`); if (td) simCell(q, td); }
-      const sec2 = (performance.now() - t0) / 1000; prog.textContent = `模擬算完了（58個車數，在你的瀏覽器裡花了${sec2.toFixed(0)}秒）。`; g.open(); };
+    function syncSweep() {
+      const left = 58 - doneCount();
+      bStop.hidden = !running; bAll.hidden = left === 0; bAll.disabled = running;
+      bAll.textContent = left === 58 ? "把3到60台全部跑一次" : `繼續跑剩下的（還有${left}個）`;
+    }
+    function stopSweep(why) {
+      if (!running) return; running = false; sweepRun++; engine.cancel("p6all");
+      prog.textContent = `${why}目前算完${doneCount()}／58個車數，已經算完的會保留。`; syncSweep();
+    }
+    async function runSweep() {
+      confirmBox.hidden = true; running = true; const my = ++sweepRun, t0 = performance.now(); syncSweep();
+      prog.textContent = `模擬已算完 ${doneCount()}／58 個車數`;
+      for (let q = 3; q <= 60; q++) {
+        if (sweep[q]) continue;
+        const res = await engine.run({ cmd: "verdict", N: q }, "p6all");
+        if (my !== sweepRun || res.cancelled) return;
+        if (res.error) { running = false; prog.textContent = `算${q}台的時候出錯了：${res.error}。已經算完的會保留，可以按「繼續跑剩下的」再試一次。`; syncSweep(); return; }
+        sweep[q] = { verdict: res.r.verdict, runs: res.r.runs }; updateCell(q);
+        prog.textContent = `模擬已算完 ${doneCount()}／58 個車數`;
+      }
+      spent += (performance.now() - t0) / 1000; running = false; syncSweep();
+      prog.textContent = `模擬算完了（58個車數，在你的瀏覽器裡一共花了約${spent.toFixed(0)}秒）。`; g.open();
+    }
+    bAll.onclick = () => {
+      if (running) return;
+      if (engine.mode === "main" && !consent) { confirmBox.hidden = false; bYes.focus(); return; }
+      runSweep().catch(err => { running = false; prog.textContent = `計算出錯了：${err}`; syncSweep(); });
+    };
+    bYes.onclick = () => { consent = true; confirmBox.hidden = true; bAll.onclick(); };
+    bNo.onclick = () => { confirmBox.hidden = true; prog.textContent = "沒有跑。想跑的時候再按一次。"; bAll.focus(); };
+    bStop.onclick = () => { stopSweep("已停止。"); bAll.focus(); };
+    // 跑到一半Worker壞掉：先停下來問，不直接改在畫面這邊算
+    engine.onFallback(() => { if (running && !consent) { stopSweep("背景計算停止運作了。"); confirmBox.hidden = false; } });
     function draw() {
       if (body.hidden) return;
       drawRing(ex.cv, { x: ring.x, v: ring.v, N: n, L, small: false });
@@ -629,9 +727,9 @@
     range.addEventListener("input", () => setN(+range.value));
     const tick = dt => { if (!vis.on || body.hidden) return; if (!reduce()) { const k = st.take(dt); for (let i = 0; i < k; i++) ring.step(); if (loop.paint) drawRing(ex.cv, { x: ring.x, v: ring.v, N: n, L }); } };
     const vis = watch(stage);
-    setN(22); renderStrip();
-    let rs = 0; new ResizeObserver(() => { const w = strip.clientWidth < 600; if (w !== rs) { rs = w; renderStrip(); } }).observe(strip);
-    return { enter() { loop.add(tick); }, leave() { loop.del(tick); }, draw };
+    setN(22); renderStrip(); syncSweep();
+    let rs = 0; new ResizeObserver(() => { const w = perRow(); if (w !== rs) { rs = w; renderStrip(); } }).observe(strip);
+    return { enter() { loop.add(tick); }, leave() { loop.del(tick); stopSweep("離開這一頁時停止了。"); engine.cancel("p6one"); oneRun++; bOne.disabled = false; if (msg.textContent.startsWith("正在算")) msg.textContent = ""; }, draw };
   };
 
   // ---------- 第7頁：三個實驗 ----------
@@ -671,54 +769,81 @@
     const cv = el("canvas", { class: "ring", role: "img", "aria-label": "模型時間300時的環道，已經形成塞車，標出來的是要換成平滑車的那台" });
     const clock = clockEl(), msg = say(), res1 = el("dl", { class: "results" });
     const bR3 = btn("固定目標速度", ""), bR1 = btn("照自己過去的平均速度", "plain");
-    const bMode = el("button", { type: "button", class: "btn plain", "aria-pressed": "false" }, "改成播放動畫（預設快轉）");
-    const box2 = el("div", { class: "sim-box" }, el("p", { style: "margin:0", html: `${tagHtml("sim")}環道上已經形成塞車。選一種規則，把標出來的這台車換成平滑車。` }),
+    let playAnim = false;
+    const seg = segmented("跑的時候：", ["快轉", "播放動畫"], i => { playAnim = i === 1; });
+    const box2 = el("div", { class: "sim-box", id: "p8-sim" }, el("p", { style: "margin:0", html: `${tagHtml("sim")}環道上已經形成塞車。選一種規則，把標出來的這台車換成平滑車。` }),
       el("p", { class: "fine", style: "margin:0" }, "平滑車的規則是我們自己設計的，不是實驗用的控制方式。"),
-      el("div", { class: "split" }, el("div", { class: "model" }, cv), el("div", { style: "display:grid;gap:12px" }, el("div", { class: "btns" }, bR3, bR1), bMode, clock.box, msg, res1)),
+      el("div", { class: "split" }, el("div", { class: "model" }, cv), el("div", { style: "display:grid;gap:12px" }, el("div", { class: "btns" }, bR3, bR1), seg.el, clock.box, msg, res1)),
       el("p", { class: "fine", style: "margin:0" }, "從模型時間300換成平滑車，跑到1500；在1000到1500這一段算下面三件事，分三列，不合成一個分數。同時在背景跑一個「不換」的對照。"),
       el("p", { style: "margin:0;font-size:17px" }, "失敗的例子：只限制加速度、沒有安全機制的平滑車會撞車。"));
     after(6).after(box2);
 
     // 三、第三題
-    const MULT = [0.9, 1.0, 1.05, 1.1, 1.2];
-    const q3 = el("div", { class: "sim-box" }), q3body = el("div", { style: "display:grid;gap:12px" }), lk = lockable(q3body, "先選一個答案，滑桿才會打開。");
+    const MULT = [0.9, 1.0, 1.05, 1.1, 1.2], fm = m => (Math.round(m * 100) % 10 ? m.toFixed(2) : m.toFixed(1));
+    const q3 = el("div", { class: "sim-box", id: "p8-q3" }), q3body = el("div", { style: "display:grid;gap:12px" }), lk = lockable(q3body, "先選一個答案，滑桿才會打開。");
     const range = el("input", { type: "range", min: "0", max: "4", step: "1", value: "1", id: "p8u" }), out = el("output", { for: "p8u" });
     const res3 = el("dl", { class: "results" }), msg3 = say(), hist = el("ul", { class: "fine", style: "margin:0;padding-left:1.2em" }), bRev = btn("揭曉", ""); bRev.hidden = true;
-    q3body.append(el("div", { class: "slider" }, el("label", { for: "p8u" }, "平滑車的目標速度（固定目標速度的規則）"), out, range, el("div", { class: "ticks", "aria-hidden": "true" }, ...MULT.map(m => el("span", {}, `${m}倍`)))), msg3, res3, hist, bRev);
+    // 揭曉要做的兩件事，一開始就列出來（條件跟原本一樣：1.0倍和任一個大於1.0倍都跑過）
+    const todo1 = el("li", {}, "先跑1.0倍（原本均勻車流的速度）"), todo2 = el("li", {}, "再跑任一個大於1.0倍");
+    const todo = el("div", { class: "todo-box" }, el("p", { style: "margin:0;font-weight:700" }, "要看第三題的答案，先做這兩件事："), el("ol", { class: "todo" }, todo1, todo2));
+    const bRun = btn("跑這個值", "");
+    q3body.append(todo, el("div", { class: "slider" }, el("label", { for: "p8u" }, "平滑車的目標速度（固定目標速度的規則）"), out, range, el("div", { class: "ticks", "aria-hidden": "true" }, ...MULT.map(m => el("span", {}, `${fm(m)}倍`)))), el("div", { class: "btns" }, bRun), msg3, res3, hist, bRev);
     predict(q3, "把目標速度設得比原本均勻車流的速度快，車速起伏一定會更小嗎？", ["一定會更小", "不一定，可能更大", "沒有差別"], () => lk.unlock());
     q3.append(lk.wrap); after(8).after(q3);
+    // 頁首的跳轉：這頁很長，先讓讀者知道有哪幾段可以操作（內容一個字都不刪）
+    const jumpTo = (node, focusSel) => () => { node.scrollIntoView({ block: "start", behavior: reduce() ? "auto" : "smooth" }); const f = $(focusSel, node); if (f) f.focus({ preventScroll: true }); };
+    bars.tabIndex = -1;
+    $(".main", sec).prepend(el("nav", { class: "jump", "aria-label": "這一頁的三段" }, el("p", {}, "這一頁有一份實驗結果，和兩個可以自己操作的地方："),
+      el("button", { type: "button", onclick: jumpTo(bars, "h3") }, "看實驗結果"),
+      el("button", { type: "button", onclick: jumpTo(box2, "button") }, "換一台平滑車"),
+      el("button", { type: "button", onclick: jumpTo(q3, "button") }, "第三題")));
 
-    let base = null, x300 = null, ring = null, frames = null, fi = 0, playing = false, playAnim = false, busy = false; const tried = new Set();
-    const showU = () => { const m = MULT[+range.value]; out.textContent = `均勻車流速度的${m}倍（${(O.V(2) * m).toFixed(3)}）`; range.setAttribute("aria-valuetext", out.textContent); };
+    // 同一個計算只送一次：算過的存起來，正在算的共用同一個Promise
+    const cache = {}, pend = {};
+    const compute = (key, msgObj) => {
+      if (cache[key]) return Promise.resolve(cache[key]);
+      if (!pend[key]) pend[key] = engine.run(msgObj, "p8").then(r => { delete pend[key]; if (!r.error && !r.cancelled) cache[key] = r; return r; });
+      return pend[key];
+    };
+    const getBase = () => compute("R0", { cmd: "smooth", kind: "R0" });
+    let x300 = null, ring = null, frames = null, fi = 0, playing = false, busy = false, q3Seq = 0; const tried = new Set();
+    const showU = () => { const m = MULT[+range.value]; out.textContent = `均勻車流速度的${fm(m)}倍（${(O.V(2) * m).toFixed(3)}）`; range.setAttribute("aria-valuetext", out.textContent); };
     showU();
-    const rows = (dl, r) => { dl.textContent = "";
+    const rows = (dl, r, base) => { dl.textContent = "";
       const row = (k, v, cls) => dl.append(el("div", {}, el("dt", {}, k), el("dd", { class: cls || "" }, v)));
       row("車速起伏", `是不換的時候的${Math.round(r.std / base.std * 100)}%`);
       row("平均車速", `不換的時候是${base.mean.toFixed(3)}，換了之後是${r.mean.toFixed(3)}`);
       row("安全", `最小車距${r.minH.toFixed(3)}，${r.minH > 0 ? "沒有撞車" : "撞車了（車距變成負的）"}`, r.minH > 0 ? "" : "bad-text"); };
-    const getBase = async () => { if (!base) base = await engine.run({ cmd: "smooth", kind: "R0" }); return base; };
+    const failed = r => r.error || r.cancelled;
     function initRing() { if (x300) return; const x = Array.from({ length: N }, (_, n) => n * 2.0); x[0] += 0.1; const r = new O.Ring(N, L, 1.0, x); while (r.t < 300 - 1e-9) r.step(); x300 = { x: r.x, v: r.v, t: r.t }; ring = x300; }
     async function go(kind, label) {
-      if (busy) return; busy = true; [bR3, bR1].forEach(b => { b.disabled = true; }); msg.textContent = `「${label}」計算中……`; res1.textContent = "";
-      const [b0, r] = await Promise.all([getBase(), engine.run({ cmd: "smooth", kind, mult: 1.0, frames: playAnim })]);
+      if (busy) return; busy = true; [bR3, bR1].forEach(b => { b.disabled = true; }); const anim = playAnim;
+      msg.textContent = `「${label}」計算中……`; res1.textContent = "";
+      const key = kind === "R3" ? "R3:1" : kind, [b0, r] = await Promise.all([getBase(), compute(key + (anim ? ":frames" : ""), { cmd: "smooth", kind, mult: 1.0, frames: anim })]);
       busy = false; [bR3, bR1].forEach(b => { b.disabled = false; });
-      if (playAnim && r.frames.length) { frames = r.frames; fi = 0; playing = true; msg.textContent = `「${label}」播放中……`; frames.done = () => { msg.textContent = `「${label}」跑完了。`; rows(res1, r); }; }
-      else { ring = { x: r.x, v: r.v, t: 1500 }; msg.textContent = `「${label}」跑完了（快轉）。`; rows(res1, r); draw(); }
+      if (failed(b0) || failed(r)) { msg.textContent = `「${label}」算到一半出錯了：${b0.error || r.error || "被中斷"}。可以再按一次。`; return; }
+      if (anim && r.frames.length) { frames = r.frames; fi = 0; playing = true; msg.textContent = `「${label}」播放中……`; frames.done = () => { msg.textContent = `「${label}」跑完了。`; rows(res1, r, b0); }; }
+      else { ring = { x: r.x, v: r.v, t: 1500 }; msg.textContent = `「${label}」跑完了（快轉）。`; rows(res1, r, b0); draw(); }
     }
     bR3.onclick = () => go("R3", "固定目標速度");
     bR1.onclick = () => go("R1", "照自己過去的平均速度");
-    bMode.onclick = () => { playAnim = !playAnim; bMode.setAttribute("aria-pressed", String(playAnim)); };
-    async function runQ3() {
-      const m = MULT[+range.value]; msg3.textContent = `${m}倍：計算中……`; res3.textContent = "";
-      const [b0, r] = await Promise.all([getBase(), engine.run({ cmd: "smooth", kind: "R3", mult: m })]);
-      if (MULT[+range.value] !== m) return;
-      msg3.textContent = `${m}倍：跑完了。`; rows(res3, r);
-      if (!tried.has(m)) { tried.add(m); hist.append(el("li", {}, `${m}倍：車速起伏是不換的時候的${Math.round(r.std / base.std * 100)}%`)); }
+    function syncTodo() {
+      todo1.classList.toggle("done", tried.has(1.0)); todo2.classList.toggle("done", [...tried].some(q => q > 1.0));
       if (tried.has(1.0) && [...tried].some(q => q > 1.0) && !g.isOpen) bRev.hidden = false;
     }
-    range.addEventListener("input", showU);
+    // 只顯示「現在選的那個值」的結果：比較舊的請求回來時，如果讀者已經換了值，就不寫到畫面上
+    async function runQ3() {
+      const m = MULT[+range.value], my = ++q3Seq;
+      msg3.textContent = `${fm(m)}倍：計算中……`; res3.textContent = "";
+      const [b0, r] = await Promise.all([getBase(), compute("R3:" + m, { cmd: "smooth", kind: "R3", mult: m })]);
+      if (!failed(b0) && !failed(r) && !tried.has(m)) { tried.add(m); hist.append(el("li", {}, `${fm(m)}倍：車速起伏是不換的時候的${Math.round(r.std / b0.std * 100)}%`)); syncTodo(); }
+      if (my !== q3Seq || MULT[+range.value] !== m) return;
+      if (failed(b0) || failed(r)) { msg3.textContent = `${fm(m)}倍算到一半出錯了：${b0.error || r.error || "被中斷"}。可以再按「跑這個值」。`; return; }
+      msg3.textContent = `${fm(m)}倍：跑完了。`; rows(res3, r, b0);
+    }
+    range.addEventListener("input", () => { showU(); q3Seq++; msg3.textContent = ""; res3.textContent = ""; });
     range.addEventListener("change", runQ3);
-    q3body.prepend(el("div", { class: "btns" }, btn("跑這個值", "", runQ3)));
+    bRun.onclick = runQ3;
     bRev.onclick = () => { g.open(); bRev.hidden = true; };
     function draw() { if (!ring) return; drawRing(cv, { x: ring.x, v: ring.v, N, L, sel: 0, selLabel: "換成平滑車的車", lens: true }); clock.set(ring.t); }
     const tick = dt => { if (!vis.on) return;
@@ -731,7 +856,12 @@
   // ---------- 第10頁：三個問題 ----------
   PAGES[10] = sec => {
     const qs = $$(".quiz", sec); qs.forEach((q, i) => { q.hidden = i > 0; });
-    const further = el("div", { class: "further", hidden: true }, el("h3", {}, "延伸閱讀"),
+    // 三題做完之後的思考題：不計分、不收集答案（文字是使用者核准的，見runs/2026-11-13-n7-build-r3.md）
+    const think = el("div", { class: "think" }, el("h3", {}, "想一想（不計分）"),
+      el("p", {}, "不看前面，你能用一句話說明，為什麼沒有車禍或障礙物，也可能出現塞車嗎？"),
+      el("p", { class: "fine" }, "不用寫下來，這裡也不會記錄你的答案。想不出來的話，可以回去看："),
+      el("p", { class: "back-links" }, ...[1, 2, 3, 4].map(k => el("a", { href: `#p${k}` }, `第${k}頁：${DATA.titles[k - 1]}`))));
+    const further = el("div", { class: "further", hidden: true }, think, el("h3", {}, "延伸閱讀"),
       el("ul", {}, el("li", {}, el("a", { href: `${DATA.repo}/blob/main/wiki/index.md`, target: "_blank", rel: "noopener" }, "這份簡報的知識庫（LLM Wiki）入口")),
         ...DATA.sources.map(s => el("li", {}, el("a", { href: s.url, target: "_blank", rel: "noopener" }, `${s.title}（${s.year}）`)))),
       el("h3", {}, "這份簡報怎麼做出來的"),

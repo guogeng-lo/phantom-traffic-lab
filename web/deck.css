@@ -102,8 +102,25 @@ ol.steps li.done::before { content: "✓"; background: var(--infield); border-co
 .btn:active:not([disabled]) { box-shadow: 0 1px 0 var(--act-d); transform: translateY(4px) }
 .btn.plain { background: var(--card); box-shadow: inset 0 0 0 3px var(--ink) }
 .btn.plain:active:not([disabled]) { transform: translateY(2px) }
-.btn.plain[aria-pressed="true"] { background: #fff4cf; box-shadow: inset 0 0 0 3px var(--act-d) }
-.btn.plain[aria-pressed="true"]::before { content: "✓ " }
+/* 兩個互斥的選項（快轉｜播放動畫） */
+.seg-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px }
+.seg-label { font-weight: 700; font-size: 17px }
+.seg { display: inline-flex; border-radius: 999px; box-shadow: inset 0 0 0 3px var(--ink); padding: 3px; background: var(--card) }
+.seg button { appearance: none; border: 0; background: transparent; border-radius: 999px; min-height: 44px; padding: 6px 18px; font-family: var(--head); font-weight: 800; font-size: 17px; cursor: pointer; color: var(--ink) }
+.seg button[aria-pressed="true"] { background: var(--act); box-shadow: 0 3px 0 var(--act-d) }
+/* 第6頁：Worker不能用時的確認、選到的車數 */
+.confirm { margin: 12px 0; padding: 14px 16px; border-radius: 12px; background: #fff4cf; box-shadow: inset 0 0 0 2px var(--act-d); display: grid; gap: 10px }
+.confirm p { margin: 0; font-size: 17px }
+.strip .sel { outline: 3px solid var(--ink); outline-offset: -1px }
+.strip thead th.sel { color: var(--ink); font-weight: 900 }
+.verdict-line { font-size: 17px; line-height: 1.55; margin: 0 }
+/* 第8頁第三題的待辦 */
+.todo-box { background: #f6f8f5; border-radius: 12px; padding: 12px 14px; display: grid; gap: 6px }
+ol.todo { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; counter-reset: td }
+ol.todo li { counter-increment: td; display: grid; grid-template-columns: 30px 1fr; gap: 10px; align-items: center; font-size: 17px }
+ol.todo li::before { content: counter(td); width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; box-shadow: inset 0 0 0 2px var(--ink) }
+ol.todo li.done::before { content: "✓"; background: var(--act); box-shadow: none }
+ol.todo li.done { color: var(--soft) }
 .btn[disabled] { opacity: .45; cursor: default; box-shadow: none }
 .key { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 12px; font-size: 16px }
 .key span { display: inline-flex; align-items: center; gap: 8px }
@@ -240,3 +257,17 @@ details.card9 > :last-child { padding-bottom: 14px; margin-bottom: 0 }
   .btn { font-size: 18px; padding: 10px 20px }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important } }
+
+/* 第3頁：時空圖畫的範圍寫在圖上方；手機上按鈕、說明、題目排在圖正下方 */
+.ts-range { margin: 0 4px 8px; font-size: 17px; font-weight: 700; line-height: 1.5 }
+@media (max-width: 860px) { .ts-grid .placard > .p3-act { order: -1 } }
+/* 第5頁：靠近分界時的提醒 */
+.near-note { margin: 0; padding: 10px 12px; border-radius: 10px; background: #fff4cf; font-size: 17px; line-height: 1.5 }
+/* 第8頁最上面的跳轉 */
+.jump { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin: 0 0 18px; padding: 12px 14px; background: var(--card); border-radius: 14px; box-shadow: 0 2px 0 #d3dbd0; max-width: 46em }
+.jump p { margin: 0; font-weight: 700; font-size: 17px; flex-basis: 100% }
+.jump button { appearance: none; border: 0; border-radius: 999px; min-height: 44px; padding: 6px 16px; font-family: var(--head); font-weight: 800; font-size: 17px; background: var(--wall); box-shadow: inset 0 0 0 2px var(--ink); cursor: pointer; color: var(--ink) }
+/* 第10頁的思考題 */
+.think { background: var(--card); border-radius: 18px; padding: 18px 20px; margin: 0 0 16px; box-shadow: inset 0 0 0 3px var(--act) }
+.think h3 { margin: 0 0 10px; font-family: var(--head); font-weight: 800; font-size: 22px }
+.think p { margin: 0 0 10px }
