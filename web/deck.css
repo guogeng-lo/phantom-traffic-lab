@@ -213,6 +213,20 @@ canvas.chart { width: 100% }
 .bar-axis { display: grid; grid-template-columns: 2.2em minmax(0, 1fr) minmax(0, 1fr); font-size: 15px; color: var(--soft) }
 .bar-axis span:nth-child(2) { text-align: right; padding-right: 8px }
 .bar-axis span:nth-child(3) { padding-left: 8px }
+.bar-t { display: none }
+/* 節點8：窄螢幕每筆兩行。第一行「實驗A｜少了80.8%」，第二行長條（減少在中線左邊、增加在右邊）。
+   標籤不再放進或貼著長條，所以不會被截斷、也不會擠在一起。 */
+@media (max-width: 560px) {
+  .bars { gap: 18px }
+  .bar-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); row-gap: 4px; min-height: 0 }
+  .bar-row > b, .bar-l span, .bar-r span { display: none }
+  .bar-t { display: flex; gap: 2px; grid-column: 1 / -1; margin: 0; font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.4 }
+  .bar-t b { font-family: var(--head) }
+  .bar-t span:first-of-type { color: var(--soft) }
+  .bar-l, .bar-r, .bar-l i, .bar-r i { height: 18px }
+  .bar-axis { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) }
+  .bar-axis span:first-child { display: none }
+}
 .sim-box { background: var(--card); border-radius: 18px; padding: 16px 18px; margin: 0 0 18px; display: grid; gap: 14px; max-width: 58em }
 .sim-box .split { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); gap: 18px; align-items: start }
 .sim-box .model { padding: 4% }

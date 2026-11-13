@@ -6,7 +6,11 @@ const path = require("path");
 const DOCS = path.resolve(__dirname, "..", "docs");
 const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".png": "image/png" };
 
+/* 設了環境變數SITE_URL（例如正式網址）就不起本機伺服器，直接測那個網址；這時也不擋外部字型。 */
+const SITE_URL = process.env.SITE_URL ? process.env.SITE_URL.replace(/\/?$/, "/") : null;
+
 function serve() {
+  if (SITE_URL) return Promise.resolve({ srv: { close() {} }, url: SITE_URL });
   return new Promise(res => {
     const srv = http.createServer((req, rsp) => {
       const u = decodeURIComponent(req.url.split("?")[0].split("#")[0]);
@@ -21,6 +25,7 @@ function serve() {
 
 /** 字型（Google Fonts）在測試環境連不到；擋掉外部請求，讓每次測試的條件一樣，也不會等到逾時。 */
 async function blockExternal(page) {
+  if (SITE_URL) return;
   await page.route(/^https?:\/\/(?!127\.0\.0\.1)/, r => r.abort());
 }
 

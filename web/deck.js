@@ -764,7 +764,10 @@
         const pct = Math.abs(v) / MAX * 100, label = `${v < 0 ? "少了" : "多了"}${Math.abs(v)}%`, inside = pct > 55;
         const bar = el("i", { style: `width:${pct}%` }), span = el("span", { style: inside ? (v < 0 ? `left:${100 - pct}%;padding-left:8px;color:#fff` : `right:${100 - pct}%;padding-right:8px;color:#fff`) : (v < 0 ? `right:calc(${pct}% + 6px)` : `left:calc(${pct}% + 6px)`) }, label);
         bars.append(el("div", { class: "bar-row", role: "img", "aria-label": `${NAMES[k]}，實驗${"ABC"[i]}：${label}` },
-          el("b", { "aria-hidden": "true" }, "ABC"[i]), v < 0 ? el("div", { class: "bar-l" }, bar, span) : el("div", { class: "bar-l" }), v < 0 ? el("div", { class: "bar-r" }) : el("div", { class: "bar-r" }, bar, span)));
+          el("b", { "aria-hidden": "true" }, "ABC"[i]),
+          // 窄螢幕（≤560px）改用這一行文字，長條另起一行；寬螢幕不顯示（見deck.css的.bar-t）
+          el("div", { class: "bar-t" }, el("b", {}, `實驗${"ABC"[i]}`), el("span", { "aria-hidden": "true" }, "｜"), el("span", {}, label)),
+          v < 0 ? el("div", { class: "bar-l" }, bar, span) : el("div", { class: "bar-l" }), v < 0 ? el("div", { class: "bar-r" }) : el("div", { class: "bar-r" }, bar, span)));
       });
     }
     bars.append(el("p", { class: "fine", style: "margin:0" }, "比的是：剛出現波、還沒控制的時段，跟控制開啟中表現最好的時段。每種控制方式只做了一場。"));
