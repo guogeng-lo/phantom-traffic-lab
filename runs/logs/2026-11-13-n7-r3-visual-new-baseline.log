@@ -1,0 +1,4 @@
+$ python3 tests/compare_shots.py --update tests/visual-baseline-r3 <tmp>/vr3-a
+（commit a752ac9，docs/index.html SHA-256 4bbe482e4fcd…，2026-11-13T04:03:03Z）
+已把20張截圖存成基準：tests/visual-baseline-r3
+結束代碼：0
