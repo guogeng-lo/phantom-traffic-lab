@@ -1,0 +1,266 @@
+[
+ {
+  "group": "B1",
+  "i": 1,
+  "wallS": 11.784,
+  "score": 0.98,
+  "lcp": 1552,
+  "tbt": 112,
+  "cls": 0.0001962161853713029,
+  "fcp": 1552,
+  "longTasks": [
+   {
+    "url": "http://127.0.0.1:45727/#p1",
+    "start": 1730,
+    "dur": 185
+   },
+   {
+    "url": "Unattributable",
+    "start": 1510,
+    "dur": 104
+   },
+   {
+    "url": "Unattributable",
+    "start": 1614,
+    "dur": 74
+   }
+  ],
+  "mainthread": [
+   [
+    "Other",
+    1581
+   ],
+   [
+    "Script Evaluation",
+    585
+   ],
+   [
+    "Style & Layout",
+    420
+   ],
+   [
+    "Rendering",
+    144
+   ],
+   [
+    "Parse HTML & CSS",
+    48
+   ],
+   [
+    "Script Parsing & Compilation",
+    29
+   ],
+   [
+    "Garbage Collection",
+    8
+   ]
+  ],
+  "loadBefore": "0.37 0.09 0.03",
+  "topBefore": [
+   "%CPU   RSS COMMAND",
+   "100 134572 node",
+   "3.8 345624 claude",
+   "0.1  7488 process_api",
+   "0.1     0 migration/1",
+   "0.0     0 kworker/u8:1-iou_exit"
+  ]
+ },
+ {
+  "group": "B1",
+  "i": 2,
+  "wallS": 11.551,
+  "score": 0.99,
+  "lcp": 1657,
+  "tbt": 19,
+  "cls": 0.0001962161853713029,
+  "fcp": 1598,
+  "longTasks": [
+   {
+    "url": "http://127.0.0.1:45727/#p1",
+    "start": 1695,
+    "dur": 84
+   },
+   {
+    "url": "Unattributable",
+    "start": 1545,
+    "dur": 53
+   },
+   {
+    "url": "http://127.0.0.1:45727/",
+    "start": 1642,
+    "dur": 53
+   }
+  ],
+  "mainthread": [
+   [
+    "Other",
+    1273
+   ],
+   [
+    "Script Evaluation",
+    384
+   ],
+   [
+    "Style & Layout",
+    333
+   ],
+   [
+    "Rendering",
+    170
+   ],
+   [
+    "Parse HTML & CSS",
+    38
+   ],
+   [
+    "Script Parsing & Compilation",
+    27
+   ],
+   [
+    "Garbage Collection",
+    11
+   ]
+  ],
+  "loadBefore": "0.55 0.14 0.04",
+  "topBefore": [
+   "%CPU   RSS COMMAND",
+   "3.7 342416 claude",
+   "3.2 141940 node",
+   "0.1  7488 process_api",
+   "0.1     0 migration/1",
+   "0.0     0 kworker/u8:1-iou_exit"
+  ]
+ },
+ {
+  "group": "B1",
+  "i": 3,
+  "wallS": 11.394,
+  "score": 0.99,
+  "lcp": 1627,
+  "tbt": 46,
+  "cls": 0.0001962161853713029,
+  "fcp": 1627,
+  "longTasks": [
+   {
+    "url": "http://127.0.0.1:45727/#p1",
+    "start": 1653,
+    "dur": 122
+   },
+   {
+    "url": "Unattributable",
+    "start": 1554,
+    "dur": 98
+   },
+   {
+    "url": "http://127.0.0.1:45727/",
+    "start": 1796,
+    "dur": 51
+   },
+   {
+    "url": "Unattributable",
+    "start": 1502,
+    "dur": 50
+   }
+  ],
+  "mainthread": [
+   [
+    "Other",
+    1367
+   ],
+   [
+    "Script Evaluation",
+    424
+   ],
+   [
+    "Style & Layout",
+    274
+   ],
+   [
+    "Rendering",
+    130
+   ],
+   [
+    "Parse HTML & CSS",
+    27
+   ],
+   [
+    "Script Parsing & Compilation",
+    27
+   ],
+   [
+    "Garbage Collection",
+    11
+   ]
+  ],
+  "loadBefore": "0.54 0.15 0.05",
+  "topBefore": [
+   "%CPU   RSS COMMAND",
+   "3.5 340340 claude",
+   "2.3 147608 node",
+   "0.1  7488 process_api",
+   "0.1     0 migration/1",
+   "0.0     0 kworker/u8:1-iou_exit"
+  ]
+ },
+ {
+  "group": "B1",
+  "i": 4,
+  "wallS": 11.295,
+  "score": 0.99,
+  "lcp": 1647,
+  "tbt": 0,
+  "cls": 0.0001962161853713029,
+  "fcp": 1647,
+  "longTasks": [
+   {
+    "url": "http://127.0.0.1:45727/#p1",
+    "start": 1567,
+    "dur": 125
+   },
+   {
+    "url": "Unattributable",
+    "start": 1501,
+    "dur": 65
+   }
+  ],
+  "mainthread": [
+   [
+    "Other",
+    1218
+   ],
+   [
+    "Script Evaluation",
+    361
+   ],
+   [
+    "Style & Layout",
+    272
+   ],
+   [
+    "Rendering",
+    121
+   ],
+   [
+    "Parse HTML & CSS",
+    33
+   ],
+   [
+    "Script Parsing & Compilation",
+    24
+   ],
+   [
+    "Garbage Collection",
+    18
+   ]
+  ],
+  "loadBefore": "0.56 0.17 0.06",
+  "topBefore": [
+   "%CPU   RSS COMMAND",
+   "3.3 341064 claude",
+   "2.3 108688 node",
+   "0.1  7492 process_api",
+   "0.1     0 migration/1",
+   "0.0     0 kworker/u8:1-iou_exit"
+  ]
+ }
+]

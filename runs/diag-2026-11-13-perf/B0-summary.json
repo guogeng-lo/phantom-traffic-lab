@@ -1,0 +1,88 @@
+[
+ {
+  "group": "B0",
+  "i": 1,
+  "wallS": 14.25,
+  "score": 0.83,
+  "lcp": 2312,
+  "tbt": 594,
+  "cls": 0.0001962161853713029,
+  "fcp": 1583,
+  "longTasks": [
+   {
+    "url": "http://127.0.0.1:35807/#p1",
+    "start": 1877,
+    "dur": 504
+   },
+   {
+    "url": "http://127.0.0.1:35807/",
+    "start": 1733,
+    "dur": 144
+   },
+   {
+    "url": "Unattributable",
+    "start": 1521,
+    "dur": 107
+   },
+   {
+    "url": "http://127.0.0.1:35807/",
+    "start": 2484,
+    "dur": 85
+   },
+   {
+    "url": "Unattributable",
+    "start": 2589,
+    "dur": 74
+   },
+   {
+    "url": "http://127.0.0.1:35807/",
+    "start": 2420,
+    "dur": 64
+   },
+   {
+    "url": "http://127.0.0.1:35807/#p1",
+    "start": 1631,
+    "dur": 59
+   }
+  ],
+  "mainthread": [
+   [
+    "Other",
+    1869
+   ],
+   [
+    "Style & Layout",
+    1125
+   ],
+   [
+    "Script Evaluation",
+    942
+   ],
+   [
+    "Rendering",
+    196
+   ],
+   [
+    "Parse HTML & CSS",
+    93
+   ],
+   [
+    "Script Parsing & Compilation",
+    47
+   ],
+   [
+    "Garbage Collection",
+    40
+   ]
+  ],
+  "loadBefore": "0.12 0.03 0.01",
+  "topBefore": [
+   "%CPU   RSS COMMAND",
+   "83.3 133436 node",
+   "3.7 372768 claude",
+   "0.1  7488 process_api",
+   "0.1     0 migration/1",
+   "0.0     0 kworker/u8:1-kvfree_rcu_reclaim"
+  ]
+ }
+]

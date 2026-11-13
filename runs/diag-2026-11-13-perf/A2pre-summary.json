@@ -1,0 +1,322 @@
+[
+ {
+  "group": "A2pre",
+  "i": 1,
+  "wallS": 11.987,
+  "score": 0.99,
+  "lcp": 1553,
+  "tbt": 71,
+  "cls": 0.0001962161853713029,
+  "fcp": 1553,
+  "longTasks": [
+   {
+    "url": "http://127.0.0.1:33717/#p1",
+    "start": 1668,
+    "dur": 149
+   },
+   {
+    "url": "Unattributable",
+    "start": 1553,
+    "dur": 71
+   }
+  ],
+  "mainthread": [
+   [
+    "Other",
+    1487
+   ],
+   [
+    "Script Evaluation",
+    524
+   ],
+   [
+    "Style & Layout",
+    381
+   ],
+   [
+    "Rendering",
+    222
+   ],
+   [
+    "Parse HTML & CSS",
+    40
+   ],
+   [
+    "Script Parsing & Compilation",
+    25
+   ],
+   [
+    "Garbage Collection",
+    12
+   ]
+  ],
+  "loadBefore": "1.29 0.99 0.54",
+  "topBefore": [
+   "%CPU   RSS COMMAND",
+   "100 134444 node",
+   "1.3 295520 claude",
+   "0.0  7492 process_api",
+   "0.0     0 chrome-headless",
+   "0.0     0 chrome-headless"
+  ]
+ },
+ {
+  "group": "A2pre",
+  "i": 2,
+  "wallS": 11.636,
+  "score": 0.99,
+  "lcp": 1669,
+  "tbt": 87,
+  "cls": 0.0001962161853713029,
+  "fcp": 1669,
+  "longTasks": [
+   {
+    "url": "http://127.0.0.1:33717/#p1",
+    "start": 1709,
+    "dur": 165
+   },
+   {
+    "url": "Unattributable",
+    "start": 1503,
+    "dur": 151
+   },
+   {
+    "url": "Unattributable",
+    "start": 1654,
+    "dur": 54
+   }
+  ],
+  "mainthread": [
+   [
+    "Other",
+    1611
+   ],
+   [
+    "Script Evaluation",
+    521
+   ],
+   [
+    "Style & Layout",
+    354
+   ],
+   [
+    "Rendering",
+    216
+   ],
+   [
+    "Parse HTML & CSS",
+    35
+   ],
+   [
+    "Script Parsing & Compilation",
+    25
+   ],
+   [
+    "Garbage Collection",
+    12
+   ]
+  ],
+  "loadBefore": "1.55 1.07 0.58",
+  "topBefore": [
+   "%CPU   RSS COMMAND",
+   "3.5 141676 node",
+   "1.2 295704 claude",
+   "0.0  7492 process_api",
+   "0.0     0 migration/1",
+   "0.0 40708 environment-man"
+  ]
+ },
+ {
+  "group": "A2pre",
+  "i": 3,
+  "wallS": 11.824,
+  "score": 0.99,
+  "lcp": 1555,
+  "tbt": 100,
+  "cls": 0.0001962161853713029,
+  "fcp": 1555,
+  "longTasks": [
+   {
+    "url": "http://127.0.0.1:33717/#p1",
+    "start": 1706,
+    "dur": 191
+   },
+   {
+    "url": "Unattributable",
+    "start": 1584,
+    "dur": 79
+   },
+   {
+    "url": "Unattributable",
+    "start": 1512,
+    "dur": 72
+   }
+  ],
+  "mainthread": [
+   [
+    "Other",
+    1752
+   ],
+   [
+    "Script Evaluation",
+    559
+   ],
+   [
+    "Style & Layout",
+    460
+   ],
+   [
+    "Rendering",
+    164
+   ],
+   [
+    "Parse HTML & CSS",
+    62
+   ],
+   [
+    "Script Parsing & Compilation",
+    42
+   ],
+   [
+    "Garbage Collection",
+    14
+   ]
+  ],
+  "loadBefore": "1.38 1.05 0.57",
+  "topBefore": [
+   "%CPU   RSS COMMAND",
+   "2.3 147072 node",
+   "1.2 296272 claude",
+   "0.0  7492 process_api",
+   "0.0     0 migration/1",
+   "0.0 40708 environment-man"
+  ]
+ },
+ {
+  "group": "A2pre",
+  "i": 4,
+  "wallS": 11.843,
+  "score": 0.99,
+  "lcp": 1558,
+  "tbt": 48,
+  "cls": 0.0001962161853713029,
+  "fcp": 1558,
+  "longTasks": [
+   {
+    "url": "http://127.0.0.1:33717/#p1",
+    "start": 1611,
+    "dur": 146
+   },
+   {
+    "url": "Unattributable",
+    "start": 1507,
+    "dur": 53
+   },
+   {
+    "url": "http://127.0.0.1:33717/#p1",
+    "start": 1561,
+    "dur": 50
+   }
+  ],
+  "mainthread": [
+   [
+    "Other",
+    1519
+   ],
+   [
+    "Script Evaluation",
+    525
+   ],
+   [
+    "Style & Layout",
+    344
+   ],
+   [
+    "Rendering",
+    156
+   ],
+   [
+    "Parse HTML & CSS",
+    44
+   ],
+   [
+    "Script Parsing & Compilation",
+    37
+   ],
+   [
+    "Garbage Collection",
+    19
+   ]
+  ],
+  "loadBefore": "1.24 1.03 0.57",
+  "topBefore": [
+   "%CPU   RSS COMMAND",
+   "2.5 108116 node",
+   "1.2 296788 claude",
+   "0.0  7492 process_api",
+   "0.0     0 migration/1",
+   "0.0 40708 environment-man"
+  ]
+ },
+ {
+  "group": "A2pre",
+  "i": 5,
+  "wallS": 11.583,
+  "score": 0.99,
+  "lcp": 1690,
+  "tbt": 30,
+  "cls": 0.0001962161853713029,
+  "fcp": 1690,
+  "longTasks": [
+   {
+    "url": "http://127.0.0.1:33717/#p1",
+    "start": 1618,
+    "dur": 181
+   },
+   {
+    "url": "Unattributable",
+    "start": 1508,
+    "dur": 61
+   }
+  ],
+  "mainthread": [
+   [
+    "Other",
+    1592
+   ],
+   [
+    "Script Evaluation",
+    585
+   ],
+   [
+    "Style & Layout",
+    355
+   ],
+   [
+    "Rendering",
+    163
+   ],
+   [
+    "Script Parsing & Compilation",
+    27
+   ],
+   [
+    "Parse HTML & CSS",
+    23
+   ],
+   [
+    "Garbage Collection",
+    12
+   ]
+  ],
+  "loadBefore": "1.24 1.04 0.58",
+  "topBefore": [
+   "%CPU   RSS COMMAND",
+   "2.3 115084 node",
+   "1.2 296700 claude",
+   "0.0  7492 process_api",
+   "0.0     0 migration/1",
+   "0.0 40708 environment-man"
+  ]
+ }
+]

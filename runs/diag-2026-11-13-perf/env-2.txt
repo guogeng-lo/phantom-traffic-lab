@@ -1,0 +1,12 @@
+== 環境：A1開始前
+2
+沒有cpu.max
+0.32 0.55 0.26 1/105 2721
+               total        used        free      shared  buff/cache   available
+Mem:            8022         545        6989          16         710        7476
+%CPU   RSS COMMAND
+ 1.8 344912 claude
+ 0.0  7492 process_api
+ 0.0     0 migration/1
+ 0.0 40704 environment-man
+ 0.0     0 kworker/u8:1-iou_exit

@@ -1,0 +1,68 @@
+[
+ {
+  "group": "B2c1",
+  "i": 1,
+  "wallS": 11.851,
+  "score": 0.98,
+  "lcp": 1565,
+  "tbt": 135,
+  "cls": 0.0001962161853713029,
+  "fcp": 1565,
+  "longTasks": [
+   {
+    "url": "http://127.0.0.1:37299/#p1",
+    "start": 1700,
+    "dur": 210
+   },
+   {
+    "url": "Unattributable",
+    "start": 1560,
+    "dur": 85
+   },
+   {
+    "url": "Unattributable",
+    "start": 1505,
+    "dur": 50
+   }
+  ],
+  "mainthread": [
+   [
+    "Other",
+    1367
+   ],
+   [
+    "Script Evaluation",
+    442
+   ],
+   [
+    "Style & Layout",
+    431
+   ],
+   [
+    "Rendering",
+    140
+   ],
+   [
+    "Parse HTML & CSS",
+    67
+   ],
+   [
+    "Script Parsing & Compilation",
+    25
+   ],
+   [
+    "Garbage Collection",
+    20
+   ]
+  ],
+  "loadBefore": "0.47 0.17 0.06",
+  "topBefore": [
+   "%CPU   RSS COMMAND",
+   "89.2 129908 node",
+   "3.2 338280 claude",
+   "0.1  7492 process_api",
+   "0.1     0 migration/1",
+   "0.0  3452 run.sh"
+  ]
+ }
+]

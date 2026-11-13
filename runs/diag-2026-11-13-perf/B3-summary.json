@@ -1,0 +1,294 @@
+[
+ {
+  "group": "B3",
+  "i": 1,
+  "wallS": 10.903,
+  "score": 0.98,
+  "lcp": 1553,
+  "tbt": 132,
+  "cls": 0.0001754334347305687,
+  "fcp": 1553,
+  "longTasks": [
+   {
+    "url": "http://127.0.0.1:46581/#p1",
+    "start": 1638,
+    "dur": 206
+   },
+   {
+    "url": "Unattributable",
+    "start": 1508,
+    "dur": 85
+   }
+  ],
+  "mainthread": [
+   [
+    "Other",
+    1191
+   ],
+   [
+    "Script Evaluation",
+    482
+   ],
+   [
+    "Style & Layout",
+    417
+   ],
+   [
+    "Rendering",
+    120
+   ],
+   [
+    "Parse HTML & CSS",
+    61
+   ],
+   [
+    "Script Parsing & Compilation",
+    40
+   ]
+  ],
+  "loadBefore": "0.36 0.18 0.07",
+  "topBefore": [
+   "%CPU   RSS COMMAND",
+   "110 134724 node",
+   "3.3 53076 chrome-headless",
+   "2.9 429976 claude",
+   "2.9 137200 node",
+   "2.5 87716 chrome-headless"
+  ]
+ },
+ {
+  "group": "B3",
+  "i": 2,
+  "wallS": 10.751,
+  "score": 0.99,
+  "lcp": 1723,
+  "tbt": 33,
+  "cls": 0.0001754334347305687,
+  "fcp": 1709,
+  "longTasks": [
+   {
+    "url": "http://127.0.0.1:46581/#p1",
+    "start": 1624,
+    "dur": 201
+   },
+   {
+    "url": "Unattributable",
+    "start": 1507,
+    "dur": 65
+   },
+   {
+    "url": "Unattributable",
+    "start": 1572,
+    "dur": 51
+   }
+  ],
+  "mainthread": [
+   [
+    "Other",
+    1266
+   ],
+   [
+    "Script Evaluation",
+    465
+   ],
+   [
+    "Style & Layout",
+    399
+   ],
+   [
+    "Rendering",
+    175
+   ],
+   [
+    "Script Parsing & Compilation",
+    32
+   ],
+   [
+    "Parse HTML & CSS",
+    32
+   ],
+   [
+    "Garbage Collection",
+    22
+   ]
+  ],
+  "loadBefore": "0.47 0.21 0.08",
+  "topBefore": [
+   "%CPU   RSS COMMAND",
+   "3.7 98648 chrome-headless",
+   "3.7 57148 chrome-headless",
+   "3.5 46448 chrome-headless",
+   "3.1 140620 node",
+   "2.9 346128 claude"
+  ]
+ },
+ {
+  "group": "B3",
+  "i": 3,
+  "wallS": 10.747,
+  "score": 0.99,
+  "lcp": 1550,
+  "tbt": 88,
+  "cls": 0.0001754334347305687,
+  "fcp": 1550,
+  "longTasks": [
+   {
+    "url": "http://127.0.0.1:46581/#p1",
+    "start": 1642,
+    "dur": 162
+   },
+   {
+    "url": "Unattributable",
+    "start": 1507,
+    "dur": 92
+   }
+  ],
+  "mainthread": [
+   [
+    "Other",
+    1204
+   ],
+   [
+    "Script Evaluation",
+    567
+   ],
+   [
+    "Style & Layout",
+    401
+   ],
+   [
+    "Rendering",
+    158
+   ],
+   [
+    "Parse HTML & CSS",
+    41
+   ],
+   [
+    "Script Parsing & Compilation",
+    23
+   ],
+   [
+    "Garbage Collection",
+    18
+   ]
+  ],
+  "loadBefore": "0.47 0.22 0.08",
+  "topBefore": [
+   "%CPU   RSS COMMAND",
+   "4.0 101152 chrome-headless",
+   "3.8 57972 chrome-headless",
+   "3.0 47184 chrome-headless",
+   "2.8 344060 claude",
+   "2.1 146280 node"
+  ]
+ },
+ {
+  "group": "B3",
+  "i": 4,
+  "wallS": 10.832,
+  "score": 1,
+  "lcp": 1517,
+  "tbt": 61,
+  "cls": 0.0001754334347305687,
+  "fcp": 1517,
+  "longTasks": [
+   {
+    "url": "http://127.0.0.1:46581/#p1",
+    "start": 1565,
+    "dur": 142
+   }
+  ],
+  "mainthread": [
+   [
+    "Other",
+    1208
+   ],
+   [
+    "Script Evaluation",
+    461
+   ],
+   [
+    "Style & Layout",
+    372
+   ],
+   [
+    "Rendering",
+    223
+   ],
+   [
+    "Parse HTML & CSS",
+    24
+   ],
+   [
+    "Script Parsing & Compilation",
+    24
+   ]
+  ],
+  "loadBefore": "0.51 0.24 0.09",
+  "topBefore": [
+   "%CPU   RSS COMMAND",
+   "4.2 101120 chrome-headless",
+   "4.0 57580 chrome-headless",
+   "2.9 47412 chrome-headless",
+   "2.7 344280 claude",
+   "2.3 106948 node"
+  ]
+ },
+ {
+  "group": "B3",
+  "i": 5,
+  "wallS": 10.942,
+  "score": 0.99,
+  "lcp": 1633,
+  "tbt": 0,
+  "cls": 0.0001754334347305687,
+  "fcp": 1633,
+  "longTasks": [
+   {
+    "url": "http://127.0.0.1:46581/#p1",
+    "start": 1598,
+    "dur": 82
+   }
+  ],
+  "mainthread": [
+   [
+    "Other",
+    1216
+   ],
+   [
+    "Script Evaluation",
+    445
+   ],
+   [
+    "Style & Layout",
+    346
+   ],
+   [
+    "Rendering",
+    145
+   ],
+   [
+    "Parse HTML & CSS",
+    30
+   ],
+   [
+    "Script Parsing & Compilation",
+    25
+   ],
+   [
+    "Garbage Collection",
+    9
+   ]
+  ],
+  "loadBefore": "0.58 0.26 0.10",
+  "topBefore": [
+   "%CPU   RSS COMMAND",
+   "4.3 101524 chrome-headless",
+   "4.1 57680 chrome-headless",
+   "2.9 47588 chrome-headless",
+   "2.6 344804 claude",
+   "2.2 107440 node"
+  ]
+ }
+]

@@ -1,0 +1,12 @@
+== 環境：B結束
+2
+沒有cpu.max
+2.42 0.83 0.31 1/105 2676
+               total        used        free      shared  buff/cache   available
+Mem:            8022         564        6971          16         710        7457
+%CPU   RSS COMMAND
+ 2.3 345180 claude
+ 0.0  7492 process_api
+ 0.0     0 migration/1
+ 0.0  3980 run.sh
+ 0.0     0 kworker/u8:1-iou_exit

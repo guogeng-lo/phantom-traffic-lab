@@ -1,0 +1,12 @@
+== 環境：開始
+2
+沒有cpu.max
+0.12 0.03 0.01 4/103 375
+               total        used        free      shared  buff/cache   available
+Mem:            8022         575        7370          16         296        7447
+%CPU   RSS COMMAND
+ 3.6 372088 claude
+ 0.1  7488 process_api
+ 0.1     0 migration/1
+ 0.0     0 kworker/u8:1-kvfree_rcu_reclaim
+ 0.0 40748 environment-man
