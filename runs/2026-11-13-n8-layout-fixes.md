@@ -76,3 +76,7 @@
 | `docs/index.html` | `2343251d0a94a9559863e68c2ffcbc85d2cf3894f7efc18453bae7745c9893e2` |
 | `web/deck.js` | `92a78cd07334e04a55f6853cc72ba333ba3bd9ec12075f207845b7ac9e638a0b` |
 | `web/deck.css` | `1064eacb3f127c0ac426097bbcaaa9583ebf776c9adfffe4d41c408cfc44296b` |
+
+## 後來補記
+
+- 使用者在第二次真機確認時看過這次修改的五個地方和第8頁長條圖，沒有發現問題（見`2026-11-13-n8-final-check.md`的「使用者確認」；那份紀錄由使用者核實中）。
