@@ -283,17 +283,19 @@
     }
   }
   const engine = (() => {
-    let w = null, id = 0; const cbs = new Map();
+    let w = null, id = 0; const cbs = new Map(), sent = new Map();
+    const local = m => setTimeout(() => workerMain(O, m, d => { const f = cbs.get(d.id); cbs.delete(d.id); sent.delete(d.id); if (f) f(d); }), 0);
     try {
       const src = $("#ovm-src").textContent + "\n;(function(){var workerMain=" + workerMain.toString() + ";self.onmessage=function(e){workerMain(self.OVM,e.data,function(d){self.postMessage(d);});};})();";
       w = new Worker(URL.createObjectURL(new Blob([src], { type: "text/javascript" })));
-      w.onmessage = e => { const f = cbs.get(e.data.id); cbs.delete(e.data.id); if (f) f(e.data); };
-      w.onerror = () => { w = null; };
+      w.onmessage = e => { const f = cbs.get(e.data.id); cbs.delete(e.data.id); sent.delete(e.data.id); if (f) f(e.data); };
+      // Worker開不起來（例如被沙盒擋掉）：改在主執行緒算，已經送出去、還沒回來的也重算，不會卡住
+      w.onerror = ev => { if (ev && ev.preventDefault) ev.preventDefault(); if (w) { w.terminate(); w = null; } for (const m of sent.values()) local(m); };
     } catch (err) { w = null; }
     return {
       get mode() { return w ? "worker" : "main"; },
-      run(msg) { return new Promise(res => { const m = Object.assign({ id: ++id }, msg); cbs.set(m.id, res);
-        if (w) w.postMessage(m); else setTimeout(() => workerMain(O, m, d => { const f = cbs.get(d.id); cbs.delete(d.id); f(d); }), 0); }); }
+      run(msg) { return new Promise(res => { const m = Object.assign({ id: ++id }, msg); cbs.set(m.id, res); sent.set(m.id, m);
+        if (w) w.postMessage(m); else local(m); }); }
     };
   })();
 
@@ -787,7 +789,11 @@
     window.scrollTo(0, 0);
     if (focus) $("h2", sec).focus({ preventScroll: true });
   }
-  function go(pg, focus) { pg = Math.max(1, Math.min(total, pg)); if (location.hash !== `#p${pg}`) history.pushState(null, "", `#p${pg}`); show(pg, focus); }
+  // 網址加#pN，讓返回鍵和分享連結能用。在沙盒裡（例如被嵌在別的網頁的iframe、about:srcdoc）不能改網址，就只換頁
+  function go(pg, focus) { pg = Math.max(1, Math.min(total, pg)); try { if (location.hash !== `#p${pg}`) history.pushState(null, "", `#p${pg}`); } catch (err) { /* 不能改網址 */ } show(pg, focus); }
+  // 頁內連結（目錄、第10頁「答案在」）自己換頁，不交給瀏覽器：在about:srcdoc裡#p1會被解讀成外層網頁的網址
+  document.addEventListener("click", e => { const a = e.target.closest('a[href^="#p"]'); if (!a || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    const m = /^#p(\d+)$/.exec(a.getAttribute("href")); if (!m) return; e.preventDefault(); $(".toc").open = false; go(+m[1], true); });
   const fromHash = () => { const m = /^#p(\d+)$/.exec(location.hash); return m ? Math.max(1, Math.min(total, +m[1])) : 1; };
   window.addEventListener("popstate", () => show(fromHash(), true));
   window.addEventListener("hashchange", () => show(fromHash(), true));
