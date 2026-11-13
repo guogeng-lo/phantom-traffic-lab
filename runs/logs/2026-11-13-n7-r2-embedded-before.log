@@ -1,0 +1,44 @@
+$ node tests/e2e_embedded.js   （修改前：docs/index.html還是commit e615728建的版本）
+
+## 情況A：照原樣
+通過｜在about:srcdoc裡（沙盒、沒有同源）｜實際：about:srcdoc
+沒通過｜「下一頁」換到第2頁｜實際：p1
+測試程式出錯： locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for getByRole('button', { name: '上一頁' })
+    - locator resolved to <button disabled type="button" data-go="prev" class="nav-btn">上一頁</button>
+  - attempting click action
+    2 × waiting for element to be visible, enabled and stable
+      - element is not enabled
+    - retrying click action
+    - waiting 20ms
+    2 × waiting for element to be visible, enabled and stable
+      - element is not enabled
+    - retrying click action
+      - waiting 100ms
+    56 × waiting for element to be visible, enabled and stable
+       - element is not enabled
+     - retrying click action
+       - waiting 500ms
+
+    at <repo>/tests/e2e_embedded.js:41:50 {
+  log: [
+    "  - waiting for getByRole('button', { name: '上一頁' })",
+    '    - locator resolved to <button disabled type="button" data-go="prev" class="nav-btn">上一頁</button>',
+    '  - attempting click action',
+    '    2 × waiting for element to be visible, enabled and stable',
+    '      - element is not enabled',
+    '    - retrying click action',
+    '    - waiting 20ms',
+    '    2 × waiting for element to be visible, enabled and stable',
+    '      - element is not enabled',
+    '    - retrying click action',
+    '      - waiting 100ms',
+    '    56 × waiting for element to be visible, enabled and stable',
+    '       - element is not enabled',
+    '     - retrying click action',
+    '       - waiting 500ms'
+  ],
+  name: 'TimeoutError'
+}
+結束代碼：2
