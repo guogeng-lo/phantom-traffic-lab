@@ -1,6 +1,10 @@
 /* 節點7：手機效能。標準在跑之前寫在這裡（下面的LIMITS），沒過就改程式，不改標準；要改標準先問使用者。
  * 用法：node tests/perf_mobile.js
  * 1. Lighthouse（手機設定：模擬慢速4G、CPU慢4倍）量第1頁的載入：效能分數、LCP、TBT、CLS。
+ *    固定條件下連續、各自獨立跑5次（每次新開瀏覽器），每個指標取5次的中位數跟門檻比；5次的原始數字全部印出來。
+ *    單次TBT超過1000 ms的另外標成「異常」，不能因為中位數通過就忽略；異常出現2次以上，整項算沒通過，要調查。
+ *    （2026-11-13使用者授權：原本只跑1次。第2輪同一版本出現過0.74／TBT 1,240 ms，之後3次都是0.99，
+ *     單次結果不穩定。門檻不變。見runs/2026-11-13-n7-standard-lighthouse.md）
  * 2. 動畫和圖表的CPU負擔：Chromium開手機畫面（375×812、裝置像素比3），CPU慢4倍，每個會動的頁面跑6秒，
  *    用CDP的Performance.getMetrics量主執行緒忙碌的比例；同時確認模型時間照每秒6個模型時間前進（沒有因為效能偷少算）。
  * 3. 不在畫面上的東西不能算：第1頁捲到看不到、換到沒有動畫的第7頁時，主執行緒要幾乎沒事。
@@ -15,7 +19,10 @@ const LIMITS = {
   lcpMs: 2500, tbtMs: 200, cls: 0.1,   // Core Web Vitals「良好」的門檻（TBT用Lighthouse的良好門檻）
   busy: 0.6,             // 動畫頁：CPU慢4倍時，主執行緒忙碌比例上限（留四成給讀者的操作）
   idleBusy: 0.08,        // 沒有動畫或看不到時的上限
-  rate: 0.9              // 模型時間至少要走到「每秒6個模型時間×秒數」的90%
+  rate: 0.9,             // 模型時間至少要走到「每秒6個模型時間×秒數」的90%
+  lhRuns: 5,             // Lighthouse跑幾次，取中位數
+  tbtOutlierMs: 1000,    // 單次TBT超過這個值標成異常
+  maxOutliers: 1         // 異常超過這個次數，整項算沒通過
 };
 let fails = 0;
 const say = (ok, msg) => { if (!ok) fails++; console.log(`${ok ? "通過" : "沒通過"}｜${msg}`); };
@@ -24,21 +31,33 @@ const say = (ok, msg) => { if (!ok) fails++; console.log(`${ok ? "通過" : "沒
   const { srv, url } = await serve();
   console.log("## 標準", JSON.stringify(LIMITS));
 
-  // ---- 1. Lighthouse ----
-  const out = path.join(require("os").tmpdir(), `lh-${process.pid}.json`);
+  // ---- 1. Lighthouse：5次取中位數 ----
+  const fs = require("fs");
   const env = Object.assign({}, process.env, { CHROME_PATH: chromium.executablePath() });
-  try {
-    // 用非同步的execFile：本機伺服器跑在同一個程式裡，同步等待會讓伺服器沒辦法回應
-    await new Promise((res, rej) => execFile(process.execPath, [require.resolve("lighthouse/cli/index.js"), url + "#p1", "--only-categories=performance", "--output=json", `--output-path=${out}`,
-      "--chrome-flags=--headless=new --no-sandbox", "--quiet"], { env, timeout: 300000 }, err => err ? rej(err) : res()));
-    const d = require(out), A = d.audits, perf = d.categories.performance.score;
-    console.log(`  Lighthouse ${d.lighthouseVersion}，${d.configSettings.formFactor}，CPU慢${d.configSettings.throttling.cpuSlowdownMultiplier}倍`);
-    say(perf >= LIMITS.lhScore, `Lighthouse效能分數 ${perf}（要≥${LIMITS.lhScore}）`);
-    say(A["largest-contentful-paint"].numericValue <= LIMITS.lcpMs, `LCP ${A["largest-contentful-paint"].displayValue}（要≤${LIMITS.lcpMs / 1000} s）`);
-    say(A["total-blocking-time"].numericValue <= LIMITS.tbtMs, `TBT ${A["total-blocking-time"].displayValue}（要≤${LIMITS.tbtMs} ms）`);
-    say(A["cumulative-layout-shift"].numericValue <= LIMITS.cls, `CLS ${A["cumulative-layout-shift"].displayValue}（要≤${LIMITS.cls}）`);
-    console.log(`  （參考）FCP ${A["first-contentful-paint"].displayValue}，主執行緒工作 ${A["mainthread-work-breakdown"].displayValue}`);
-  } catch (e) { say(false, "Lighthouse沒有跑完：" + String(e.message).split("\n")[0]); }
+  const runs = [];
+  for (let i = 1; i <= LIMITS.lhRuns; i++) {
+    const out = path.join(require("os").tmpdir(), `lh-${process.pid}-${i}.json`);
+    try {
+      // 用非同步的execFile：本機伺服器跑在同一個程式裡，同步等待會讓伺服器沒辦法回應
+      await new Promise((res, rej) => execFile(process.execPath, [require.resolve("lighthouse/cli/index.js"), url + "#p1", "--only-categories=performance", "--output=json", `--output-path=${out}`,
+        "--chrome-flags=--headless=new --no-sandbox", "--quiet"], { env, timeout: 300000 }, err => err ? rej(err) : res()));
+      const d = JSON.parse(fs.readFileSync(out, "utf8")), A = d.audits;
+      const r = { score: d.categories.performance.score, lcp: A["largest-contentful-paint"].numericValue, tbt: A["total-blocking-time"].numericValue, cls: A["cumulative-layout-shift"].numericValue, fcp: A["first-contentful-paint"].numericValue };
+      runs.push(r);
+      if (i === 1) console.log(`  Lighthouse ${d.lighthouseVersion}，${d.configSettings.formFactor}，CPU慢${d.configSettings.throttling.cpuSlowdownMultiplier}倍`);
+      console.log(`  第${i}次：效能${r.score}、LCP ${(r.lcp / 1000).toFixed(2)} s、TBT ${Math.round(r.tbt)} ms、CLS ${r.cls.toFixed(3)}、FCP ${(r.fcp / 1000).toFixed(2)} s${r.tbt > LIMITS.tbtOutlierMs ? "　← 異常（TBT超過1000 ms）" : ""}`);
+    } catch (e) { console.log(`  第${i}次：Lighthouse沒有跑完：${String(e.message).split("\n")[0]}`); }
+  }
+  say(runs.length === LIMITS.lhRuns, `Lighthouse跑完${runs.length}／${LIMITS.lhRuns}次`);
+  if (runs.length) {
+    const med = k => { const v = runs.map(r => r[k]).sort((a, b) => a - b), m = v.length >> 1; return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2; };
+    say(med("score") >= LIMITS.lhScore, `Lighthouse效能分數中位數 ${med("score")}（要≥${LIMITS.lhScore}）`);
+    say(med("lcp") <= LIMITS.lcpMs, `LCP中位數 ${(med("lcp") / 1000).toFixed(2)} s（要≤${LIMITS.lcpMs / 1000} s）`);
+    say(med("tbt") <= LIMITS.tbtMs, `TBT中位數 ${Math.round(med("tbt"))} ms（要≤${LIMITS.tbtMs} ms）`);
+    say(med("cls") <= LIMITS.cls, `CLS中位數 ${med("cls").toFixed(3)}（要≤${LIMITS.cls}）`);
+    const out = runs.filter(r => r.tbt > LIMITS.tbtOutlierMs).length;
+    say(out <= LIMITS.maxOutliers, `TBT異常（單次超過${LIMITS.tbtOutlierMs} ms）${out}次（超過${LIMITS.maxOutliers}次算反覆出現，要調查）`);
+  }
 
   // ---- 2、3. 動畫的CPU負擔 ----
   const browser = await chromium.launch();
