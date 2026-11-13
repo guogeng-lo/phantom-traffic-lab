@@ -594,13 +594,18 @@
     const click = n => { if (!lk || body.hidden) return; if (demo.ring) { msg.textContent = "已經點過了。按「重來」或換一個a再試。"; return; }
       demo.click(t, n, TAU, BETA); msg.textContent = "跑跑看……"; if (a > 1.5 && a < 2 && !animPref) fastForward(); else { playing = true; sync(); } };
     const cr = clickableRing(ex.cv, () => { const [x, v] = demo.state(t); return { x, v, N, L }; }, click, "22台車的環狀道路，點一台車讓它輕踩一下煞車。", () => draw());
-    function draw() {
+    // 擾動圖只在內容變了才重畫：新增資料點、完成、重設、換a、點車、寬度改變（第3輪之後的限定效能修補）。
+    // 環道照原本每一格畫；force＝true時（例如視窗大小改變）一定重畫。
+    let chartKey = "";
+    function draw(force) {
       const [x, v] = demo.state(t);
       drawRing(ex.cv, { x, v, N, L, hint: ["點環道上任一台車", "它會輕輕踩一下煞車"], sel: demo.ring ? demo.ring.brake[0] : null, focus: cr.focus(), lens: true });
       clock.set(demo.ring ? demo.time() : t);
+      const key = [pts.length, done || "", a, !!demo.ring, cv.clientWidth].join("|");
+      if (!force && key === chartKey) return;
       const xm = XMAX(a), last = pts[pts.length - 1];
-      lineChart(cv, { x0: 0, x1: xm, y0: 1e-5, y1: 1, log: true, xticks: xm === 100 ? [0, 25, 50, 75, 100] : xm === 300 ? [0, 100, 200, 300] : [0, 500, 1000, 1500], xlabel: "點擊之後的模型時間",
-        refs: a > 2 ? [{ v: 0.01, text: "0.01" }] : [], series: [{ pts, color: C.ink, width: 2.5 }], notes: done && last ? [{ x: last[0], y: last[1], text: done, bg: done === "塞住了" ? C.stopBg : C.act, fill: done === "塞住了" ? "#fff" : C.ink }] : [] });
+      chartKey = lineChart(cv, { x0: 0, x1: xm, y0: 1e-5, y1: 1, log: true, xticks: xm === 100 ? [0, 25, 50, 75, 100] : xm === 300 ? [0, 100, 200, 300] : [0, 500, 1000, 1500], xlabel: "點擊之後的模型時間",
+        refs: a > 2 ? [{ v: 0.01, text: "0.01" }] : [], series: [{ pts, color: C.ink, width: 2.5 }], notes: done && last ? [{ x: last[0], y: last[1], text: done, bg: done === "塞住了" ? C.stopBg : C.act, fill: done === "塞住了" ? "#fff" : C.ink }] : [] }) ? key : "";
       chartNote.textContent = demo.ring ? `a = ${fa(a)}，每0.5模型時間記一次。` : "";
     }
     range.addEventListener("input", () => { a = AS[+range.value]; out.textContent = `a = ${fa(a)}`; range.setAttribute("aria-valuetext", out.textContent); reset(); });
@@ -611,7 +616,7 @@
     const tick = dt => { if (!vis.on || body.hidden || !playing || done) return; const n = st.take(dt); if (!demo.ring) t += n * DT; else for (let i = 0; i < n; i++) if (!stepOne()) break; if (loop.paint || done) draw(); };
     const vis = watch(stage);
     reset();
-    return { enter() { loop.add(tick); }, leave() { loop.del(tick); run++; if (demo.ring && !done) playing = false; }, draw };
+    return { enter() { loop.add(tick); }, leave() { loop.del(tick); run++; if (demo.ring && !done) playing = false; }, draw: () => draw(true) };   // 外面（視窗大小改變）呼叫時一定重畫
   };
 
   // ---------- 第6頁：車數 ----------
