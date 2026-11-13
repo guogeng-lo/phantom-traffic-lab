@@ -48,6 +48,27 @@
 
 視覺基準沒有更新，`visual-baseline-r3`保留原樣。
 
+## 部署後在正式網址重跑（字型檔可以載入，用的是真正的圓體）
+
+正式網址上的`index.html`跟本機建置的SHA-256一致（`2343251d…`）之後，設`SITE_URL`為正式網址再跑：
+
+| 測試 | 結果 | log |
+|---|---|---|
+| `n8_layout_fixes.js` | 沒通過0項 | `logs/2026-11-13-n8-layout-official-fixes.log`，截圖`n8-layout-fixes/after-official/` |
+| `layout_widths.js` | 沒通過0 | `logs/2026-11-13-n8-layout-official-widths.log` |
+| `e2e_flow.js`桌機／手機 | 各68項，沒通過0 | `logs/2026-11-13-n8-layout-official-e2e-desktop.log`、`-e2e-mobile.log` |
+| `e2e_async.js` | 沒通過0 | `logs/2026-11-13-n8-layout-official-async.log` |
+| `a11y_axe.js` | 沒通過0 | `logs/2026-11-13-n8-layout-official-a11y.log` |
+| `p8_bars.js` | **沒通過9項**，見下 | `logs/2026-11-13-n8-layout-official-p8-bars.log` |
+
+### `p8_bars.js`在真正的圓體下沒通過
+
+- 沒通過的是640、768、1280寬（寬螢幕的排法，這兩批修改都沒動到）的「車速起伏」A、B、C：白字的範圍「有一部分在長條外面」。手機寬度（320～430）全部通過。
+- 量出來的數字（1280寬）：字的範圍高24px（y 730.9～754.9），長條高22px（y 732.1～754.1）；左右方向字完全在長條裡（字130.1～211.0，長條122.2～411.6）。也就是圓體的行框比系統字型高，上下各多出約1px。
+- 截圖（`n8-p8-bars/official-realfont-w1280.png`）上白字完整在長條裡，看起來沒有被截到。
+- 上一批第8頁的正式網址測試是通過的，但那時`fonts.gstatic.com`被擋，用的是系統字型，所以沒有測到這個情況。
+- **判斷**：這是測試用「行框」量文字範圍造成的，不是畫面上看得到的問題，但這是推論（根據數字和截圖）。**測試沒有改**：要改量法（例如上下方向改用字級大小而不是行框）等於改檢查標準，要先由使用者決定。
+
 ## SHA-256（修改後）
 
 | 檔案 | SHA-256 |
