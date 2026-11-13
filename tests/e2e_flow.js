@@ -120,7 +120,7 @@ function check(name, ok, got) { results.push(ok); console.log(`${ok ? "通過" :
   const t0 = Date.now();
   await tap(sec(6).getByRole("button", { name: "把3到60台全部跑一次" }));
   await page.waitForFunction(() => document.querySelector("#p6 .progress").textContent.includes("算完了"), null, { timeout: 300000 });
-  const cells = await page.evaluate(() => { const out = {}; document.querySelectorAll("#p6 .strip table").forEach(tb => { const ks = [...tb.querySelectorAll("thead th")].slice(1).map(th => +th.textContent); const sim = [...tb.querySelectorAll("tbody tr:nth-child(2) td")]; const th = [...tb.querySelectorAll("tbody tr:nth-child(1) td")]; ks.forEach((k, i) => { out[k] = [th[i].className, sim[i].className]; }); }); return out; });
+  const cells = await page.evaluate(() => { const out = {}; document.querySelectorAll("#p6 .strip table").forEach(tb => { const ks = [...tb.querySelectorAll("thead th")].slice(1).map(th => +th.textContent); const sim = [...tb.querySelectorAll("tbody tr:nth-child(2) td")]; const th = [...tb.querySelectorAll("tbody tr:nth-child(1) td")]; ks.forEach((k, i) => { const cc = el => el.className.split(" ").find(c => c.startsWith("c-")); out[k] = [cc(th[i]), cc(sim[i])]   /* 第3輪起，選到的車數多一個sel，只看c-開頭的那個 */; }); }); return out; });
   console.log(`  （全部跑一次在這個瀏覽器花了${((Date.now() - t0) / 1000).toFixed(0)}秒；${await sec(6).locator(".progress").textContent()}）`);
   const want = k => k === 3 ? "c-gap" : k === 21 ? "c-na" : (k >= 16 && k <= 39 ? "c-up" : "c-down");
   const bad = Object.keys(cells).filter(k => cells[k][1] !== want(+k));

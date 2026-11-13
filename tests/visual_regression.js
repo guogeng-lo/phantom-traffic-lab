@@ -28,7 +28,8 @@ async function states(page, n) {
   if (n === 10) for (let q = 1; q <= 3; q++) { await s.locator(`.quiz[data-quiz="${q}"] .opt[data-right="1"]`).click(); await s.locator(`.quiz[data-quiz="${q}"]`).getByRole("button", { name: q < 3 ? "下一題" : "看延伸閱讀" }).click(); }
 }
 
-(async () => {
+module.exports = { states };
+if (require.main === module) (async () => {
   const { srv, url } = await serve();
   const browser = await chromium.launch();
   for (const [tag, opt] of [["desktop", { viewport: { width: 1280, height: 900 } }], ["m375", { viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true }]]) {

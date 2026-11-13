@@ -165,9 +165,11 @@ node tests/test_js_parity_browser.js     # 節點7：在Chromium裡用簡報內�
 python3 tests/test_site_static.py        # 節點7：出處、連結、沒有懸停操作、不存資料、沒有寫死的檢查結果
 node tests/e2e_flow.js [--mobile]        # 節點7：Playwright實際操作全部互動（桌機／手機觸控）
 node tests/e2e_embedded.js               # 節點7：簡報嵌在沙盒iframe（about:srcdoc）裡也能換頁、計算
+node tests/e2e_async.js                  # 節點7：第6頁停止、離頁、Worker失敗，第8頁重複計算和舊結果覆蓋
+node tests/layout_widths.js [截圖資料夾]  # 節點7：320、640（放大200%）、768寬的版面和文字溢出
 node tests/a11y_axe.js                   # 節點7：axe-core和鍵盤、觸控範圍、控制項名稱（要先npm install）
 node tests/perf_mobile.js                # 節點7：Lighthouse和動畫的CPU負擔（要先npm install）
-node tests/visual_regression.js <資料夾> && python3 tests/compare_shots.py tests/visual-baseline <資料夾>   # 節點7：視覺回歸
+node tests/visual_regression.js <資料夾> && python3 tests/compare_shots.py tests/visual-baseline-r3 <資料夾>   # 節點7：視覺回歸（第3輪起的基準；第1輪的基準tests/visual-baseline/保留不動）
 ```
 
 ## 10. Commit

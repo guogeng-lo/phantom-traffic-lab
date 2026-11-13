@@ -43,7 +43,10 @@ async function open(browser, inj) {
   for (let i = 0; i < 50 && !f; i++) { f = page.frames().find(x => x.url() === "about:srcdoc"); if (!f) await page.waitForTimeout(100); }
   await f.waitForSelector("#p1:not([hidden])");
   // 記下每一次送出的計算（只是旁聽，原封不動交給原本的函式）
-  await f.evaluate(() => { const e = window.__deck.engine, r = e.run.bind(e); window.__calls = []; e.run = (m, ...rest) => { window.__calls.push(m.cmd + (m.N != null ? ":" + m.N : "") + (m.kind ? ":" + m.kind : "") + (m.mult != null ? ":" + m.mult : "")); return r(m, ...rest); }; });
+  // __calls：送出的計算；__done：真的算完回來的（停止時被中斷的不算），「只算一次」看的是__done
+  await f.evaluate(() => { const e = window.__deck.engine, r = e.run.bind(e); window.__calls = []; window.__done = [];
+    e.run = (m, ...rest) => { const key = m.cmd + (m.N != null ? ":" + m.N : "") + (m.kind ? ":" + m.kind : "") + (m.mult != null ? ":" + m.mult : "");
+      window.__calls.push(key); return r(m, ...rest).then(d => { if (d && !d.cancelled && !d.error) window.__done.push(key); return d; }); }; });
   return { page, f, errs };
 }
 const tryClick = async (loc) => { try { await loc.click(SHORT); return true; } catch (e) { return false; } };
@@ -81,7 +84,7 @@ async function sweepCase(browser, k) {
   if (k !== "A") await tryClick(f.locator("#p6").getByRole("button", { name: "照樣全部跑" }));
   const finished = await f.waitForFunction(() => document.querySelector("#p6 .progress").textContent.includes("算完了"), null, { timeout: 300000 }).then(() => true, () => false);
   say(resumed && finished, "回來之後可以繼續，最後算完");
-  const calls = await f.evaluate(() => window.__calls.filter(c => c.startsWith("verdict:")));
+  const calls = await f.evaluate(() => window.__done.filter(c => c.startsWith("verdict:")));
   const per = {}; calls.forEach(c => { per[c] = (per[c] || 0) + 1; });
   const dup = Object.entries(per).filter(([, n]) => n > 1).map(([c, n]) => `${c.slice(8)}台×${n}`);
   say(Object.keys(per).length === 58 && dup.length === 0, "每個車數只算一次（繼續時不重算）", `${Object.keys(per).length}個車數${dup.length ? "；重算：" + dup.join("、") : ""}`);
@@ -120,7 +123,7 @@ async function p8Case(browser) {
   await page.waitForTimeout(6000);   // 等可能還在路上的舊結果回來，看它會不會蓋掉
   const shown = await q3.locator("dl.results").textContent().catch(() => ""), msg = await q3.locator(".say").textContent().catch(() => "");
   say(msg.startsWith("1.0倍") && shown.includes("42%"), "快速切換後，畫面是最後選的1.0倍的結果（舊結果沒有蓋掉）", `${msg}｜${shown.slice(0, 30)}`);
-  const calls = await f.evaluate(() => window.__calls);
+  const calls = await f.evaluate(() => window.__calls);   // 第8頁看送出的次數：同一個值不該送第二次
   const r0 = calls.filter(c => c === "smooth:R0").length, per = {};
   calls.filter(c => c.startsWith("smooth:R3")).forEach(c => { per[c] = (per[c] || 0) + 1; });
   say(r0 === 1, "「不換」的對照只算一次", `${r0}次`);
