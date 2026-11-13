@@ -1,0 +1,16 @@
+$ python3 scripts/check_quotes.py
+（commit 7e28eb8）
+[說明] bando1995：文字層和OCR的三字組重疊 0.00，文字層不可靠，改用OCR
+[OCR逐字] bando1995-capacity.md：要對照PDF頁面確認：It seems strange that the existence of congestion does not affect the capacity of transportation.
+[OCR近似] bando1995-large-n-note.md：相似度 1.00，要對照PDF頁面確認：So far as we consider the case of a large enough number of vehicles N with enough circuit length L, this boundary condition is not essential for both analytical and numerical investigations.
+[OCR逐字] bando1995-linear-stability.md：要對照PDF頁面確認：Note that the above criteria is valid in models with any legal velocity function V.
+[OCR逐字] bando1995-no-delay.md：要對照PDF頁面確認：Moreover we do not introduce the time lag of response.
+[OCR逐字] bando1995-spontaneous-jam.md：要對照PDF頁面確認：From this figure, we find that five clusters of congestion are formed even from a very tiny disturbance existing in the almost uniform vehicle distribution.
+[OCR逐字] bando1995-velocity-function.md：要對照PDF頁面確認：a driver controls the vehicle by gradually accelerating or braking in such a way that it never passes the preceding vehicle
+[說明] nagel1992：文字層和OCR的三字組重疊 0.39，文字層不可靠，改用OCR
+[OCR逐字] nagel1992-circle-jams.md：要對照PDF頁面確認：Whereas we find laminar traffic at low densities, there are congestion clusters (small jams) at higher densities, which are formed randomly due to velocity-fluctuations of the cars.
+[OCR逐字] nagel1992-real-units.md：要對照PDF頁面確認：Thus all these estimates agree in order of magnitude: time steps correspond to seconds.
+[OCR逐字] nagel1992-transition.md：要對照PDF頁面確認：However, it is not clear from these pictures where to locate an exact transition point.
+
+引用 31 段：逐字找到 22，OCR逐字 8，OCR近似 1，找不到 0，無法比對 0。
+結束代碼：0
